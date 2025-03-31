@@ -11,9 +11,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+#warning TODO nullable
+
 @interface OCPersistentCloudKitContainerOptions (Private)
-@property (nonatomic) BOOL useEncryptedStorage;
-@property BOOL useDeviceToDeviceEncryption;
+@property (assign, nonatomic) BOOL useEncryptedStorage;
+@property (assign) BOOL useDeviceToDeviceEncryption;
 
 // original: (retain, nonatomic)
 @property (copy, nonatomic) NSString *apsConnectionMachServiceName;
@@ -25,6 +27,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (retain, nonatomic) CKContainerOptions *containerOptions;
 @property (copy, nonatomic) NSArray *activityVouchers;
 @property (weak, nonatomic) NSObject<OCCloudKitMirroringDelegateProgressProvider> *progressProvider;
+@property (retain, nonatomic) CKContainer *testContainerOverride;
+@property (readonly, copy) NSString *containerIdentifier; 
+@property (assign, nonatomic) CKDatabaseScope databaseScope;
 @end
 
 NS_ASSUME_NONNULL_END

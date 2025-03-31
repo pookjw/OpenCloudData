@@ -13,7 +13,6 @@
     NSMutableDictionary<NSNumber *, __kindof OCPersistentCloudKitContainerActivity *> *_activitiesByPhaseNum;
     NSInteger _eventType;
 }
-
 @end
 
 @implementation OCPersistentCloudKitContainerEventActivity
