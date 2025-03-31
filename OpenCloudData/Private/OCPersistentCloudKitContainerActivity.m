@@ -6,18 +6,7 @@
 //
 
 #import <OpenCloudData/OCPersistentCloudKitContainerActivity.h>
-#import <OpenCloudData/LogStream.h>
-
-@interface OCPersistentCloudKitContainerActivity () {
-    NSUUID *_identifier;
-    NSUUID *_storeIdentifier;
-    NSError *_error;
-    NSUUID *_parentActivityIdentifier;
-    NSUInteger _activityType;
-    NSDate *_startDate;
-    NSDate *_endDate;
-}
-@end
+#import <OpenCloudData/Log.h>
 
 @implementation OCPersistentCloudKitContainerActivity
 
@@ -66,7 +55,8 @@
             activityTypeString = @"setup-phase";
             break;
         default:
-            os_log_fault(_OCLogGetLogStream(0x11), "CoreData: I don't know how to create a string for activity type '%lu'", activityType);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: I don't know how to create a string for activity type '%lu'", activityType);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: I don't know how to create a string for activity type '%lu'", activityType);
             abort();
     }
     dictionary[@"activityType"] = activityTypeString;
@@ -98,7 +88,7 @@
 
 - (void)finishWithError:(NSError *)error {
     if (_endDate != nil) {
-        os_log_error(_OCLogGetLogStream(0x11), "CoreData: fault: Illegal attempt to finish an activity multiple times: %@\\n", self);
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to finish an activity multiple times: %@\\n", self);
         abort();
     }
     

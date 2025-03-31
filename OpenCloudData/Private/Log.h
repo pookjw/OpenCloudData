@@ -1,5 +1,5 @@
 //
-//  LogStream.h
+//  Log.h
 //  OpenCloudData
 //
 //  Created by Jinwoo Kim on 3/30/25.

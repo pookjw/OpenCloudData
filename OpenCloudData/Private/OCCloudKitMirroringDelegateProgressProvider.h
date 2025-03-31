@@ -6,12 +6,13 @@
 //
 
 #import <OpenCloudData/OCPersistentCloudKitContainerEvent.h>
+#import <OpenCloudData/OCPersistentCloudKitContainerActivity.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol OCCloudKitMirroringDelegateProgressProvider <NSObject>
 - (void)eventUpdated:(OCPersistentCloudKitContainerEvent *)event;
-- (void)publishActivity:(id)arg1; // NSPersistentCloudKitContainerEventActivity
+- (void)publishActivity:(__kindof OCPersistentCloudKitContainerActivity *)activity;
 @end
 
 NS_ASSUME_NONNULL_END

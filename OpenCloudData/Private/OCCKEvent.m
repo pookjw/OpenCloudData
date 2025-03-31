@@ -20,6 +20,7 @@
 @dynamic countFinishedObjects;
 
 + (NSString *)entityPath {
+    // original : CloudKit/NSCKEvent
     return @"CloudKit/OCCKEvent";
 }
 

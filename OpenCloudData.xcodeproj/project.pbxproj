@@ -59,13 +59,15 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			privateHeaders = (
 				"Helper/NSObject+Foundation_IvarDescription.h",
-				Private/LogStream.h,
+				Private/Log.h,
 				Private/OCCKEvent.h,
 				Private/OCCloudKitMirroringDelegateProgressProvider.h,
 				"Private/OCPersistentCloudKitContainer+Private.h",
 				Private/OCPersistentCloudKitContainerActivity.h,
 				Private/OCPersistentCloudKitContainerEvent.h,
+				Private/OCPersistentCloudKitContainerEventActivity.h,
 				"Private/OCPersistentCloudKitContainerOptions+Private.h",
+				Private/OCPersistentCloudKitContainerSetupPhaseActivity.h,
 				SPI/CKContainerOptions.h,
 			);
 			publicHeaders = (

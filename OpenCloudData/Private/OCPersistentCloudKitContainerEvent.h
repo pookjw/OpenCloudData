@@ -11,7 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface OCPersistentCloudKitContainerEvent : NSObject <NSCopying>
 + (NSString * _Nullable)eventTypeString:(NSInteger)type;
-@property (copy, readonly, nonatomic, nullable) NSUUID *identifier; // original : (readonly, nonatomic)
+@property (retain, readonly, nonatomic, nullable) NSUUID *identifier; // original : (readonly, nonatomic)
 @property (retain, readonly, nonatomic, nullable) NSString *storeIdentifier; // original : (readonly, nonatomic)
 @property (readonly, nonatomic) NSInteger type;
 @property (retain, readonly, nonatomic, nullable) NSDate *startDate; // original : (readonly, nonatomic)
