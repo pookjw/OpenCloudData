@@ -7,9 +7,10 @@
 
 #import <XCTest/XCTest.h>
 #import <OpenCloudData/OCPersistentCloudKitContainerActivity.h>
+#import <objc/message.h>
+#import <objc/runtime.h>
 
 @interface OCPersistentCloudKitContainerActivityTests : XCTestCase
-
 @end
 
 @implementation OCPersistentCloudKitContainerActivityTests
@@ -82,6 +83,56 @@
             return @"setup-phase";
         default:
             return nil;
+    }
+}
+
+- (void)test_compareWithPlatform {
+    [self _test_compareWithPlatformWithError:nil];
+}
+
+- (void)test_compareWithPlatformWithError {
+    NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorCannotCreateFile userInfo:nil];
+    [self _test_compareWithPlatformWithError:error];
+    [error release];
+}
+
+- (void)_test_compareWithPlatformWithError:(NSError * _Nullable)error {
+    for (NSUInteger activityType = 0; activityType < 5; activityType++) {
+        NSUUID *identifier = [NSUUID UUID];
+        NSString *storeIdentifier = [NSUUID UUID].UUIDString;
+        
+        OCPersistentCloudKitContainerActivity *activity = [[OCPersistentCloudKitContainerActivity alloc] _initWithIdentifier:identifier forStore:storeIdentifier activityType:activityType];
+        id platform = ((id (*)(id, SEL, id, id, NSUInteger))objc_msgSend)([objc_lookUpClass("NSPersistentCloudKitContainerActivity") alloc], sel_registerName("_initWithIdentifier:forStore:activityType:"), identifier, storeIdentifier, activityType);
+        
+        NSMutableDictionary *dictionary_1 = [activity createDictionaryRepresentation];
+        NSMutableDictionary *dictionary_2 = ((id (*)(id, SEL))objc_msgSend)(platform, sel_registerName("createDictionaryRepresentation"));
+        
+        XCTAssertNotNil(dictionary_1[@"startDate"]);
+        [dictionary_1 removeObjectForKey:@"startDate"];
+        XCTAssertNotNil(dictionary_2[@"startDate"]);
+        [dictionary_2 removeObjectForKey:@"startDate"];
+        XCTAssertTrue([dictionary_1 isEqualToDictionary:dictionary_2]);
+        
+        [activity finishWithError:error];
+        ((void (*)(id, SEL, id))objc_msgSend)(platform, sel_registerName("finishWithError:"), error);
+        
+        NSMutableDictionary *dictionary_3 = [activity createDictionaryRepresentation];
+        NSMutableDictionary *dictionary_4 = ((id (*)(id, SEL))objc_msgSend)(platform, sel_registerName("createDictionaryRepresentation"));
+        
+        XCTAssertNotNil(dictionary_3[@"startDate"]);
+        [dictionary_3 removeObjectForKey:@"startDate"];
+        XCTAssertNotNil(dictionary_3[@"endDate"]);
+        [dictionary_3 removeObjectForKey:@"endDate"];
+        
+        XCTAssertNotNil(dictionary_4[@"startDate"]);
+        [dictionary_4 removeObjectForKey:@"startDate"];
+        XCTAssertNotNil(dictionary_4[@"endDate"]);
+        [dictionary_4 removeObjectForKey:@"endDate"];
+        
+        XCTAssertTrue([dictionary_3 isEqualToDictionary:dictionary_4]);
+        
+        [activity release];
+        [platform release];
     }
 }
 
