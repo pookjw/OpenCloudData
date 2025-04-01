@@ -16,12 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface OCPersistentCloudKitContainerOptions (OpenCloudData_Private)
 @property (assign, nonatomic) BOOL useEncryptedStorage;
 @property (assign) BOOL useDeviceToDeviceEncryption;
-
-// original: (retain, nonatomic)
-@property (copy, nonatomic) NSString *apsConnectionMachServiceName;
-
+@property (retain, nonatomic) NSString *apsConnectionMachServiceName;
 @property (retain, nonatomic) NSNumber *operationMemoryThresholdBytes;
-
 @property (nonatomic) BOOL automaticallyDownloadFileBackedFutures;
 @property (retain, nonatomic, nullable) NSNumber *ckAssetThresholdBytes;
 @property (retain, nonatomic, nullable) CKContainerOptions *containerOptions;

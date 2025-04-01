@@ -12,10 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #warning Nullable
 @interface OCCloudKitMirroringRequestOptions : NSObject <NSCopying>
-
-// original : (retain, nonatomic)
-@property (copy, nonatomic, nullable) NSArray<OCPersistentCloudKitContainerActivityVoucher *> * vouchers;
-
+@property (retain, nonatomic, nullable) NSArray<OCPersistentCloudKitContainerActivityVoucher *> * vouchers;
 @property (retain, nonatomic, null_resettable) CKOperationConfiguration *operationConfiguration;
 @property (assign, nonatomic) NSQualityOfService qualityOfService;
 @property (assign, nonatomic) BOOL allowsCellularAccess;

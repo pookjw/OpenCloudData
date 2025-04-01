@@ -20,8 +20,8 @@
 @dynamic countFinishedObjects;
 
 + (NSString *)entityPath {
-    // original : CloudKit/NSCKEvent
-    return @"CloudKit/OCCKEvent";
+#warning TODO 값 그대로 써도 되는지
+    return @"CloudKit/NSCKEvent";
 }
 
 @end

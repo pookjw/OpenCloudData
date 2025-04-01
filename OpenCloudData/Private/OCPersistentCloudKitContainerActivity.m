@@ -13,9 +13,7 @@
 - (instancetype)_initWithIdentifier:(NSUUID *)identifier forStore:(NSString *)storeIdentifier activityType:(NSUInteger)activityType {
     if (self = [super init]) {
         _identifier = [identifier retain];
-        
-        // original : -retain
-        _storeIdentifier = [storeIdentifier copy];
+        _storeIdentifier = [storeIdentifier retain];
         
         NSDate *date = [[NSDate alloc] init];
         _activityType = activityType;

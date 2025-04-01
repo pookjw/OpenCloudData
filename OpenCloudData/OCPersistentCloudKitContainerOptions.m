@@ -11,12 +11,8 @@
 @interface OCPersistentCloudKitContainerOptions ()
 @property (assign, nonatomic) BOOL useEncryptedStorage;
 @property (assign) BOOL useDeviceToDeviceEncryption;
-
-// original: (retain, nonatomic)
-@property (copy, nonatomic) NSString *apsConnectionMachServiceName;
-
+@property (retain, nonatomic) NSString *apsConnectionMachServiceName;
 @property (retain, nonatomic) NSNumber *operationMemoryThresholdBytes;
-
 @property (nonatomic) BOOL automaticallyDownloadFileBackedFutures;
 @property (retain, nonatomic, nullable) NSNumber *ckAssetThresholdBytes;
 @property (retain, nonatomic, nullable) CKContainerOptions *containerOptions;
@@ -74,8 +70,8 @@
     
     NSArray *newActivityVouchers;
     if (activityVouchers) {
-        // original : attribute는 copy이지만 -retain
-        newActivityVouchers = [activityVouchers copy];
+        // attribute는 copy이지만 -retain
+        newActivityVouchers = [activityVouchers retain];
     } else {
         newActivityVouchers = [[NSArray alloc] init];
     }
