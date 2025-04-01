@@ -6,6 +6,7 @@
 import CoreData
 import UIKit
 import OpenCloudData
+import CloudKit
 
 struct PersistenceController {
     static let shared = PersistenceController()

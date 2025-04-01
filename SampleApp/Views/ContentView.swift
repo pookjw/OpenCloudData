@@ -5,6 +5,7 @@
 
 import SwiftUI
 import CoreData
+import CloudKit
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -35,6 +36,9 @@ struct ContentView: View {
                                 .foregroundColor(.gray)
                         }
                         Text(contact.name ?? "None")
+                    }
+                    .onAppear { 
+                        print((PersistenceController.shared.container as! NSPersistentCloudKitContainer).canUpdateRecord(forManagedObjectWith: contact.objectID))
                     }
                 }
                 .onDelete(perform: deleteContacts)

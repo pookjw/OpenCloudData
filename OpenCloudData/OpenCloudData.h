@@ -18,3 +18,5 @@ FOUNDATION_EXPORT const unsigned char OpenCloudDataVersionString[];
 #import <OpenCloudData/OCPersistentCloudKitContainer.h>
 #import <OpenCloudData/OCPersistentCloudKitContainerOptions.h>
 #import <OpenCloudData/OpenCloudDataDefines.h>
+#import <OpenCloudData/NSPersistentStoreDescription+OpenCloudData.h>
+#import <OpenCloudData/OCPersistentCloudKitContainer+Sharing.h>
