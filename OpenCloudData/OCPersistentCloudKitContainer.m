@@ -128,6 +128,8 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
             @throw [NSException exceptionWithName:NSInvalidArgumentException reason:reason userInfo:userInfo];
         }
     }
+    
+    [super _loadStoreDescriptions:storeDescriptions withCompletionHandler:completionHandler];
 }
 
 - (BOOL)canModifyManagedObjectsInStore:(NSPersistentStore *)store {
