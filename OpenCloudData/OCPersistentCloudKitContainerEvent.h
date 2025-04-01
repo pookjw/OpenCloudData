@@ -5,9 +5,13 @@
 //  Created by Jinwoo Kim on 3/30/25.
 //
 
-#import <OpenCloudData/OCCKEvent.h>
+#import <Foundation/Foundation.h>
+#import <OpenCloudData/OpenCloudDataDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
+
+OC_EXTERN NSNotificationName const OCPersistentCloudKitContainerEventChangedNotification NS_SWIFT_NAME(OCPersistentCloudKitContainer.eventChangedNotification);
+OC_EXTERN NSString * const OCPersistentCloudKitContainerEventUserInfoKey NS_SWIFT_NAME(OCPersistentCloudKitContainer.eventNotificationUserInfoKey);
 
 @interface OCPersistentCloudKitContainerEvent : NSObject <NSCopying>
 + (NSString * _Nullable)eventTypeString:(NSInteger)type;
@@ -20,7 +24,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (retain, readonly, nonatomic, nullable) NSError *error; // original : (readonly, nonatomic)
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithCKEvent:(OCCKEvent *)event;
 @end
 
 NS_ASSUME_NONNULL_END

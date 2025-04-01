@@ -1,2 +1,1 @@
-- `-[OCPersistentCloudKitContainer initWithName:managedObjectModel:]`
-    - `-[OCPersistentCloudKitContainerOptions progressProvider]`
+- `-[OCPersistentCloudKitContainer initializeCloudKitSchemaWithOptions:error:]`

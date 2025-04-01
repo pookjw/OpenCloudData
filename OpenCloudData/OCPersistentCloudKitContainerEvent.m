@@ -6,7 +6,11 @@
 //
 
 #import <OpenCloudData/OCPersistentCloudKitContainerEvent.h>
+#import <OpenCloudData/OCPersistentCloudKitContainerEvent+OpenCloudData_Private.h>
 #import <OpenCloudData/Log.h>
+
+NSNotificationName const OCPersistentCloudKitContainerEventChangedNotification = @"OCPersistentCloudKitContainerEventChangedNotification";
+NSString * const OCPersistentCloudKitContainerEventUserInfoKey = @"event";
 
 @interface OCPersistentCloudKitContainerEvent () {
     NSManagedObjectID *_ckEventObjectID;

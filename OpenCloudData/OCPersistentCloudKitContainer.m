@@ -16,6 +16,8 @@
 #import <OpenCloudData/OCCloudKitMirroringDelegate.h>
 #import <OpenCloudData/NSPersistentStoreDescription+Private.h>
 #import <OpenCloudData/NSPersistentStore+Private.h>
+#import <OpenCloudData/NSPersistentStore+OpenCloudData_Private.h>
+#import <OpenCloudData/OCCloudKitMirroringInitializeSchemaRequest.h>
 #import <OpenCloudData/Log.h>
 #import <xpc/xpc.h>
 #import <CoreFoundation/CoreFoundation.h>
@@ -24,7 +26,7 @@ XPC_EXPORT XPC_NONNULL_ALL XPC_WARN_RESULT XPC_RETURNS_RETAINED xpc_object_t xpc
 
 CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_object_t object);
 
-@interface OCPersistentCloudKitContainer () <OCCloudKitMirroringDelegateProgressProvider> {
+@interface OCPersistentCloudKitContainer () {
     NSInteger _operationTimeout;
     NSManagedObjectContext *_metadataContext;
 }
@@ -221,35 +223,115 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
 }
 
 - (BOOL)canUpdateRecordForManagedObjectWithID:(NSManagedObjectID *)objectID {
-    /*
-     x21 = objectID
-     x22 = self
-     */
-    
     if (objectID.temporaryID) {
         return YES;
     }
     
-    // x19
     __kindof NSPersistentStore * _Nullable persistentStore = [objectID.persistentStore retain];
+    
+    BOOL result;
     if (persistentStore == nil) {
-        return YES;
+        result = YES;
+    } else {
+        if (![persistentStore.type isEqualToString:NSSQLiteStoreType]) {
+            result = YES;
+        } else {
+            OCCloudKitMirroringDelegate *mirroringDelegate = (OCCloudKitMirroringDelegate *)[persistentStore.mirroringDelegate retain];
+            
+            if (mirroringDelegate == nil) {
+                result = YES;
+            } else {
+                BOOL successfullyInitialized = mirroringDelegate->_successfullyInitialized;
+                OCCloudKitMirroringDelegateOptions *options = mirroringDelegate->_options;
+                
+                if (!successfullyInitialized) {
+                    CKDatabaseScope databaseScope = options.databaseScope;
+                    if (databaseScope == CKDatabaseScopePrivate) {
+                        result = YES;
+                    } else {
+                        result = NO;
+                    }
+                } else {
+                    CKDatabaseScope databaseScope = options.databaseScope;
+                    if (databaseScope != CKDatabaseScopePublic) {
+                        if (options.databaseScope != CKDatabaseScopeShared) {
+                            result = YES;
+                        } else {
+                            NSError * _Nullable error = nil;
+                            NSDictionary<NSManagedObjectID *, CKShare *> * shares = [self fetchSharesMatchingObjectIDs:@[objectID] error:&error];
+                            CKShare * _Nullable share = shares[objectID];
+                            
+                            if (share == nil) {
+#warning _NSCoreDataLog
+                                NSLog(@"%@", [NSString stringWithFormat:@"CoreData: Failed to fetch the CKShare for an object in the shared database: %@ - %@", objectID, error]);
+                                os_log_fault(_OCLogGetLogStream(0x11), "CoreData: Failed to fetch the CKShare for an object in the shared database: %@ - %@", objectID, error);
+                                abort();
+                            } else {
+                                result = (share.currentUserParticipant.permission == CKShareParticipantPermissionReadWrite);
+                            }
+                        }
+                    } else {
+                        CKRecordID *currentUserRecordID = mirroringDelegate->_currentUserRecordID;
+                        if (currentUserRecordID == nil) {
+                            result = NO;
+                        } else {
+                            [_metadataContext performBlockAndWait:^{
+#warning TODO __71-[NSPersistentCloudKitContainer canUpdateRecordForManagedObjectWithID:]_block_invoke
+                                abort();
+                            }];
+                            
+                            result = NO;
+                        }
+                    }
+                }
+            }
+            
+            [mirroringDelegate release];
+        }
     }
     
-    if (![persistentStore.type isEqualToString:NSSQLiteStoreType]) {
-        // TODO -release
-        return YES;
-    }
+    [persistentStore release];
+    return result;
+}
+
+- (BOOL)initializeCloudKitSchemaWithOptions:(OCPersistentCloudKitContainerSchemaInitializationOptions)options error:(NSError * _Nullable *)error {
+    /*
+     x20 = options
+     x19 = self
+     sp, #0x2b0 + var_290 = error ptr
+     */
     
-    // x20
-    OCCloudKitMirroringDelegate *mirroringDelegate = (OCCloudKitMirroringDelegate *)[persistentStore.mirroringDelegate retain];
-    if (mirroringDelegate == nil) {
-        return YES;
-    }
+    // sp + 0x30 = self
+    // sp + 0x38 = group
+    dispatch_group_t group = dispatch_group_create();
     
-    BOOL successfullyInitialized = mirroringDelegate->_successfullyInitialized;
-    if (!successfullyInitialized) {
+    for (__kindof NSPersistentStore *persistentStore in self.persistentStoreCoordinator.persistentStores) {
+        if (!persistentStore.oc_isCloudKitEnabled) continue;
         
+        @autoreleasepool {
+#warning _NSCoreDataLog
+            // Inline Function이 있는 것 같음
+            NSString *base = @"OpenCloudData+CloudKit: %s(%d): ";
+            NSString *content =  @"%@: will initialize cloudkit schema for store: %@";
+            NSString *string = [base stringByAppendingString:content];
+            NSLog(@"%@", [string stringByAppendingFormat:string, __func__, __LINE__, self, persistentStore]);
+            
+            dispatch_group_enter(group);
+        }
+    }
+    
+    // x21
+    NSMutableArray *array = [[NSMutableArray alloc] init];
+    
+    if (options != OCPersistentCloudKitContainerSchemaInitializationOptionsNone) {
+        // x23
+        NSMutableArray *array_2 = [[NSMutableArray alloc] init];
+        
+        OCCloudKitMirroringInitializeSchemaRequest *request = [[OCCloudKitMirroringInitializeSchemaRequest alloc] initWithOptions:nil completionBlock:^(OCCloudKitMirroringResult * _Nonnull result) {
+            abort();
+        }];
+        
+        abort();
     }
     
     abort();
@@ -258,6 +340,28 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
 @end
 
 @implementation OCPersistentCloudKitContainer (OpenCloudData_Private)
+
+- (void)eventUpdated:(OCPersistentCloudKitContainerEvent *)event {
+    @autoreleasepool {
+        [NSNotificationCenter.defaultCenter postNotificationName:OCPersistentCloudKitContainerEventChangedNotification object:self userInfo:@{OCPersistentCloudKitContainerEventUserInfoKey: event}];
+    }
+}
+
+- (void)applyActivityVoucher:(OCPersistentCloudKitContainerActivityVoucher *)activityVoucher toStores:(NSArray<NSPersistentStore *> *)stores {
+    NSArray<__kindof NSPersistentStore *> *persistentStores = self.persistentStoreCoordinator.persistentStores;
+    
+    for (__kindof NSPersistentStore *persistentStore in persistentStores) {
+        [(OCCloudKitMirroringDelegate *)persistentStore.mirroringDelegate addActivityVoucher:activityVoucher];
+    }
+}
+
+- (void)expireActivityVoucher:(OCPersistentCloudKitContainerActivityVoucher *)activityVoucher {
+    NSArray<__kindof NSPersistentStore *> *persistentStores = self.persistentStoreCoordinator.persistentStores;
+    
+    for (__kindof NSPersistentStore *persistentStore in persistentStores) {
+        [(OCCloudKitMirroringDelegate *)persistentStore.mirroringDelegate expireActivityVoucher:activityVoucher];
+    }
+}
 
 - (BOOL)assignManagedObjects:(NSArray<NSManagedObject *> *)managedObjects toCloudKitRecordZone:(CKRecordZone *)cloudKitRecordZone inPersistentStore:(__kindof NSPersistentStore *)persistentStore error:(NSError * _Nullable *)error {
 #warning TODO - Share
@@ -289,14 +393,6 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
     [dictionary_2 release];
     
     [managedObjectContext release];
-}
-
-- (void)applyActivityVoucher:(OCPersistentCloudKitContainerActivityVoucher *)activityVoucher toStores:(NSArray<NSPersistentStore *> *)stores {
-    NSArray<__kindof NSPersistentStore *> *persistentStores = self.persistentStoreCoordinator.persistentStores;
-    
-    for (__kindof NSPersistentStore *persistentStore in persistentStores) {
-        [(OCCloudKitMirroringDelegate *)persistentStore.mirroringDelegate addActivityVoucher:activityVoucher];
-    }
 }
 
 - (void)doWorkOnMetadataContext:(BOOL)asynchronous withBlock:(void (^)(NSManagedObjectContext * _Nonnull))block __attribute__((objc_direct)) {

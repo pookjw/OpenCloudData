@@ -20,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
     @package CKRecordID *_currentUserRecordID;
 }
 - (void)addActivityVoucher:(OCPersistentCloudKitContainerActivityVoucher *)activityVoucher;
+- (void)expireActivityVoucher:(OCPersistentCloudKitContainerActivityVoucher *)activityVoucher;
 @end
 
 NS_ASSUME_NONNULL_END
