@@ -323,14 +323,28 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
     }
     
     // x21
-    NSMutableArray *array = [[NSMutableArray alloc] init];
+    NSMutableArray<NSError *> *errors = [[NSMutableArray alloc] init];
     
     if (options != OCPersistentCloudKitContainerSchemaInitializationOptionsNone) {
         // x23
         NSMutableArray *array_2 = [[NSMutableArray alloc] init];
         
         OCCloudKitMirroringInitializeSchemaRequest *request = [[OCCloudKitMirroringInitializeSchemaRequest alloc] initWithOptions:nil completionBlock:^(OCCloudKitMirroringResult * _Nonnull result) {
-            abort();
+            // x20 = result
+            // x19 = self
+            
+            if (!result.success) {
+                NSError *error = result.error;
+                NSInteger code = error.code;
+                
+                if ((code - (0x20ULL << 12)) == 0xd13) {
+                    [errors addObject:error];
+                    dispatch_group_leave(group);
+                    return;
+                } else {
+                    abort();
+                }
+            }
         }];
         
         abort();
