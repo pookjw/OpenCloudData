@@ -21,6 +21,8 @@
 #import <OpenCloudData/Log.h>
 #import <xpc/xpc.h>
 #import <CoreFoundation/CoreFoundation.h>
+#import <objc/runtime.h>
+#import <objc/message.h>
 
 XPC_EXPORT XPC_NONNULL_ALL XPC_WARN_RESULT XPC_RETURNS_RETAINED xpc_object_t xpc_copy_entitlement_for_self(const char *key);
 
@@ -97,7 +99,8 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
             
             cloudKitContainerOptions.progressProvider = self;
             
-            OCCloudKitMirroringDelegate *mirroringDelegate = [[OCCloudKitMirroringDelegate alloc] initWithCloudKitContainerOptions:cloudKitContainerOptions];
+#warning TODO
+            OCCloudKitMirroringDelegate *mirroringDelegate = [[objc_lookUpClass("NSCloudKitMirroringDelegate") alloc] initWithCloudKitContainerOptions:cloudKitContainerOptions];
             
             description.mirroringDelegate = mirroringDelegate;
             
@@ -112,7 +115,8 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
             
             mirroringDelegateOptions.progressProvider = self;
             
-            OCCloudKitMirroringDelegate *mirroringDelegate = [[OCCloudKitMirroringDelegate alloc] initWithCloudKitContainerOptions:mirroringDelegateOptions];
+#warning TODO
+            OCCloudKitMirroringDelegate *mirroringDelegate = [[objc_lookUpClass("NSCloudKitMirroringDelegate") alloc] initWithCloudKitContainerOptions:mirroringDelegateOptions];
             
             description.mirroringDelegate = mirroringDelegate;
             
@@ -297,17 +301,22 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
 }
 
 - (BOOL)initializeCloudKitSchemaWithOptions:(OCPersistentCloudKitContainerSchemaInitializationOptions)options error:(NSError * _Nullable *)error {
-    /*
-     x20 = options
-     x19 = self
-     sp, #0x2b0 + var_290 = error ptr
-     */
+    // sp, #0x2c0 + var_2B0 = error ptr
     
     // sp + 0x130
     __block BOOL hasUnknownError = NO;
+    // sp + 0x100 // context에서 값만 가져오고 안 쓰는듯
+    __block NSError *contextError = nil;
+    // sp + 0x148 (or sp + 0x130 + 0x18)
+    __block BOOL contextSucceed = YES;
+    
+    // x19
+    NSUInteger icloudKitEnabledCount = 0;
     
     // sp + 0x30 = self
     // sp + 0x38 = group
+    // sp + #0x2c0 + var_2A8 = options
+    // sp + #0x2c0 + var_290 = self
     dispatch_group_t group = dispatch_group_create();
     
     for (__kindof NSPersistentStore *persistentStore in self.persistentStoreCoordinator.persistentStores) {
@@ -322,53 +331,123 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
             NSLog(@"%@", [string stringByAppendingFormat:string, __func__, __LINE__, self, persistentStore]);
             
             dispatch_group_enter(group);
+            icloudKitEnabledCount += 1;
         }
     }
     
     // x21
-    NSMutableArray<NSError *> *errors = [[NSMutableArray alloc] init];
+    NSMutableArray<NSError *> *errors_1 = [[NSMutableArray alloc] init];
     
-    if (options != OCPersistentCloudKitContainerSchemaInitializationOptionsNone) {
+    if (icloudKitEnabledCount != 0) {
         // x23
-        NSMutableArray *array_2 = [[NSMutableArray alloc] init];
+        NSMutableArray *errors_2 = [[NSMutableArray alloc] init];
         
-        OCCloudKitMirroringInitializeSchemaRequest *request = [[OCCloudKitMirroringInitializeSchemaRequest alloc] initWithOptions:nil completionBlock:^(OCCloudKitMirroringResult * _Nonnull result) {
+        // x24
+        OCCloudKitMirroringInitializeSchemaRequest *request = [[objc_lookUpClass("NSCloudKitMirroringInitializeSchemaRequest") alloc] initWithOptions:nil completionBlock:^(OCCloudKitMirroringResult * _Nonnull result) {
             // x20 = result
             // x19 = self
+            // x0 + 0x20 = expectedErrors
+            // x0 + 0x28 = errors_1
+            // x0 + 0x30 = group
+            // x0 + 0x38 = errors_2
             
             if (!result.success) {
                 NSError *error = result.error;
                 NSInteger code = error.code;
                 
-                if ((code - (0x20ULL << 12)) == 0xd13) {
-                    [errors addObject:error];
+                if ((code - (0x20ULL << 12)) == 0xD13) {
+                    [errors_1 addObject:error];
                 } else {
                     if (hasUnknownError) hasUnknownError = NO;
                     NSLog(@"OpenCloudData+CloudKit: %s(%d): Initialize schema request failed: %@", __func__, __LINE__, error);
                     hasUnknownError = NO;
                     
                     if (result.error == nil) {
-                        abort(); // TODO
+                        os_log_fault(_OCLogGetLogStream(0x11), "CoreData: Initialize schema failed but did not set an error: %@", result);
+                        os_log_error(_OCLogGetLogStream(0x11), "CoreData: Initialize schema failed but did not set an error: %@", result);
                     } else {
                         NSError *error = result.error;
                         NSDictionary *userInfo = error.userInfo;
                         
-                        // x23
-                        NSError *underlyingError = userInfo[NSUnderlyingErrorKey];
-                        if (underlyingError == nil) {
-                            
+                        if (userInfo[NSUnderlyingErrorKey] == nil) {
+                            [errors_2 addObject:error];
+                        } else {
+                            [errors_2 addObject:userInfo[NSUnderlyingErrorKey]];
                         }
                     }
                 }
+            } else {
+                NSLog(@"OpenCloudData+CloudKit: %s(%d): Finished initialize schema with result: %@", __func__, __LINE__, result);
             }
             
             dispatch_group_leave(group);
         }];
         
-        abort();
+        request.schemaInitializationOptions = options;
+        
+        // x25
+        NSManagedObjectContext *backgroundContext = [self newBackgroundContext];
+        
+        [backgroundContext performBlockAndWait:^{
+            NSError * _Nullable error = nil;
+            BOOL result = [backgroundContext executeRequest:request error:&error];
+            if (!result) {
+                contextSucceed = result;
+                contextError = error;
+            }
+        }];
+        
+        NSError * _Nullable _error = nil;
+        if (contextSucceed) {
+            const NSInteger seconds = 30;
+            intptr_t overtime = dispatch_group_wait(group, dispatch_time(DISPATCH_TIME_NOW, seconds * NSEC_PER_SEC));
+            if (overtime != 0) {
+                contextSucceed = NO;
+                
+                NSError *__error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain
+                                                              code:NSCoreDataError
+                                                          userInfo:@{NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Failed to initialize CloudKit schema because the requests timed out (a %lds wait failed).", seconds]}];
+                [errors_2 addObject:__error];
+                [__error release];
+            }
+            
+            NSDictionary *userInfo;
+            if (icloudKitEnabledCount == errors_1.count) {
+                userInfo = @{
+                    NSLocalizedFailureReasonErrorKey: @"Couldn't initialize CloudKit schema because no stores were able to succesfully initialize.",
+                    NSDetailedErrorsKey: errors_1
+                };
+            } else if (errors_2.count != 0) {
+                userInfo = @{@"encounteredErrors": errors_2};
+            } else {
+                userInfo = nil;
+            }
+            
+            _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:NSCoreDataError userInfo:userInfo];
+        }
+        
+        [request release];
+        [backgroundContext release];
+        [errors_2 release];
+        
+        [_error autorelease];
+        
+        if (!contextSucceed) {
+            if (_error == nil) {
+                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d", __func__, __LINE__);
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d", __func__, __LINE__);
+            } else {
+                if (error != NULL) {
+                    *error = _error;
+                }
+            }
+        }
     }
     
-    abort();
+    [errors_1 release];
+    dispatch_release(group);
+    
+    return contextSucceed;
 }
 
 @end
@@ -456,6 +535,10 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
     }
     
     [metadataContext release];
+}
+
+- (void)publishActivity:(__kindof OCPersistentCloudKitContainerActivity *)activity {
+    // TODO
 }
 
 @end
