@@ -39,6 +39,7 @@ struct PersistenceController {
         }
         
         container.viewContext.automaticallyMergesChangesFromParent = true
+        container.persistentStoreDescriptions.last!.shouldAddStoreAsynchronously = false
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 // Replace this implementation with code to handle the error appropriately.

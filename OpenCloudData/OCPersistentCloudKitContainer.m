@@ -305,8 +305,6 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
     
     // sp + 0x130
     __block BOOL hasUnknownError = NO;
-    // sp + 0x100 // context에서 값만 가져오고 안 쓰는듯
-    __block NSError *contextError = nil;
     // sp + 0x148 (or sp + 0x130 + 0x18)
     __block BOOL contextSucceed = YES;
     
@@ -320,7 +318,9 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
     dispatch_group_t group = dispatch_group_create();
     
     for (__kindof NSPersistentStore *persistentStore in self.persistentStoreCoordinator.persistentStores) {
-        if (!persistentStore.oc_isCloudKitEnabled) continue;
+//        if (!persistentStore.oc_isCloudKitEnabled) continue;
+        BOOL isCloudKitEnabled = ((BOOL (*)(id, SEL))objc_msgSend)(persistentStore, sel_registerName("isCloudKitEnabled"));
+        if (!isCloudKitEnabled) continue;
         
         @autoreleasepool {
 #warning _NSCoreDataLog
@@ -343,7 +343,7 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
         NSMutableArray *errors_2 = [[NSMutableArray alloc] init];
         
         // x24
-        OCCloudKitMirroringInitializeSchemaRequest *request = [[objc_lookUpClass("NSCloudKitMirroringInitializeSchemaRequest") alloc] initWithOptions:nil completionBlock:^(OCCloudKitMirroringResult * _Nonnull result) {
+        OCCloudKitMirroringInitializeSchemaRequest *request = [[OCCloudKitMirroringInitializeSchemaRequest alloc] initWithOptions:nil completionBlock:^(OCCloudKitMirroringResult * _Nonnull result) {
             // x20 = result
             // x19 = self
             // x0 + 0x20 = expectedErrors
@@ -387,17 +387,17 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
         
         // x25
         NSManagedObjectContext *backgroundContext = [self newBackgroundContext];
+        __block NSError * _Nullable _error = nil;
         
         [backgroundContext performBlockAndWait:^{
             NSError * _Nullable error = nil;
             BOOL result = [backgroundContext executeRequest:request error:&error];
             if (!result) {
                 contextSucceed = result;
-                contextError = error;
+                _error = [error retain];
             }
         }];
         
-        NSError * _Nullable _error = nil;
         if (contextSucceed) {
             const NSInteger seconds = 30;
             intptr_t overtime = dispatch_group_wait(group, dispatch_time(DISPATCH_TIME_NOW, seconds * NSEC_PER_SEC));
@@ -411,19 +411,24 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
                 [__error release];
             }
             
-            NSDictionary *userInfo;
-            if (icloudKitEnabledCount == errors_1.count) {
-                userInfo = @{
-                    NSLocalizedFailureReasonErrorKey: @"Couldn't initialize CloudKit schema because no stores were able to succesfully initialize.",
-                    NSDetailedErrorsKey: errors_1
-                };
-            } else if (errors_2.count != 0) {
-                userInfo = @{@"encounteredErrors": errors_2};
-            } else {
-                userInfo = nil;
+            if (contextSucceed) {
+                NSDictionary *userInfo;
+                if (icloudKitEnabledCount == errors_1.count) {
+                    userInfo = @{
+                        NSLocalizedFailureReasonErrorKey: @"Couldn't initialize CloudKit schema because no stores were able to succesfully initialize.",
+                        NSDetailedErrorsKey: errors_1
+                    };
+                } else if (errors_2.count != 0) {
+                    userInfo = @{@"encounteredErrors": errors_2};
+                } else {
+                    userInfo = nil;
+                }
+                
+                if (userInfo != nil) {
+                    contextSucceed = NO;
+                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:NSCoreDataError userInfo:userInfo];
+                }
             }
-            
-            _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:NSCoreDataError userInfo:userInfo];
         }
         
         [request release];

@@ -90,6 +90,10 @@
     return copy;
 }
 
+- (NSPersistentStoreRequestType)requestType {
+    return 9;
+}
+
 - (OCCloudKitMirroringRequestOptions *)createDefaultOptions {
     return [[OCCloudKitMirroringRequestOptions alloc] init];
 }

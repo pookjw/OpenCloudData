@@ -38,7 +38,7 @@ struct ContentView: View {
                         Text(contact.name ?? "None")
                     }
                     .onAppear { 
-                        print((PersistenceController.shared.container as! NSPersistentCloudKitContainer).canUpdateRecord(forManagedObjectWith: contact.objectID))
+//                        print((PersistenceController.shared.container as! NSPersistentCloudKitContainer).canUpdateRecord(forManagedObjectWith: contact.objectID))
                     }
                 }
                 .onDelete(perform: deleteContacts)
