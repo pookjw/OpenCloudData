@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4F30EDF62D9EE6AF0049782F /* ellekit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F30EDF52D9EE6AF0049782F /* ellekit */; };
+		4F30EDF92D9EEA0E0049782F /* ellekit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F30EDF82D9EEA0E0049782F /* ellekit */; };
 		4FB2FB0E2D9967630065C5B3 /* OpenCloudData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F2422D82D99522D005BA6EA /* OpenCloudData.framework */; };
 		4FB2FB0F2D9967630065C5B3 /* OpenCloudData.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4F2422D82D99522D005BA6EA /* OpenCloudData.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4FB2FB322D996ED30065C5B3 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FB2FB312D996ED30065C5B3 /* CoreData.framework */; };
@@ -78,6 +80,7 @@
 				Private/Request/OCCloudKitMirroringResult.h,
 				SPI/CKContainerOptions.h,
 				SPI/CKSchedulerActivity.h,
+				SPI/NSCloudKitMirroringDelegate.h,
 				"SPI/NSManagedObjectContext+Private.h",
 				"SPI/NSPersistentContainer+Private.h",
 				"SPI/NSPersistentStore+Private.h",
@@ -133,6 +136,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F30EDF62D9EE6AF0049782F /* ellekit in Frameworks */,
+				4F30EDF92D9EEA0E0049782F /* ellekit in Frameworks */,
 				4FB2FB322D996ED30065C5B3 /* CoreData.framework in Frameworks */,
 				4FB2FB342D996ED70065C5B3 /* CloudKit.framework in Frameworks */,
 			);
@@ -219,6 +224,8 @@
 			);
 			name = OpenCloudData;
 			packageProductDependencies = (
+				4F30EDF52D9EE6AF0049782F /* ellekit */,
+				4F30EDF82D9EEA0E0049782F /* ellekit */,
 			);
 			productName = OpenCloudData;
 			productReference = 4F2422D82D99522D005BA6EA /* OpenCloudData.framework */;
@@ -301,6 +308,9 @@
 			);
 			mainGroup = 4F2422CE2D99522D005BA6EA;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				4F30EDF72D9EEA0E0049782F /* XCRemoteSwiftPackageReference "ellekit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4F2422D92D99522D005BA6EA /* Products */;
 			projectDirPath = "";
@@ -696,6 +706,29 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4F30EDF72D9EEA0E0049782F /* XCRemoteSwiftPackageReference "ellekit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pookjw/ellekit";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4F30EDF52D9EE6AF0049782F /* ellekit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ellekit;
+		};
+		4F30EDF82D9EEA0E0049782F /* ellekit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4F30EDF72D9EEA0E0049782F /* XCRemoteSwiftPackageReference "ellekit" */;
+			productName = ellekit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4F2422CF2D99522D005BA6EA /* Project object */;
 }

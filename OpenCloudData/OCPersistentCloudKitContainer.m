@@ -19,10 +19,23 @@
 #import <OpenCloudData/NSPersistentStore+OpenCloudData_Private.h>
 #import <OpenCloudData/OCCloudKitMirroringInitializeSchemaRequest.h>
 #import <OpenCloudData/Log.h>
+#import <OpenCloudData/NSCloudKitMirroringDelegate.h>
 #import <xpc/xpc.h>
 #import <CoreFoundation/CoreFoundation.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
+@import ellekit;
+
+BOOL (*NSCloudKitMirroringDelegate_executeMirroringRequest_error_original)(id, id, id *);
+BOOL NSCloudKitMirroringDelegate_executeMirroringRequest_error_custom(id self, id request, id * error) {
+    if ([self isKindOfClass:[NSCloudKitMirroringDelegate class]]) {
+        return NSCloudKitMirroringDelegate_executeMirroringRequest_error_original(self, request, error);
+    } else if ([self isKindOfClass:[OCCloudKitMirroringDelegate class]]) {
+        abort();
+    } else {
+        abort();
+    }
+}
 
 XPC_EXPORT XPC_NONNULL_ALL XPC_WARN_RESULT XPC_RETURNS_RETAINED xpc_object_t xpc_copy_entitlement_for_self(const char *key);
 
@@ -35,6 +48,12 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
 @end
 
 @implementation OCPersistentCloudKitContainer
+
++ (void)load {
+    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
+    const void *symbol = MSFindSymbol(image, "-[NSCloudKitMirroringDelegate executeMirroringRequest:error:]");
+    MSHookFunction((void *)symbol, (void *)&NSCloudKitMirroringDelegate_executeMirroringRequest_error_custom, (void **)&NSCloudKitMirroringDelegate_executeMirroringRequest_error_original);
+}
 
 + (NSString *)discoverDefaultContainerIdentifier {
     xpc_object_t entitlements = xpc_copy_entitlement_for_self("com.apple.developer.icloud-container-identifiers");
@@ -100,7 +119,7 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
             cloudKitContainerOptions.progressProvider = self;
             
 #warning TODO
-            OCCloudKitMirroringDelegate *mirroringDelegate = [[objc_lookUpClass("NSCloudKitMirroringDelegate") alloc] initWithCloudKitContainerOptions:cloudKitContainerOptions];
+            OCCloudKitMirroringDelegate *mirroringDelegate = [[NSCloudKitMirroringDelegate alloc] initWithCloudKitContainerOptions:cloudKitContainerOptions];
             
             description.mirroringDelegate = mirroringDelegate;
             
@@ -116,7 +135,7 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
             mirroringDelegateOptions.progressProvider = self;
             
 #warning TODO
-            OCCloudKitMirroringDelegate *mirroringDelegate = [[objc_lookUpClass("NSCloudKitMirroringDelegate") alloc] initWithCloudKitContainerOptions:mirroringDelegateOptions];
+            OCCloudKitMirroringDelegate *mirroringDelegate = [[NSCloudKitMirroringDelegate alloc] initWithCloudKitContainerOptions:mirroringDelegateOptions];
             
             description.mirroringDelegate = mirroringDelegate;
             
@@ -343,7 +362,7 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
         NSMutableArray *errors_2 = [[NSMutableArray alloc] init];
         
         // x24
-        OCCloudKitMirroringInitializeSchemaRequest *request = [[OCCloudKitMirroringInitializeSchemaRequest alloc] initWithOptions:nil completionBlock:^(OCCloudKitMirroringResult * _Nonnull result) {
+        OCCloudKitMirroringInitializeSchemaRequest *request = [[objc_lookUpClass("NSCloudKitMirroringInitializeSchemaRequest") alloc] initWithOptions:nil completionBlock:^(OCCloudKitMirroringResult * _Nonnull result) {
             // x20 = result
             // x19 = self
             // x0 + 0x20 = expectedErrors
