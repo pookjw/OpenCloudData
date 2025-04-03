@@ -303,6 +303,9 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
      sp, #0x2b0 + var_290 = error ptr
      */
     
+    // sp + 0x130
+    __block BOOL hasUnknownError = NO;
+    
     // sp + 0x30 = self
     // sp + 0x38 = group
     dispatch_group_t group = dispatch_group_create();
@@ -339,12 +342,27 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
                 
                 if ((code - (0x20ULL << 12)) == 0xd13) {
                     [errors addObject:error];
-                    dispatch_group_leave(group);
-                    return;
                 } else {
-                    abort();
+                    if (hasUnknownError) hasUnknownError = NO;
+                    NSLog(@"OpenCloudData+CloudKit: %s(%d): Initialize schema request failed: %@", __func__, __LINE__, error);
+                    hasUnknownError = NO;
+                    
+                    if (result.error == nil) {
+                        abort(); // TODO
+                    } else {
+                        NSError *error = result.error;
+                        NSDictionary *userInfo = error.userInfo;
+                        
+                        // x23
+                        NSError *underlyingError = userInfo[NSUnderlyingErrorKey];
+                        if (underlyingError == nil) {
+                            
+                        }
+                    }
                 }
             }
+            
+            dispatch_group_leave(group);
         }];
         
         abort();
