@@ -64,6 +64,7 @@
 				Private/Log.h,
 				"Private/NSPersistentStore+OpenCloudData_Private.h",
 				Private/OCCKEvent.h,
+				Private/OCCloudKitExporter.h,
 				Private/OCCloudKitMirroringDelegate.h,
 				Private/OCCloudKitMirroringDelegateOptions.h,
 				Private/OCCloudKitMirroringDelegateProgressProvider.h,
@@ -86,6 +87,9 @@
 				"SPI/NSPersistentStore+Private.h",
 				"SPI/NSPersistentStoreDescription+Private.h",
 				SPI/NSPersistentStoreMirroringDelegate.h,
+				SPI/PFApplicationStateMonitor.h,
+				SPI/PFApplicationStateMonitorDelegate.h,
+				SPI/PFCloudKitExporterDelegate.h,
 			);
 			publicHeaders = (
 				"NSPersistentStoreDescription+OpenCloudData.h",

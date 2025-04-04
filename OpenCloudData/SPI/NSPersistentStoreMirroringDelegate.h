@@ -9,8 +9,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
 @protocol NSPersistentStoreMirroringDelegate <NSObject>
+- (void)persistentStoreCoordinator:(NSPersistentStoreCoordinator *)persistentStoreCoordinator didSuccessfullyAddPersistentStore:(__kindof NSPersistentStore *)persistentStore withDescription:(NSPersistentStoreDescription *)storeDescription;
+- (BOOL)validateManagedObjectModel:(NSManagedObjectModel *)managedObjectModel forUseWithStoreWithDescription:(NSPersistentStoreDescription *)storeDescription error:(NSError * _Nullable * _Nullable)error;
 @end
 
 NS_ASSUME_NONNULL_END

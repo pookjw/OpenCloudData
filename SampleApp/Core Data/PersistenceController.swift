@@ -55,7 +55,7 @@ struct PersistenceController {
                 */
                 fatalError("Unresolved error \(error), \(error.userInfo)")
             }
-            try! (container as! OCPersistentCloudKitContainer).initializeCloudKitSchema()
+            try! (container as! NSPersistentCloudKitContainer).initializeCloudKitSchema()
         })
 
         return container

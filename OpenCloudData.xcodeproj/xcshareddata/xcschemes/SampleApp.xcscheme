@@ -54,7 +54,7 @@
          <EnvironmentVariable
             key = "USE_OPEN_CLOUD_DATA"
             value = "1"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </EnvironmentVariable>
       </EnvironmentVariables>
    </LaunchAction>
