@@ -6,6 +6,9 @@
 //
 
 #import <CloudKit/CloudKit.h>
+#import <OpenCloudData/OCCloudKitMirroringRequest.h>
+#import <OpenCloudData/OCCloudKitExporterOptions.h>
+#import <OpenCloudData/OCCloudKitStoreMonitor.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -17,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface OCCloudKitExporter : NSObject
-
+- (instancetype)initWithOptions:(OCCloudKitExporterOptions *)options request:(__kindof OCCloudKitMirroringRequest *)request monitor:(OCCloudKitStoreMonitor *)monitor workQueue:(dispatch_queue_t)workQueue;
 @end
 
 NS_ASSUME_NONNULL_END
