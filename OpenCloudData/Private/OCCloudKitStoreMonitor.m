@@ -75,8 +75,19 @@
     abort();
 }
 
-- (void)performBlock:(void (^)(void))block {
-    abort();
+- (void)performBlock:(void (^ NS_NOESCAPE)(void))block {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+    if (block != nil) {
+        // objc_loadWeakRetained
+        id monitoredCoordinator = _monitoredCoordinator;
+        dispatch_group_enter(_monitorGroup);
+        block();
+        dispatch_group_leave(_monitorGroup);
+        monitoredCoordinator = nil;
+    }
+    
+    [pool release];
 }
 
 - (__kindof NSPersistentStore *)retainedMonitoredStore {
