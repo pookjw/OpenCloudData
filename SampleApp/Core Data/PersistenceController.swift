@@ -55,7 +55,13 @@ struct PersistenceController {
                 */
                 fatalError("Unresolved error \(error), \(error.userInfo)")
             }
-            try! (container as! NSPersistentCloudKitContainer).initializeCloudKitSchema()
+//            try! (container as! NSPersistentCloudKitContainer).initializeCloudKitSchema()
+            
+//            Task {
+//                try! await Task.sleep(for: .seconds(1))
+//                try! container.persistentStoreCoordinator.remove(container.persistentStoreCoordinator.persistentStores.first!)
+//                print("Removed!")
+//            }
         })
 
         return container

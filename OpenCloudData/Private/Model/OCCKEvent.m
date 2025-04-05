@@ -20,7 +20,6 @@
 @dynamic countFinishedObjects;
 
 + (NSString *)entityPath {
-#warning TODO 값 그대로 써도 되는지
     return @"CloudKit/NSCKEvent";
 }
 

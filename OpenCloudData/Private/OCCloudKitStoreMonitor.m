@@ -7,9 +7,14 @@
 
 #import <OpenCloudData/OCCloudKitStoreMonitor.h>
 #import <OpenCloudData/NSPersistentStoreCoordinator+Private.h>
+#import <OpenCloudData/NSManagedObjectContext+Private.h>
+#import <OpenCloudData/Log.h>
 #import <os/lock.h>
+#import <objc/runtime.h>
 
 //COREDATA_EXTERN NSNotificationName const _NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification;
+
+# define OS_UNFAIR_LOCK_FLAG_DATA_SYNCHRONIZATION (0x00010000)
 
 @interface OCCloudKitStoreMonitor () {
     dispatch_group_t _monitorGroup;
@@ -45,7 +50,7 @@
             NSPersistentStoreCoordinator *persistentStoreCoordinator = [store.persistentStoreCoordinator retain];
             
             [persistentStoreCoordinator performBlockAndWait:^{
-                [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(coordinatorWillRemoveStore:) name:@"_NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification" object:persistentStoreCoordinator];
+                [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(coordinatorWillRemoveStore:) name:@"_NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification" object:nil];
                 storeIsAlive = ([persistentStoreCoordinator persistentStoreForIdentifier:identifier]);
             }];
             
@@ -71,7 +76,8 @@
     [super dealloc];
 }
 
-- (void)coordinatorWillRemoveStore:(__kindof NSPersistentStore *)store {
+- (void)coordinatorWillRemoveStore:(NSNotification *)notification {
+    // _NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification은 안 불리는 Notification으로 보임
     abort();
 }
 
@@ -91,11 +97,67 @@
 }
 
 - (__kindof NSPersistentStore *)retainedMonitoredStore {
-    abort();
+    // x19 = self
+    
+    if (!_storeIsAlive) return nil;
+    if (_declaredDead) return nil;
+    
+    // x20
+    NSPersistentStoreCoordinator *monitoredCoordinator = _monitoredCoordinator;
+    if (monitoredCoordinator == nil) {
+        return nil;
+    }
+    
+    __block NSPersistentStore * _Nullable store = nil;
+    [monitoredCoordinator performBlockAndWait:^{
+        store = [[monitoredCoordinator persistentStoreForIdentifier:_storeIdentifier] retain];
+    }];
+    
+    if (store == nil) {
+        os_unfair_lock_lock_with_flags(&_aliveLock, OS_UNFAIR_LOCK_FLAG_DATA_SYNCHRONIZATION | OS_UNFAIR_LOCK_FLAG_ADAPTIVE_SPIN);
+        _storeIsAlive = NO;
+        _declaredDead = YES;
+        os_unfair_lock_unlock(&_aliveLock);
+    }
+    
+    return store;
 }
 
 - (NSManagedObjectContext *)newBackgroundContextForMonitoredCoordinator {
-    abort();
+    // self = x21
+    
+    // x19
+    NSManagedObjectContext *context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    
+    NSPersistentStoreCoordinator *monitoredCoordinator = _monitoredCoordinator;
+    if (monitoredCoordinator == nil) {
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Called after the store is dead. This method needs to be called inside a performBlock on the store monitor: %@", self);
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Called after the store is dead. This method needs to be called inside a performBlock on the store monitor: %@", self);
+        return context;
+    }
+    
+    context.persistentStoreCoordinator = monitoredCoordinator;
+    [context _setAllowAncillaryEntities:YES];
+    context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
+    
+    if (_storeIdentifier != nil) {
+        NSArray<NSString *> *old_persistentStoreIdentifiers;
+        Ivar _persistentStoreIdentifiersIvar = object_getInstanceVariable(context, "_persistentStoreIdentifiers", (void **)&old_persistentStoreIdentifiers);
+        assert(_persistentStoreIdentifiersIvar != NULL);
+        [old_persistentStoreIdentifiers release];
+        ptrdiff_t offset = ivar_getOffset(_persistentStoreIdentifiersIvar);
+        *(id *)((uintptr_t)context + offset) = [@[_storeIdentifier] copy];
+    } else {
+        os_log_fault(_OCLogGetLogStream(0x11), "fault: Attempt to create context without a store identifier.\n");
+        os_log_error(_OCLogGetLogStream(0x11), "fault: Attempt to create context without a store identifier.\n");
+    }
+    
+    if ([monitoredCoordinator persistentStoreForIdentifier:_storeIdentifier] != nil) {
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Called after the store is dead. This method needs to be called inside a performBlock on the store monitor: %@", self);
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Called after the store is dead. This method needs to be called inside a performBlock on the store monitor: %@", self);
+    }
+    
+    return context;
 }
 
 @end

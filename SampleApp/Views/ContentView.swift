@@ -62,6 +62,8 @@ struct ContentView: View {
         let newContact = Contact(context: viewContext)
         newContact.name = name
         newContact.photo = photo
+        newContact.otherEntity = .init(context: viewContext)
+        newContact.otherEntity?.string = name
 
         do {
             try viewContext.save()

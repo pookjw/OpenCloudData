@@ -1,1 +1,6 @@
-- `-[OCPersistentCloudKitContainer initializeCloudKitSchemaWithOptions:error:]`
+- OCCloudKitMirroringDelegate
+    - OCCloudKitExporterDelegate
+    - OCCloudKitExporter
+    - OCCloudKitExportContext
+    - OCCKRecordMetadata
+    - OCCKRecordZoneMetadata
