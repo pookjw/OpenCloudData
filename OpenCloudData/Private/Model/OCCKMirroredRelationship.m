@@ -10,6 +10,7 @@
 #import <OpenCloudData/OCCKRecordZoneMetadata.h>
 #import <OpenCloudData/Log.h>
 #import <objc/runtime.h>
+@import ellekit;
 
 @implementation OCCKMirroredRelationship
 @dynamic ckRecordID;
@@ -140,7 +141,7 @@
     }
 }
 
-+ (NSArray *)fetchMirroredRelationshipsMatchingRelatingRecords:(NSArray<CKRecord *> *)records andRelatingRecordIDs:(NSArray<CKRecordID *> *)recordIDs fromStore:(__kindof NSPersistentStore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
++ (NSArray<OCCKMirroredRelationship *> *)fetchMirroredRelationshipsMatchingRelatingRecords:(NSArray<CKRecord *> *)records andRelatingRecordIDs:(NSArray<CKRecordID *> *)recordIDs fromStore:(__kindof NSPersistentStore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
     /*
      x24 = records
      x25 = recordIDs
@@ -539,6 +540,118 @@
     } else {
         return [NSSet set];
     }
+}
+
++ (BOOL)updateMirroredRelationshipsMatchingRecords:(NSArray<CKRecord *> *)records forStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext usingBlock:(BOOL (^ NS_NOESCAPE)(OCCKMirroredRelationship * _Nonnull, CKRecord * _Nonnull, NSError * _Nullable * _Nullable))block error:(NSError * _Nullable *)error {
+    /*
+     x24 = records
+     x21 = store
+     x19 = managedObjectContext
+     x22 = block
+     x20 = error
+     */
+    
+    // sp, #0xf8
+    NSError * _Nullable _error = nil;
+    // sp, #0x28
+    NSArray<OCCKMirroredRelationship *> * _Nullable fetchedRelationships = [OCCKMirroredRelationship fetchMirroredRelationshipsMatchingRelatingRecords:records andRelatingRecordIDs:@[] fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+    
+    if (fetchedRelationships == nil) {
+        // <+120> | <+1064>
+        abort();
+    }
+    
+    // x22
+    NSMutableSet<CKRecordID *> *recordIDs = [[NSMutableSet alloc] init];
+    // x21 / sp + 0x10
+    NSMutableDictionary<CKRecordID *, CKRecord *> *recodsByRecordID = [[NSMutableDictionary alloc] init];
+    
+    // x28
+    for (CKRecord *record in records) {
+        if ([record.recordType isEqualToString:@"CDMR"]) {
+            recodsByRecordID[record.recordID] = record;
+            [recordIDs addObject:record.recordID];
+        } else {
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Attempted to update a mirrored relationship with a non-mirrored-relationship record: %@\n", record);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Attempted to update a mirrored relationship with a non-mirrored-relationship record: %@\n", record);
+        }
+    }
+    
+    //x24
+    NSMutableDictionary<CKRecordID *, OCCKMirroredRelationship *> *relationshipsByRecordID = [[NSMutableDictionary alloc] init];
+    
+    // x25
+    for (OCCKMirroredRelationship *relationship in fetchedRelationships) {
+        // original : getCloudKitCKRecordZoneIDClass
+        // x26
+        CKRecordZoneID *zoneID = [[CKRecordZoneID alloc] initWithZoneName:relationship.recordZone.ckRecordZoneName ownerName:relationship.recordZone.ckOwnerName];
+        
+        // original : getCloudKitCKRecordZoneIDClass
+        // x27
+        CKRecordID *recordID = [[CKRecordID alloc] initWithRecordName:relationship.ckRecordID zoneID:zoneID];
+        
+        relationshipsByRecordID[recordID] = relationship;
+        [recordIDs addObject:recordID];
+        
+        [recordID release];
+        [zoneID release];
+    }
+    
+    // x21
+    BOOL succeed = NO;
+    
+    // x23
+    for (CKRecordID *recordID in recordIDs) {
+        // x25
+        OCCKMirroredRelationship *relationship = relationshipsByRecordID[recordID];
+        CKRecord *record = recodsByRecordID[recordID];
+        
+        BOOL result = block(relationship, record, &_error);
+        if (!result) break;
+        succeed = YES;
+    }
+    
+    [recordIDs release];
+    [relationshipsByRecordID release];
+    [recodsByRecordID release];
+    
+    if (!succeed) {
+        if (_error != nil) {
+            if (error) *error = _error;
+        } else {
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        }
+        
+        return NO;
+    }
+    
+    return YES;
+}
+
++ (NSArray<OCCKMirroredRelationship *> *)fetchMirroredRelationshipsMatchingPredicate:(NSPredicate *)predicate fromStore:(__kindof NSPersistentStore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
+    NSFetchRequest<OCCKMirroredRelationship *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKMirroredRelationship entityPath]];
+    fetchRequest.affectedStores = @[store];
+    fetchRequest.fetchBatchSize = 1000;
+    fetchRequest.predicate = predicate;
+    return [managedObjectContext executeFetchRequest:fetchRequest error:error];
+}
+
++ (NSNumber *)countMirroredRelationshipsInStore:(__kindof NSPersistentStore *)store matchingPredicate:(NSPredicate *)predicate withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
+    NSFetchRequest<OCCKMirroredRelationship *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKMirroredRelationship entityPath]];
+    fetchRequest.predicate = predicate;
+    fetchRequest.resultType = NSCountResultType;
+    fetchRequest.affectedStores = @[store];
+    
+    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
+    const void *symbol = MSFindSymbol(image, "-[NSManagedObjectContext _countForFetchRequest_:error:]");
+    NSInteger count = ((NSInteger (*)(id, id, id *))symbol)(managedObjectContext, fetchRequest, error);
+    
+    if (count == NSNotFound) {
+        return nil;
+    }
+    
+    return [NSNumber numberWithUnsignedInteger:count];
 }
 
 @end
