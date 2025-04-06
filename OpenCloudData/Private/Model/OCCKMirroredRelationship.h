@@ -7,6 +7,7 @@
 
 #import <CoreData/CoreData.h>
 #import <OpenCloudData/OCCloudKitImportZoneContext.h>
+#import <OpenCloudData/PFMirroredManyToManyRelationshipV2.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -33,7 +34,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (CKRecordID * _Nullable)createRecordIDForRelatedRecord NS_RETURNS_RETAINED __attribute__((objc_direct));
 - (BOOL)updateRelationshipValueUsingImportContext:(OCCloudKitImportZoneContext *)importContext andManagedObjectContext:(NSManagedObjectContext *)managedObjectContext isDelete:(BOOL)isDelete error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 
-+ (NSArray *)fetchMirroredRelationshipsMatchingRelatingRecords:(NSArray<CKRecord *> *)records andRelatingRecordIDs:(NSArray<CKRecordID *> *)recordIDs fromStore:(__kindof NSPersistentStore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error;
++ (NSArray<OCCKMirroredRelationship *> * _Nullable)fetchMirroredRelationshipsMatchingRelatingRecords:(NSArray<CKRecord *> *)records andRelatingRecordIDs:(NSArray<CKRecordID *> *)recordIDs fromStore:(__kindof NSPersistentStore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
++ (NSArray<OCCKMirroredRelationship *> * _Nullable)fetchPendingMirroredRelationshipsInStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
++ (OCCKMirroredRelationship * _Nullable)mirroredRelationshipForManyToMany:(PFMirroredManyToManyRelationshipV2 *)manyToManyRelationship inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
++ (OCCKMirroredRelationship *)insertMirroredRelationshipForManyToMany:(PFMirroredManyToManyRelationshipV2 *)manyToManyRelationship inZoneWithMetadata:(OCCKRecordZoneMetadata *)metadata inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext __attribute__((objc_direct));
++ (BOOL)purgeMirroredRelationshipsWithRecordIDs:(NSArray<CKRecordID *> *)recordIDs fromStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
++ (NSSet<CKRecordID *> * _Nullable)markRelationshipsForDeletedRecordIDs:(NSArray<CKRecordID *> *)deletedRecordIDs inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

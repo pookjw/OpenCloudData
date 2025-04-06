@@ -3,10 +3,10 @@
     <entity name="Contact" representedClassName="Contact" syncable="YES" codeGenerationType="class">
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="photo" optional="YES" attributeType="Transformable" valueTransformerName="" customClassName="UIKit.UIImage"/>
-        <relationship name="otherEntity" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="contact" inverseEntity="Entity"/>
+        <relationship name="otherEntities" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Entity" inverseName="contacts" inverseEntity="Entity"/>
     </entity>
     <entity name="Entity" representedClassName="Entity" syncable="YES" codeGenerationType="class">
         <attribute name="string" optional="YES" attributeType="String"/>
-        <relationship name="contact" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Contact" inverseName="otherEntity" inverseEntity="Contact"/>
+        <relationship name="contacts" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Contact" inverseName="otherEntities" inverseEntity="Contact"/>
     </entity>
 </model>

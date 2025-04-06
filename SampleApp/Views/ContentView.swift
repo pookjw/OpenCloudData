@@ -62,8 +62,8 @@ struct ContentView: View {
         let newContact = Contact(context: viewContext)
         newContact.name = name
         newContact.photo = photo
-        newContact.otherEntity = .init(context: viewContext)
-        newContact.otherEntity?.string = name
+        newContact.otherEntities = .init(object: Entity(context: viewContext))
+        (newContact.otherEntities?.allObjects.last as! Entity).string = name
 
         do {
             try viewContext.save()

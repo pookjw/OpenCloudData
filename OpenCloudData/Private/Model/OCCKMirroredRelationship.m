@@ -9,6 +9,7 @@
 #import <OpenCloudData/OCCloudKitMetadataModel.h>
 #import <OpenCloudData/OCCKRecordZoneMetadata.h>
 #import <OpenCloudData/Log.h>
+#import <objc/runtime.h>
 
 @implementation OCCKMirroredRelationship
 @dynamic ckRecordID;
@@ -131,8 +132,8 @@
         if (_error != nil) {
             if (error) *error = _error;
         } else {
-            os_log_error(_OCLogGetLogStream(0x11), "CoreData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_fault(_OCLogGetLogStream(0x11), "CoreData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
         }
         
         return NO;
@@ -140,7 +141,404 @@
 }
 
 + (NSArray *)fetchMirroredRelationshipsMatchingRelatingRecords:(NSArray<CKRecord *> *)records andRelatingRecordIDs:(NSArray<CKRecordID *> *)recordIDs fromStore:(__kindof NSPersistentStore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
-    abort();
+    /*
+     x24 = records
+     x25 = recordIDs
+     sp + 0x40 = store
+     sp + 0x30 = error
+     sp + 0x38 = managedObjectContext
+     */
+    
+    
+    // sp + 0x118
+    NSError * _Nullable contextError = nil;
+    
+    // sp + 0x48
+    NSMutableArray<OCCKMirroredRelationship *> *relationships = [[NSMutableArray alloc] init];
+    
+    // x19
+    NSMutableDictionary<CKRecordZoneID *, NSMutableSet<NSString *> *> *recordNamesSetByZoneID = [[NSMutableDictionary alloc] init];
+    
+    // x26
+    for (CKRecordID *recordID in recordIDs) {
+        // x27
+        CKRecordZoneID *zoneID = recordID.zoneID;
+        
+        // x28
+        NSMutableSet<NSString *> *recordNamesSet = [recordNamesSetByZoneID[zoneID] retain];
+        
+        if (recordNamesSet == nil) {
+            recordNamesSet = [[NSMutableSet alloc] init];
+            recordNamesSetByZoneID[zoneID] = recordNamesSet;
+        }
+        
+        [recordNamesSet addObject:recordID.recordName];
+        [recordNamesSet release];
+    }
+    
+    // x26
+    for (CKRecord *record in records) {
+        // x27
+        NSMutableSet<NSString *> *recordNamesSet = [recordNamesSetByZoneID[record.recordID.zoneID] retain];
+        
+        if (recordNamesSet == nil) {
+            recordNamesSet = [[NSMutableSet alloc] init];
+            recordNamesSetByZoneID[record.recordID.zoneID] = recordNamesSet;
+        }
+        
+        [recordNamesSet addObject:record.recordID.recordName];
+        [recordNamesSet release];
+    }
+    
+    // x21
+    for (CKRecordZoneID *recordZoneID in recordNamesSetByZoneID) @autoreleasepool {
+        // x28
+        NSFetchRequest<OCCKMirroredRelationship *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKMirroredRelationship entityPath]];
+        
+        // x22 / sp + 0x8 / sp + x10 / sp
+        NSMutableSet<NSString *> *recordNamesSet = recordNamesSetByZoneID[recordZoneID];
+        
+        // x20 / sp + 0x18
+        NSString *zoneName = recordZoneID.zoneName;
+        
+        // sp + 0x20
+        NSString *ownerName = recordZoneID.ownerName;
+        
+        fetchRequest.predicate = [NSPredicate predicateWithFormat:@"(ckRecordID IN %@ OR recordName IN %@ OR relatedRecordName IN %@) AND recordZone.ckRecordZoneName = %@ AND recordZone.ckOwnerName = %@", recordNamesSet, recordNamesSet, recordNamesSet, zoneName, ownerName];
+        fetchRequest.affectedStores = @[store];
+        fetchRequest.relationshipKeyPathsForPrefetching = @[@"recordZone"];
+        fetchRequest.returnsObjectsAsFaults = NO;
+        
+        // x21
+        NSArray<OCCKMirroredRelationship *> * _Nullable results = [managedObjectContext executeFetchRequest:fetchRequest error:&contextError];
+        if (results != nil) {
+            [relationships addObjectsFromArray:results];
+        } else {
+            [contextError retain];
+            [relationships release];
+            relationships = nil;
+        }
+        
+        if (results == nil) break;
+    }
+    
+    if (relationships == nil) {
+        NSError *_error = [[contextError retain] autorelease];
+        
+        if (_error == nil) {
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        } else if (error) {
+            *error = _error;
+        }
+    }
+    
+    [contextError release];
+    contextError = nil;
+    [recordNamesSetByZoneID release];
+    
+    return [relationships autorelease];
+}
+
++ (NSArray<OCCKMirroredRelationship *> *)fetchPendingMirroredRelationshipsInStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
+    /*
+     x21 = store
+     x19 = managedObjectContext
+     x20 = error
+     */
+    
+    // sp + 0x8
+    NSError * _Nullable contextError = nil;
+    
+    // x22
+    NSFetchRequest<OCCKMirroredRelationship *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKMirroredRelationship entityPath]];
+    
+    fetchRequest.affectedStores = @[store];
+    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"isPending == 1"];
+    
+    // x19
+    NSArray<OCCKMirroredRelationship *> * _Nullable results = [managedObjectContext executeFetchRequest:fetchRequest error:&contextError];
+    
+    if (results == nil) {
+        if (contextError == nil) {
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        } else if (error) {
+            *error = contextError;
+        }
+    }
+    
+    return results;
+}
+
++ (OCCKMirroredRelationship *)mirroredRelationshipForManyToMany:(PFMirroredManyToManyRelationshipV2 *)manyToManyRelationship inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
+    /*
+     x19 = manyToManyRelationship
+     x23 = store
+     x21 = managedObjectContext
+     x20 = error
+     */
+    
+    // x22
+    NSFetchRequest<OCCKMirroredRelationship *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKMirroredRelationship entityPath]];
+    
+    fetchRequest.affectedStores = @[store];
+    
+    NSString * _Nullable recordName;
+    if (manyToManyRelationship != nil) {
+        CKRecordID * _Nullable _manyToManyRecordID;
+        assert(object_getInstanceVariable(manyToManyRelationship, "_manyToManyRecordID", (void **)&_manyToManyRecordID) != NULL);
+        recordName = _manyToManyRecordID.recordName;
+    } else {
+        recordName = nil;
+    }
+    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"ckRecordID = %@", recordName];
+    
+    NSArray<OCCKMirroredRelationship *> * _Nullable results = [managedObjectContext executeFetchRequest:fetchRequest error:error];
+    if (results == nil) return nil;
+    
+    if (results.count > 2) {
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Found more than one mirrored relationship matching a many to many: %@\n%@\n", manyToManyRelationship, results);
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Found more than one mirrored relationship matching a many to many: %@\n%@\n", manyToManyRelationship, results);
+    }
+    
+    return results.lastObject;
+}
+
++ (OCCKMirroredRelationship *)insertMirroredRelationshipForManyToMany:(PFMirroredManyToManyRelationshipV2 *)manyToManyRelationship inZoneWithMetadata:(OCCKRecordZoneMetadata *)metadata inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext {
+    /*
+     x21 = manyToManyRelationship
+     x19 = metadata
+     x23 = store
+     x22 = managedObjectContext
+     */
+    
+    OCCKMirroredRelationship *object = [NSEntityDescription insertNewObjectForEntityForName:[OCCKMirroredRelationship entityPath] inManagedObjectContext:managedObjectContext];
+    
+    [managedObjectContext assignObject:object toPersistentStore:store];
+    
+    NSString * _Nullable ckRecordID;
+    if (manyToManyRelationship != nil) {
+        CKRecordID * _Nullable _manyToManyRecordID;
+        assert(object_getInstanceVariable(manyToManyRelationship, "_manyToManyRecordID", (void **)&_manyToManyRecordID) != NULL);
+        ckRecordID = _manyToManyRecordID.recordName;
+    } else {
+        ckRecordID = nil;
+    }
+    object.ckRecordID = ckRecordID;
+    
+    NSString * _Nullable cdEntityName;
+    if (manyToManyRelationship != nil) {
+        NSRelationshipDescription * _Nullable _relationshipDescription;
+        assert(object_getInstanceVariable(manyToManyRelationship, "_relationshipDescription", (void **)&_relationshipDescription) != NULL);
+        cdEntityName = _relationshipDescription.entity.name;
+    } else {
+        cdEntityName = nil;
+    }
+    object.cdEntityName = cdEntityName;
+    
+    NSString * _Nullable recordName;
+    if (manyToManyRelationship != nil) {
+        CKRecordID * _Nullable _ckRecordID;
+        assert(object_getInstanceVariable(manyToManyRelationship, "_ckRecordID", (void **)&_ckRecordID) != NULL);
+        recordName = _ckRecordID.recordName;
+    } else {
+        recordName = nil;
+    }
+    object.recordName = recordName;
+    
+    
+    NSString * _Nullable relatedEntityName;
+    if (manyToManyRelationship != nil) {
+        NSRelationshipDescription * _Nullable _inverseRelationshipDescription;
+        assert(object_getInstanceVariable(manyToManyRelationship, "_inverseRelationshipDescription", (void **)&_inverseRelationshipDescription) != NULL);
+        relatedEntityName = _inverseRelationshipDescription.entity.name;
+    } else {
+        relatedEntityName = nil;
+    }
+    object.relatedEntityName = relatedEntityName;
+    
+    
+    NSString * _Nullable relatedRecordName;
+    if (manyToManyRelationship != nil) {
+        CKRecordID * _Nullable _relatedCKRecordID;
+        assert(object_getInstanceVariable(manyToManyRelationship, "_relatedCKRecordID", (void **)&_relatedCKRecordID) != NULL);
+        relatedRecordName = _relatedCKRecordID.recordName;
+    } else {
+        relatedRecordName = nil;
+    }
+    object.relatedRecordName = relatedRecordName;
+    
+    NSString * _Nullable relationshipName;
+    if (manyToManyRelationship != nil) {
+        NSRelationshipDescription * _Nullable _relationshipDescription;
+        assert(object_getInstanceVariable(manyToManyRelationship, "_relationshipDescription", (void **)&_relationshipDescription) != NULL);
+        relationshipName = _relationshipDescription.name;
+    } else {
+        relationshipName = nil;
+    }
+    object.relationshipName = relationshipName;
+    
+    object.isPending = @(NO);
+    object.isUploaded = @(NO);
+    object.needsDelete = @(NO);
+    object.recordZone = metadata;
+    
+    return object;
+}
+
++ (BOOL)purgeMirroredRelationshipsWithRecordIDs:(NSArray<CKRecordID *> *)recordIDs fromStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
+    /*
+     X22 = recordIDs
+     X23 = store
+     x21 = managedObjectContext
+     sp + 0x18 = error
+     */
+    
+    // sp + 0x128
+    NSError * _Nullable contextError = nil;
+    BOOL hasError = NO;
+    
+    // x20
+    NSMutableDictionary<CKRecordZoneID *, NSMutableSet<NSString *> *> *recordNamesSetByZoneID = [[NSMutableDictionary alloc] init];
+    
+    for (CKRecordID *recordID in recordIDs) {
+        CKRecordZoneID *zoneID = recordID.zoneID;
+        
+        // x26
+        NSMutableSet<NSString *> *recordNamesSet = [recordNamesSetByZoneID[zoneID] retain];
+        if (recordNamesSet == nil) {
+            recordNamesSet = [[NSMutableSet alloc] init];
+            recordNamesSetByZoneID[recordID.zoneID] = recordNamesSet;
+        }
+        
+        [recordNamesSet addObject:recordID.recordName];
+        [recordNamesSet release];
+    }
+    
+    NSFetchRequest<OCCKMirroredRelationship *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKMirroredRelationship entityPath]];
+    fetchRequest.affectedStores = @[store];
+    
+    // x27
+    for (CKRecordZoneID *zoneID in recordNamesSetByZoneID) {
+        NSMutableSet<NSString *> *recordNamesSet = recordNamesSetByZoneID[zoneID];
+        fetchRequest.predicate = [NSPredicate predicateWithFormat:@"((recordZone.ckRecordZoneName = %@) AND (recordZone.ckOwnerName = %@) AND (ckRecordID IN %@))", zoneID.zoneName, zoneID.ownerName, recordNamesSet];
+        
+        // x25
+        NSArray<OCCKMirroredRelationship *> * _Nullable relationships = [managedObjectContext executeFetchRequest:fetchRequest error:&contextError];
+        if (relationships == nil) {
+            hasError = YES;
+            break;
+        }
+        
+        for (OCCKMirroredRelationship *relationship in relationships) {
+            [managedObjectContext deleteObject:relationship];
+        }
+    }
+    
+    if (!hasError) {
+        fetchRequest.predicate = [NSPredicate predicateWithFormat:@"(needsDelete = 1 AND isUploaded = 1)"];
+        // x22
+        NSArray<OCCKMirroredRelationship *> * _Nullable relationships = [managedObjectContext executeFetchRequest:fetchRequest error:&contextError];
+        if (relationships == nil) {
+            hasError = YES;
+        } else {
+            for (OCCKMirroredRelationship *relationship in relationships) {
+                [managedObjectContext deleteObject:relationship];
+            }
+        }
+    }
+    
+    [recordNamesSetByZoneID release];
+    
+    if (hasError) {
+        if (contextError == nil) {
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        } else {
+            if (error) *error = contextError;
+        }
+        
+        return NO;
+    } else {
+        return YES;
+    }
+}
+
++ (NSSet<CKRecordID *> *)markRelationshipsForDeletedRecordIDs:(NSArray<CKRecordID *> *)deletedRecordIDs inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
+    /*
+     x23 = deletedRecordIDs
+     X24 = store
+     sp + 0x40 = managedObjectContext
+     x19 = error
+     */
+    
+    // sp + 0x118
+    NSError * _Nullable contextError = nil;
+    
+    if (deletedRecordIDs.count != 0) {
+        // x19
+        NSMutableSet<CKRecordID *> *recordIDsSet = [[NSMutableSet alloc] init];
+        // x20
+        NSMutableDictionary<CKRecordZoneID *, NSMutableSet<NSString *> *> *recordNamesSetByZoneID = [[NSMutableDictionary alloc] init];
+        
+        // x21
+        for (CKRecordID *deletedRecordID in deletedRecordIDs) {
+            NSMutableSet<NSString *> *recordNamesSet = [recordNamesSetByZoneID[deletedRecordID.zoneID] retain];
+            if (recordNamesSet == nil) {
+                recordNamesSet = [[NSMutableSet alloc] init];
+                recordNamesSetByZoneID[deletedRecordID.zoneID] = recordNamesSet;
+            }
+            
+            [recordNamesSet addObject:deletedRecordID.recordName];
+            [recordNamesSet release];
+        }
+        
+        NSFetchRequest<OCCKMirroredRelationship *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKMirroredRelationship entityPath]];
+        fetchRequest.affectedStores = @[store];
+        
+        // x28
+        for (CKRecordZoneID *zoneID in recordNamesSetByZoneID) {
+            // x21
+            NSMutableSet<NSString *> *recordNamesSet = recordNamesSetByZoneID[zoneID];
+            
+            fetchRequest.predicate = [NSPredicate predicateWithFormat:@"((recordZone.ckRecordZoneName = %@) AND (recordZone.ckOwnerName = %@) AND ((recordName IN %@) OR (relatedRecordName IN %@))) OR needsDelete = 1", zoneID.zoneName, zoneID.ownerName, recordNamesSet, recordNamesSet];
+            
+            // x28
+            NSArray<OCCKMirroredRelationship *> * _Nullable relationships = [managedObjectContext executeFetchRequest:fetchRequest error:&contextError];
+            if (relationships == nil) {
+                if (contextError == nil) {
+                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+                } else {
+                    if (error) {
+                        *error = contextError;
+                    }
+                }
+                
+                [recordIDsSet release];
+                [recordNamesSetByZoneID release];
+                return nil;
+            }
+            
+            // x25
+            for (OCCKMirroredRelationship *relationship in relationships) {
+                CKRecordID *recordID = [relationship createRecordID];
+                [recordIDsSet addObject:recordID];
+                [recordID release];
+                
+                relationship.needsDelete = @(YES);
+                relationship.isUploaded = @(NO);
+            }
+        }
+        
+        NSSet<CKRecordID *> *result = [[recordIDsSet copy] autorelease];
+        [recordIDsSet release];
+        [recordNamesSetByZoneID release];
+        return result;
+    } else {
+        return [NSSet set];
+    }
 }
 
 @end

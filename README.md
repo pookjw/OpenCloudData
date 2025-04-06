@@ -2,5 +2,4 @@
     - OCCloudKitExporterDelegate
     - OCCloudKitExporter
     - OCCloudKitExportContext
-    - OCCKRecordMetadata
-    - OCCKRecordZoneMetadata
+    - OCCKMirroredRelationship
