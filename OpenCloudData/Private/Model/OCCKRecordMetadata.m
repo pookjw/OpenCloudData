@@ -140,7 +140,7 @@
     NSSQLModel *model = [persistentStore model];
     
     const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-    const void *symbol = MSFindSymbol(image, "_sqlEntityForEntityDescription");
+    const void *symbol = MSFindSymbol(image, "__sqlEntityForEntityDescription");
     
     NSSQLEntity * _Nullable entity = ((id (*)(id, id))symbol)(object.objectID.entity, model);
     uint _entityID;
