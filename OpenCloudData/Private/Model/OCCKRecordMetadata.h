@@ -10,12 +10,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO moveReceipts
+#warning TODO
 // direct method 있음
 
 @class OCCKRecordZoneMetadata;
 
 @interface OCCKRecordMetadata : NSManagedObject
++ (NSData * _Nullable)encodeRecord:(CKRecord *)record error:(NSError * _Nullable * _Nullable)error NS_RETURNS_RETAINED;
++ (NSString *)entityPath;
++ (OCCKRecordMetadata * _Nullable)insertMetadataForObject:(NSManagedObject *)object setRecordName:(BOOL)setRecordName inZoneWithID:(CKRecordZoneID *)zoneID recordNamePrefix:(NSString * _Nullable)recordNamePrefix error:(NSError * _Nullable * _Nullable)error;
+
 @property (retain, nonatomic) NSString *ckRecordName;
 @property (retain, nonatomic, nullable) NSData *ckRecordSystemFields;
 @property (retain, nonatomic, nullable) NSData *encodedRecord;

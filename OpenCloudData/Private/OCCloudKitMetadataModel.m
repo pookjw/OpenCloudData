@@ -7,6 +7,8 @@
 
 #import <OpenCloudData/OCCloudKitMetadataModel.h>
 
+NSString * const OCCKRecordIDAttributeName = @"ckRecordID";
+
 @implementation OCCloudKitMetadataModel
 
 + (NSUInteger)ancillaryEntityCount {

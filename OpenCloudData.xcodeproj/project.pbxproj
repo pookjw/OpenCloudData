@@ -96,11 +96,16 @@
 				SPI/CKSchedulerActivity.h,
 				SPI/NSCloudKitMirroringDelegate.h,
 				"SPI/NSManagedObjectContext+Private.h",
+				"SPI/NSManagedObjectID+Private.h",
 				"SPI/NSPersistentContainer+Private.h",
 				"SPI/NSPersistentStore+Private.h",
 				"SPI/NSPersistentStoreCoordinator+Private.h",
 				"SPI/NSPersistentStoreDescription+Private.h",
 				SPI/NSPersistentStoreMirroringDelegate.h,
+				SPI/NSSQLEntity.h,
+				SPI/NSSQLModel.h,
+				SPI/NSSQLModelProvider.h,
+				SPI/NSStoreMapping.h,
 				SPI/PFApplicationStateMonitor.h,
 				SPI/PFApplicationStateMonitorDelegate.h,
 				SPI/PFMirroredManyToManyRelationship.h,
@@ -316,6 +321,7 @@
 					};
 					4FB2FAE72D99668A0065C5B3 = {
 						CreatedOnToolsVersion = 16.3;
+						LastSwiftMigration = 1630;
 					};
 					4FB2FB812D99A2530065C5B3 = {
 						CreatedOnToolsVersion = 16.3;
@@ -603,6 +609,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_ENTITLEMENTS = SampleApp/App/CoreDataSync.entitlements;
 				CODE_SIGN_STYLE = Automatic;
@@ -625,6 +632,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "SampleApp/App/SampleApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -637,6 +645,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_ENTITLEMENTS = SampleApp/App/CoreDataSync.entitlements;
 				CODE_SIGN_STYLE = Automatic;
@@ -659,6 +668,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "SampleApp/App/SampleApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

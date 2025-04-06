@@ -10,7 +10,7 @@ struct CoreDataSyncApp: App {
     private let persistenceController = PersistenceController.shared
     
     init() {
-        
+        sa_shim()
     }
 
     var body: some Scene {

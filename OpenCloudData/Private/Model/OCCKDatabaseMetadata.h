@@ -10,13 +10,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-
 @class OCCKRecordZoneMetadata;
 
 @interface OCCKDatabaseMetadata : NSManagedObject
 + (OCCKDatabaseMetadata * _Nullable)databaseMetadataForScope:(CKDatabaseScope)databaseScope forStore:(__kindof NSPersistentStore *)store inContext:(NSManagedObjectContext *)context error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
-@property (class, nonatomic, readonly) NSString *entityPath;
++ (NSString *)entityPath;
 @property (retain, nonatomic, nullable) NSNumber *hasSubscriptionNum;
 @property (retain, nonatomic) NSNumber *databaseScopeNum;
 @property (retain, nonatomic) NSString *databaseName;
