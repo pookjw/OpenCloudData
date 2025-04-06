@@ -10,6 +10,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+#warning TODO
+
 @class OCCKRecordZoneMetadata;
 
 @interface OCCKRecordZoneQuery : NSManagedObject
