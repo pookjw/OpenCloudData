@@ -23,6 +23,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (OCCKRecordMetadata * _Nullable)insertMetadataForObject:(NSManagedObject *)object setRecordName:(BOOL)setRecordName inZoneWithID:(CKRecordZoneID *)zoneID recordNamePrefix:(NSString * _Nullable)recordNamePrefix error:(NSError * _Nullable * _Nullable)error;
 + (NSManagedObjectID * _Nullable)createObjectIDForEntityID:(NSNumber *)entityIDNumber primaryKey:(NSNumber *)primaryKeyNumber inSQLCore:(NSSQLCore *)sqlCore NS_RETURNS_RETAINED __attribute__((objc_direct));
 + (NSManagedObjectID * _Nullable)createObjectIDFromMetadataDictionary:(NSDictionary<NSString *, id> *)metadataDictionary inSQLCore:(NSSQLCore *)sqlCore NS_RETURNS_RETAINED __attribute__((objc_direct));
++ (OCCKRecordMetadata * _Nullable)metadataForObject:(NSManagedObject *)object inManagedObjectContext:(NSManagedObjectContext *)context error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
++ (NSArray<OCCKRecordMetadata *> * _Nullable)metadataForObjectIDs:(NSArray<NSManagedObjectID *> *)objectIDs inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)context error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 
 @property (retain, nonatomic) NSString *ckRecordName;
 @property (retain, nonatomic, nullable) NSData *ckRecordSystemFields;

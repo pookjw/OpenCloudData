@@ -255,4 +255,67 @@
     return [OCCKRecordMetadata createObjectIDForEntityID:metadataDictionary[@"entityId"] primaryKey:metadataDictionary[@"entityPK"] inSQLCore:sqlCore];
 }
 
++ (OCCKRecordMetadata *)metadataForObject:(NSManagedObject *)object inManagedObjectContext:(NSManagedObjectContext *)context error:(NSError * _Nullable *)error {
+    abort();
+}
+
++ (NSArray<OCCKRecordMetadata *> *)metadataForObjectIDs:(NSArray<NSManagedObjectID *> *)objectIDs inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)context error:(NSError * _Nullable *)error {
+    /*
+     x19 = objectIDs
+     x24 = store
+     x22 = context
+     sp + 0x10 = error
+     */
+    
+    // sp + 0x68
+    NSError * _Nullable contextError = nil;
+    
+    // sp + 0x18
+    NSDictionary<NSNumber *, NSSet<NSNumber *> *> *entityIDToPrimaryKeySet = [OCCloudKitMetadataModel createMapOfEntityIDToPrimaryKeySetForObjectIDs:objectIDs];
+    
+    // x19
+    NSMutableArray<OCCKRecordMetadata *> *results = [[NSMutableArray alloc] init];
+    // x23
+    NSFetchRequest<OCCKRecordMetadata *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordMetadata entityPath]];
+    fetchRequest.affectedStores = @[store];
+    
+    // x28
+    for (NSNumber *entityID in entityIDToPrimaryKeySet.allKeys) @autoreleasepool {
+        NSSet<NSNumber *> *primaryKeySet = entityIDToPrimaryKeySet[entityID];
+        
+        fetchRequest.predicate = [NSPredicate predicateWithFormat:@"entityId = %@ and entityPK in %@", entityID, primaryKeySet];
+        fetchRequest.fetchBatchSize = 500;
+        
+        // x28
+        NSArray<OCCKRecordMetadata *> * _Nullable fetchedObjects = [context executeFetchRequest:fetchRequest error:&contextError];
+        if (fetchedObjects != nil) {
+            [results addObjectsFromArray:fetchedObjects];
+        } else {
+            // break 호출 및 contextError, results 검사가 없음
+            // Error가 여러 번 발생하면 NSError에 Leak이 발생할 것
+            [contextError retain];
+            [results release];
+            results = nil;
+        }
+    }
+    
+    [entityIDToPrimaryKeySet release];
+    
+    if (results == nil) {
+        if (contextError == nil) {
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        } else {
+            if (error) {
+                *error = [[contextError retain] autorelease];
+            }
+        }
+    }
+    
+    [contextError release];
+    contextError = nil;
+    
+    return [results autorelease];
+}
+
 @end
