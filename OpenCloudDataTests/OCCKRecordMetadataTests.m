@@ -16,7 +16,7 @@
 
 @implementation OCCKRecordMetadataTests
 
-- (void)test_encodeRecord {
+- (void)test_encodeAndDecodeRecord {
     CKRecord *originalRecord = [OCCKRecordMetadataTests _createRecord];
     
     NSError * _Nullable error = nil;
@@ -25,19 +25,14 @@
     XCTAssertNil(error);
     XCTAssertNotNil(data);
     
-    NSData * _Nullable decompressedData = [data decompressedDataUsingAlgorithm:NSDataCompressionAlgorithmLZFSE error:&error];
+    CKRecord * _Nullable decodedRecord = [OCCKRecordMetadata recordFromEncodedData:data error:&error];
     XCTAssertNil(error);
-    XCTAssertNotNil(decompressedData);
-    [data release];
+    XCTAssertNotNil(decodedRecord);
     
-    CKRecord * _Nullable decodedReocrd = [NSKeyedUnarchiver unarchivedObjectOfClass:[CKRecord class] fromData:decompressedData error:&error];
-    XCTAssertNil(error);
-    XCTAssertNotNil(decodedReocrd);
-    
-    XCTAssertTrue([decodedReocrd.recordType isEqualToString:originalRecord.recordType]);
-    XCTAssertTrue([decodedReocrd.recordID.recordName isEqualToString:originalRecord.recordID.recordName]);
-    XCTAssertTrue([decodedReocrd.recordID.zoneID.zoneName isEqualToString:originalRecord.recordID.zoneID.zoneName]);
-    XCTAssertTrue([decodedReocrd.recordID.zoneID.ownerName isEqualToString:originalRecord.recordID.zoneID.ownerName]);
+    XCTAssertTrue([decodedRecord.recordType isEqualToString:originalRecord.recordType]);
+    XCTAssertTrue([decodedRecord.recordID.recordName isEqualToString:originalRecord.recordID.recordName]);
+    XCTAssertTrue([decodedRecord.recordID.zoneID.zoneName isEqualToString:originalRecord.recordID.zoneID.zoneName]);
+    XCTAssertTrue([decodedRecord.recordID.zoneID.ownerName isEqualToString:originalRecord.recordID.zoneID.ownerName]);
 }
 
 - (void)test_compareWithPlatform {

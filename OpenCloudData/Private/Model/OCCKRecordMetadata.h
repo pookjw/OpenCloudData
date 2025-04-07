@@ -7,6 +7,7 @@
 
 #import <CoreData/CoreData.h>
 #import <OpenCloudData/OCCKRecordZoneMoveReceipt.h>
+#import <OpenCloudData/NSSQLCore.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -17,8 +18,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface OCCKRecordMetadata : NSManagedObject
 + (NSData * _Nullable)encodeRecord:(CKRecord *)record error:(NSError * _Nullable * _Nullable)error NS_RETURNS_RETAINED;
++ (CKRecord * _Nullable)recordFromEncodedData:(NSData *)encodedData error:(NSError * _Nullable * _Nullable)error NS_RETURNS_RETAINED;
 + (NSString *)entityPath;
 + (OCCKRecordMetadata * _Nullable)insertMetadataForObject:(NSManagedObject *)object setRecordName:(BOOL)setRecordName inZoneWithID:(CKRecordZoneID *)zoneID recordNamePrefix:(NSString * _Nullable)recordNamePrefix error:(NSError * _Nullable * _Nullable)error;
++ (NSManagedObjectID * _Nullable)createObjectIDForEntityID:(NSNumber *)entityIDNumber primaryKey:(NSNumber *)primaryKeyNumber inSQLCore:(NSSQLCore *)sqlCore NS_RETURNS_RETAINED __attribute__((objc_direct));
++ (NSManagedObjectID * _Nullable)createObjectIDFromMetadataDictionary:(NSDictionary<NSString *, id> *)metadataDictionary inSQLCore:(NSSQLCore *)sqlCore NS_RETURNS_RETAINED __attribute__((objc_direct));
 
 @property (retain, nonatomic) NSString *ckRecordName;
 @property (retain, nonatomic, nullable) NSData *ckRecordSystemFields;

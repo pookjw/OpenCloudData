@@ -102,6 +102,7 @@
 				"SPI/NSPersistentStoreCoordinator+Private.h",
 				"SPI/NSPersistentStoreDescription+Private.h",
 				SPI/NSPersistentStoreMirroringDelegate.h,
+				SPI/NSSQLCore.h,
 				SPI/NSSQLEntity.h,
 				SPI/NSSQLModel.h,
 				SPI/NSSQLModelProvider.h,
@@ -610,7 +611,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_ENTITLEMENTS = SampleApp/App/CoreDataSync.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -646,7 +646,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_ENTITLEMENTS = SampleApp/App/CoreDataSync.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

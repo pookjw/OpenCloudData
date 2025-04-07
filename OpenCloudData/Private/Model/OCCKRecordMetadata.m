@@ -62,13 +62,50 @@
             os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
             os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
         } else {
+            [_error autorelease];
             if (error) {
-                *error = [_error autorelease];
+                *error = _error;
             }
         }
         
         return nil;
     }
+}
+
++ (CKRecord *)recordFromEncodedData:(NSData *)encodedData error:(NSError * _Nullable *)error {
+    /*
+     x2 = encodedData
+     x19 = error
+     */
+    
+    // x21
+    CKRecord * _Nullable record = nil;
+    // sp + 0x8
+    NSError * _Nullable _error = nil;
+    @autoreleasepool {
+        // x21
+        NSData * _Nullable decompressedData = [encodedData decompressedDataUsingAlgorithm:NSDataCompressionAlgorithmLZFSE error:&_error];
+        if (decompressedData == nil) {
+            [_error retain];
+        } else {
+            // original : getCloudKitCKRecordClass
+            record = [[NSKeyedUnarchiver unarchivedObjectOfClass:[CKRecord class] fromData:decompressedData error:&_error] retain];
+        }
+    }
+    
+    if (record == nil) {
+        if (_error == nil) {
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        } else {
+            [_error autorelease];
+            if (error) *error = _error;
+        }
+        
+        return nil;
+    }
+    
+    return record;
 }
 
 + (NSString *)entityPath {
@@ -175,6 +212,47 @@
     }
     
     return metadataObject;
+}
+
++ (NSManagedObjectID *)createObjectIDForEntityID:(NSNumber *)entityIDNumber primaryKey:(NSNumber *)primaryKeyNumber inSQLCore:(NSSQLCore *)sqlCore {
+    /*
+     x20 = entityIDNumber
+     x21 = primaryKeyNumber
+     X19 = sqlCore
+     */
+    
+    // x22
+    unsigned long entityID = entityIDNumber.unsignedIntegerValue;
+    // x21
+    NSInteger primaryKey = primaryKeyNumber.integerValue;
+    
+    if (entityID == 0) {
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Cannot create objectID: called before the record has the necessary properties (entityID): %@", entityIDNumber);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Cannot create objectID: called before the record has the necessary properties (entityID): %@", entityIDNumber);
+        return nil;
+    }
+    
+    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
+    const void *symbol = MSFindSymbol(image, "__sqlCoreLookupSQLEntityForEntityID");
+    
+    NSSQLEntity * _Nullable sqlEntity = ((id (*)(id, unsigned long))symbol)(sqlCore, entityID);
+    if (sqlEntity == nil) {
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Cannot create objectID. Unable to find entity with id '%@' in store '%@'", entityIDNumber, sqlCore);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Cannot create objectID. Unable to find entity with id '%@' in store '%@'", entityIDNumber, sqlCore);
+        return nil;
+    }
+    
+    if (primaryKey < 1) {
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Cannot create objectID: called before the record has the necessary properties (primaryKey): %@ / %@", primaryKeyNumber, sqlCore);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Cannot create objectID: called before the record has the necessary properties (primaryKey): %@ / %@", primaryKeyNumber, sqlCore);
+        return nil;
+    }
+    
+    return [sqlCore newObjectIDForEntity:sqlEntity pk:primaryKey];
+}
+
++ (NSManagedObjectID *)createObjectIDFromMetadataDictionary:(NSDictionary<NSString *,id> *)metadataDictionary inSQLCore:(NSSQLCore *)sqlCore {
+    return [OCCKRecordMetadata createObjectIDForEntityID:metadataDictionary[@"entityId"] primaryKey:metadataDictionary[@"entityPK"] inSQLCore:sqlCore];
 }
 
 @end
