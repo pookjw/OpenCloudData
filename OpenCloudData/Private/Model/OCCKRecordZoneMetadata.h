@@ -16,6 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 // direct method 있음
 
 @interface OCCKRecordZoneMetadata : NSManagedObject
++ (NSSet<CKRecordZoneID *> * _Nullable)fetchZoneIDsAssignedToObjectsWithIDs:(NSSet<NSManagedObjectID *> *)objectIDs fromStore:(__kindof NSPersistentStore *)store inContext:(NSManagedObjectContext *)context error:(NSError * _Nullable * _Nullable)error;
+
 @property (retain, nonatomic, nullable) NSNumber *hasRecordZoneNum;
 @property (retain, nonatomic, nullable) NSNumber *hasSubscriptionNum;
 @property (retain, nonatomic) NSString *ckRecordZoneName;

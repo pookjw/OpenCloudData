@@ -77,6 +77,7 @@ NSString * const OCCKRecordIDAttributeName = @"ckRecordID";
         
         NSSQLEntity * _Nullable entity = ((id (*)(id, id))symbol)(objectID.entity, model);
         if (entity == nil) {
+            [persistentStore release];
             continue;
         }
         
