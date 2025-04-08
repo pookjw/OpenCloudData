@@ -875,4 +875,282 @@
     return succeed;
 }
 
++ (NSNumber *)countRecordMetadataInStore:(__kindof NSPersistentStore *)store matchingPredicate:(NSPredicate *)predicate withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
+    /*
+     x23 = store
+     X22 = predicate
+     x20 = managedObjectCotext
+     x19 = error
+     */
+    
+    // x21
+    NSFetchRequest<OCCKRecordMetadata *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordMetadata entityPath]];
+    
+    fetchRequest.resultType = NSCountResultType;
+    fetchRequest.affectedStores = @[store];
+    
+    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
+    const void *symbol = MSFindSymbol(image, "-[NSManagedObjectContext _countForFetchRequest_:error:]");
+    NSInteger count = ((NSInteger (*)(id, id, id *))symbol)(managedObjectContext, fetchRequest, error);
+    
+    if (count == NSNotFound) {
+        return nil;
+    }
+    
+    return [NSNumber numberWithUnsignedInteger:count];
+}
+
++ (NSSet<NSManagedObjectID *> *)batchUpdateMetadataMatchingEntityIdsAndPKs:(NSDictionary<NSNumber *,NSSet<NSNumber *> *> *)entityIdsAndPKs withUpdates:(NSDictionary<NSString *,id> *)updates inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
+    /*
+     x22 = entityIdsAndPKs
+     x25 = updates
+     x23 = store
+     x24 = managedObjectContext
+     x21 = error
+     */
+    
+    // sp + 0x80
+    __block NSError * _Nullable contextError = nil;
+    // sp + 0x98
+    __block BOOL succeed = YES;
+    
+    // x20 (result)
+    NSMutableSet<NSManagedObjectID *> *results = [[NSMutableSet alloc] init];
+    
+    // x19
+    NSBatchUpdateRequest *batchUpdateRequest = [[NSBatchUpdateRequest alloc] initWithEntityName:[OCCKRecordMetadata entityPath]];
+    batchUpdateRequest.affectedStores = @[store];
+    batchUpdateRequest.propertiesToUpdate = updates;
+    batchUpdateRequest.resultType = NSUpdatedObjectIDsResultType;
+    
+    /*
+     x19 = sp + 0x20
+     x24 = sp + 0x28
+     x23 = sp + 0x30
+     x20 = sp + 0x38
+     x20 == sp
+     */
+    [entityIdsAndPKs enumerateKeysAndObjectsUsingBlock:^(NSNumber * _Nonnull entityID, NSSet<NSNumber *> * _Nonnull entityPKs, BOOL * _Nonnull stop) {
+        @autoreleasepool { // 왜 있지
+            batchUpdateRequest.predicate = [NSPredicate predicateWithFormat:@"entityId = %@ AND entityPK IN %@", entityID, entityPKs];
+            NSBatchUpdateResult * _Nullable requestResult = [managedObjectContext executeRequest:batchUpdateRequest error:&contextError];
+            // x22
+            NSArray<NSManagedObjectID *> * _Nullable result = requestResult.result;
+            if (result == nil) {
+                *stop = YES;
+                [contextError retain];
+                succeed = NO;
+                return;
+            }
+            
+            // x23
+            NSFetchRequest<OCCKRecordMetadata *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordMetadata entityPath]];
+            fetchRequest.predicate = [NSPredicate predicateWithFormat:@"SELF IN %@", result];
+            fetchRequest.propertiesToFetch = @[@"entityId", @"entityPK"];
+            fetchRequest.affectedStores = @[store];
+            fetchRequest.returnsObjectsAsFaults = NO;
+            
+            // x21
+            NSArray<OCCKRecordMetadata *> * _Nullable fetchedRecordMetadataArray = [managedObjectContext executeFetchRequest:fetchRequest error:&contextError];
+            if (fetchedRecordMetadataArray == nil) {
+                *stop = YES;
+                [contextError retain];
+                succeed = NO;
+                return;
+            }
+            
+            for (OCCKRecordMetadata *recordMetadata in fetchedRecordMetadataArray) {
+                NSManagedObjectID *objectID = [recordMetadata createObjectIDForLinkedRow];
+                [results addObject:objectID];
+                [objectID release];
+            }
+        }
+    }];
+    
+    if (!succeed) {
+        [results release];
+        
+        if (contextError == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        } else if (error) {
+            *error = [[contextError retain] autorelease];
+        }
+        
+        results = nil;
+    }
+    
+    [batchUpdateRequest release];
+    return [results autorelease];
+}
+
++ (void)enumerateRecordMetadataDictionariesMatchingObjectIDs:(NSArray<NSManagedObjectID *> *)objectIDs withProperties:(NSArray<NSString *> *)properties inStore:(NSSQLCore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext block:(void (^ NS_NOESCAPE)(NSDictionary<NSString *,id> * _Nullable, NSError * _Nullable, BOOL * _Nonnull))block {
+    /*
+     x20 / sp + 0x20 = objectIDs
+     sp + 0x18 = properties
+     x22 = store
+     sp + 0x28 = managedObjectContext
+     x19 = block
+     */
+    
+    // x21
+    NSMutableDictionary<NSNumber *, NSMutableSet<NSNumber *> *> *entityIDToReferenceData64Set = [[NSMutableDictionary alloc] init];
+    
+    // x26
+    for (NSManagedObjectID *objectID in objectIDs) {
+        // x28
+        NSSQLModel *model = store.model;
+        
+        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
+        const void *symbol = MSFindSymbol(image, "__sqlEntityForEntityDescription");
+        
+        NSSQLEntity * _Nullable entity = ((id (*)(id, id))symbol)(objectID.entity, model);
+        uint _entityID;
+        if (entity == nil) {
+            _entityID = 0;
+        } else {
+            Ivar ivar = object_getInstanceVariable(entity, "_entityID", NULL);
+            assert(ivar != NULL);
+            _entityID = *(uint *)((uintptr_t)entity + ivar_getOffset(ivar));
+        }
+        // x27
+        NSNumber *entityIDNumber = @(_entityID);
+        // x26
+        NSNumber *referenceData64Number = @([objectID _referenceData64]);
+        
+        // x28
+        NSMutableSet<NSNumber *> *referenceData64Set = [entityIDToReferenceData64Set[entityIDNumber] retain];
+        if (referenceData64Set == nil) {
+            referenceData64Set = [[NSMutableSet alloc] init];
+            entityIDToReferenceData64Set[entityIDNumber] = referenceData64Set;
+        }
+        [referenceData64Set addObject:referenceData64Number];
+        [referenceData64Set release];
+    }
+    
+    // x22
+    NSMutableArray<NSString *> *array = [[NSMutableArray alloc] init];
+    BOOL found = NO;
+    
+    // x26
+    for (NSString *property in properties) {
+        [array addObject:property];
+        found = [property isEqualToString:@"objectID"] | found;
+    }
+    
+    if (!found) [array addObject:@"objectID"];
+    
+    NSError * _Nullable error = nil;
+    // x27
+    for (NSNumber *entityIDNumber in entityIDToReferenceData64Set) @autoreleasepool {
+        NSFetchRequest<OCCKRecordMetadata *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordMetadata entityPath]];
+        fetchRequest.resultType = NSDictionaryResultType;
+        fetchRequest.fetchBatchSize = 1000;
+        fetchRequest.propertiesToFetch = array;
+        
+        NSMutableSet<NSNumber *> *referenceData64Set = entityIDToReferenceData64Set[entityIDNumber];
+        fetchRequest.predicate = [NSPredicate predicateWithFormat:@"entityId = %@ AND entityPK IN %@", entityIDNumber, referenceData64Set];
+        
+        // sp + 0x78
+        NSError * _Nullable _error = nil;
+        // x27
+        NSArray<NSDictionary<NSString *, id> *> *_Nullable dictionaries = [managedObjectContext executeFetchRequest:fetchRequest error:&_error];
+        if (dictionaries == nil) {
+            if (error == nil) error = [_error retain];
+            continue;
+        }
+        
+        // sp + 0x77
+        BOOL stop = NO;
+        for (NSDictionary<NSString *, id> *dictionary in dictionaries) {
+            block(dictionary, nil, &stop);
+            if (stop) break;
+        }
+        if (stop) break;
+    }
+    
+    // 아무것도 안하는듯?
+    [error autorelease];
+    [entityIDToReferenceData64Set release];
+    [array release];
+}
+
+- (CKRecordID *)createRecordID {
+    // x19 = self
+    
+    CKRecordID * _Nullable result;
+    if (self.recordZone == nil) {
+        result = nil;
+    } else {
+        // x20
+        CKRecordZoneID * _Nullable recordZoneID = [self.recordZone createRecordZoneID];
+        if (recordZoneID == nil) {
+            result = nil;
+        } else {
+            if (self.ckRecordName == nil) {
+                result = nil;
+            } else {
+                // original : getCloudKitCKRecordIDClass
+                result = [[CKRecordID alloc] initWithRecordName:self.ckRecordName zoneID:recordZoneID];
+            }
+        }
+        [recordZoneID release];
+    }
+    
+    if (result == nil) {
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: createRecordID called before the record has the necessary properties: %@\n", self);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: createRecordID called before the record has the necessary properties: %@\n", self);
+    }
+    
+    return result;
+}
+
+- (CKRecord *)createRecordFromSystemFields {
+    // x21 = self
+    
+    // x19
+    NSData * _Nullable ckRecordSystemFields = self.ckRecordSystemFields;
+    if (ckRecordSystemFields == nil) {
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: NCKRecordMetadata: System fields record name doesn't match row: %@\n%@\n%@\n", self.ckRecordName, nil, self);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: NCKRecordMetadata: System fields record name doesn't match row: %@\n%@\n%@\n", self.ckRecordName, nil, self);
+        return nil;
+    }
+    
+    // x19
+    NSKeyedUnarchiver * _Nullable unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:ckRecordSystemFields error:NULL];
+    // x20
+    CKRecord *record = [[CKRecord alloc] initWithCoder:unarchiver];
+    // x22
+    NSString *ckRecordName = self.ckRecordName;
+    
+    if (![ckRecordName isEqualToString:record.recordID.recordName]) {
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: NCKRecordMetadata: System fields record name doesn't match row: %@\n%@\n%@\n", self.ckRecordName, record, self);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: NCKRecordMetadata: System fields record name doesn't match row: %@\n%@\n%@\n", self.ckRecordName, record, self);
+        [record release];
+        return nil;
+    }
+    
+    if (![record.recordType hasPrefix:@"CD_"]) {
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: NSCKRecordMetadata: System fields record type doesn't match new schema: %@\n%@\n%@", self.ckRecordName, record.recordID, self);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: NSCKRecordMetadata: System fields record type doesn't match new schema: %@\n%@\n%@", self.ckRecordName, record.recordID, self);
+        [record release];
+        return nil;
+    }
+    
+    [unarchiver finishDecoding];
+    [unarchiver release];
+    
+    return record;
+}
+
+- (NSManagedObjectID *)createObjectIDForLinkedRow {
+    // x19 = self
+    // x21
+    NSNumber *entityId = self.entityId;
+    // x22
+    NSNumber *entityPK = self.entityPK;
+    
+    return [OCCKRecordMetadata createObjectIDForEntityID:entityId primaryKey:entityPK inSQLCore:(NSSQLCore *)self.objectID.persistentStore];
+}
+
 @end

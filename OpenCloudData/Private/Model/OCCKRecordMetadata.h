@@ -30,8 +30,11 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSArray<OCCKRecordMetadata *> * _Nullable)metadataForRecordIDs:(NSArray<CKRecordID *> *)recordIDs fromStore:(__kindof NSPersistentStore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 + (NSDictionary<CKRecordID *, OCCKRecordMetadata *> * _Nullable)createMapOfMetadataMatchingRecords:(NSArray<CKRecord *> *)records andRecordIDs:(NSArray<CKRecordID *> *)recordIDs inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error NS_RETURNS_RETAINED __attribute__((objc_direct));
 + (BOOL)purgeRecordMetadataWithRecordIDs:(NSArray<CKRecordID *> *)recordIDs inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
++ (NSNumber * _Nullable)countRecordMetadataInStore:(__kindof NSPersistentStore *)store matchingPredicate:(NSPredicate *)predicate withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
++ (NSSet<NSManagedObjectID *> * _Nullable)batchUpdateMetadataMatchingEntityIdsAndPKs:(NSDictionary<NSNumber *, NSSet<NSNumber *> *> *)entityIdsAndPKs withUpdates:(NSDictionary<NSString *, id> *)updates inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
++ (void)enumerateRecordMetadataDictionariesMatchingObjectIDs:(NSArray<NSManagedObjectID *> *)objectIDs withProperties:(NSArray<NSString *> *)properties inStore:(NSSQLCore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext block:(void (^ NS_NOESCAPE)(NSDictionary<NSString *, id> * _Nullable results, NSError * _Nullable error, BOOL *stop))block __attribute__((objc_direct));
 
-@property (retain, nonatomic) NSString *ckRecordName;
+@property (retain, nonatomic) NSString *ckRecordName; // Model 상에서는 isOptional = 0이지만 -createRecordID에서는 nil 확인을 하고 있음
 @property (retain, nonatomic, nullable) NSData *ckRecordSystemFields;
 @property (retain, nonatomic, nullable) NSData *encodedRecord;
 @property (retain, nonatomic) NSNumber *entityId;
@@ -45,6 +48,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (retain, nonatomic, nullable) NSNumber *pendingExportTransactionNumber;
 @property (retain, nonatomic, nullable) NSNumber *pendingExportChangeTypeNumber;
 @property (retain, nonatomic, nullable) NSSet<OCCKRecordZoneMoveReceipt *> *moveReceipts;
+
+- (CKRecordID * _Nullable)createRecordID NS_RETURNS_RETAINED __attribute__((objc_direct));
+- (CKRecord * _Nullable)createRecordFromSystemFields NS_RETURNS_RETAINED;
+- (NSManagedObjectID * _Nullable)createObjectIDForLinkedRow NS_RETURNS_RETAINED __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END
