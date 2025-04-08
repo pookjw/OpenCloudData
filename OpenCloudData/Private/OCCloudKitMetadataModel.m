@@ -44,7 +44,9 @@ NSString * const OCCKRecordIDAttributeName = @"ckRecordID";
     // x26
     for (NSManagedObjectID *objectID in objectIDs) {
         if (objectID.isTemporaryID) {
-            // <+296>
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Somehow got a temporary objectID for export: %s", [objectID.description cStringUsingEncoding:NSUTF8StringEncoding]);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Somehow got a temporary objectID for export: %s", [objectID.description cStringUsingEncoding:NSUTF8StringEncoding]);
+            continue;
         }
         
         // x28
@@ -53,6 +55,7 @@ NSString * const OCCKRecordIDAttributeName = @"ckRecordID";
             if (![persistentStore.identifier isEqualToString:store.identifier]) {
                 os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Somehow got a temporary objectID for export: %s\n", [objectID.description cStringUsingEncoding:NSUTF8StringEncoding]);
                 os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Somehow got a temporary objectID for export: %s\n", [objectID.description cStringUsingEncoding:NSUTF8StringEncoding]);
+                [persistentStore release];
                 continue;
             }
         }
@@ -61,6 +64,7 @@ NSString * const OCCKRecordIDAttributeName = @"ckRecordID";
         if (![persistentStore isKindOfClass:objc_lookUpClass("NSSQLCore")]) {
             os_log_error(_OCLogGetLogStream(0x11), "CoreData: This method only supports objectIDs from SQLite stores: %s\n", [objectID.description cStringUsingEncoding:NSUTF8StringEncoding]);
             os_log_fault(_OCLogGetLogStream(0x11), "CoreData: fault: This method only supports objectIDs from SQLite stores: %s\n", [objectID.description cStringUsingEncoding:NSUTF8StringEncoding]);
+            [persistentStore release];
             continue;
         }
         
@@ -94,7 +98,6 @@ NSString * const OCCKRecordIDAttributeName = @"ckRecordID";
         [primaryKeySet addObject:referenceData64Number];
         [primaryKeySet release];
         
-        // <+596>
         [persistentStore release];
     }
     
