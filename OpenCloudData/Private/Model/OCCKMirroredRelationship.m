@@ -557,8 +557,14 @@
     NSArray<OCCKMirroredRelationship *> * _Nullable fetchedRelationships = [OCCKMirroredRelationship fetchMirroredRelationshipsMatchingRelatingRecords:records andRelatingRecordIDs:@[] fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
     
     if (fetchedRelationships == nil) {
-        // <+120> | <+1064>
-        abort();
+        if (_error == nil) {
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        } else {
+            if (error) *error = _error;
+        }
+        
+        return NO;
     }
     
     // x22

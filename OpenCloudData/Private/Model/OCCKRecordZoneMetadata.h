@@ -16,7 +16,10 @@ NS_ASSUME_NONNULL_BEGIN
 // direct method 있음
 
 @interface OCCKRecordZoneMetadata : NSManagedObject
++ (OCCKRecordZoneMetadata * _Nullable)zoneMetadataForZoneID:(CKRecordZoneID *)zoneID inDatabaseWithScope:(CKDatabaseScope)databaseScope forStore:(__kindof NSPersistentStore *)store inContext:(NSManagedObjectContext *)context createIfMissing:(BOOL)createIfMissing error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
++ (OCCKRecordZoneMetadata * _Nullable)zoneMetadataForZoneID:(CKRecordZoneID *)zoneID inDatabaseWithScope:(CKDatabaseScope)databaseScope forStore:(__kindof NSPersistentStore *)store inContext:(NSManagedObjectContext *)context error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 + (NSSet<CKRecordZoneID *> * _Nullable)fetchZoneIDsAssignedToObjectsWithIDs:(NSSet<NSManagedObjectID *> *)objectIDs fromStore:(__kindof NSPersistentStore *)store inContext:(NSManagedObjectContext *)context error:(NSError * _Nullable * _Nullable)error;
++ (NSString *)entityPath;
 
 @property (retain, nonatomic, nullable) NSNumber *hasRecordZoneNum;
 @property (retain, nonatomic, nullable) NSNumber *hasSubscriptionNum;
