@@ -28,11 +28,11 @@ NSString * const OCCKRecordIDAttributeName = @"ckRecordID";
     return @"CloudKit";
 }
 
-+ (NSDictionary<NSNumber *, NSSet<NSNumber *> *> *)createMapOfEntityIDToPrimaryKeySetForObjectIDs:(NSArray<NSManagedObjectID *> *)objectIDs {
++ (NSDictionary<NSNumber *, NSSet<NSNumber *> *> *)createMapOfEntityIDToPrimaryKeySetForObjectIDs:(NSObject<NSFastEnumeration> *)objectIDs {
     return [OCCloudKitMetadataModel createMapOfEntityIDToPrimaryKeySetForObjectIDs:objectIDs fromStore:nil];
 }
 
-+ (NSDictionary<NSNumber *, NSSet<NSNumber *> *> *)createMapOfEntityIDToPrimaryKeySetForObjectIDs:(NSArray<NSManagedObjectID *> *)objectIDs fromStore:(__kindof NSPersistentStore *)store {
++ (NSDictionary<NSNumber *, NSSet<NSNumber *> *> *)createMapOfEntityIDToPrimaryKeySetForObjectIDs:(NSObject<NSFastEnumeration> *)objectIDs fromStore:(__kindof NSPersistentStore *)store {
     /*
      x20 = objectIDs
      x19 = store

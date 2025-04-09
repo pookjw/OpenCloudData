@@ -96,7 +96,62 @@
 }
 
 + (NSSet<CKRecordZoneID *> *)fetchZoneIDsAssignedToObjectsWithIDs:(NSSet<NSManagedObjectID *> *)objectIDs fromStore:(__kindof NSPersistentStore *)store inContext:(NSManagedObjectContext *)context error:(NSError * _Nullable *)error {
-    abort();
+    /*
+     x20 = objectIDs
+     sp + 0x30 = store
+     sp + 0x28 = context
+     x19 = error
+     */
+    
+    // sp + 0xd8
+    NSError * _Nullable contextError = nil;
+    
+    // sp + 0x48
+    NSMutableSet<CKRecordZoneID *> *results = [[NSMutableSet alloc] init];
+    
+    // sp + 0x38
+    NSDictionary<NSNumber *, NSSet<NSNumber *> *> *entityIDToPrimaryKeySet = [OCCloudKitMetadataModel createMapOfEntityIDToPrimaryKeySetForObjectIDs:objectIDs];
+    
+    // x26
+    for (NSNumber *entityIDNumber in entityIDToPrimaryKeySet) {
+        // x27
+        NSSet<NSNumber *> *primaryKeySet = entityIDToPrimaryKeySet[entityIDNumber];
+        
+        NSFetchRequest<OCCKRecordMetadata *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordMetadata entityPath]];
+        fetchRequest.predicate = [NSPredicate predicateWithFormat:@"entityId = %@ and entityPK IN %@", entityIDNumber, primaryKeySet];
+        fetchRequest.resultType = NSDictionaryResultType;
+        fetchRequest.propertiesToFetch = @[@"recordZone.ckRecordZoneName", @"recordZone.ckOwnerName"];
+        fetchRequest.propertiesToGroupBy = @[@"recordZone.ckRecordZoneName", @"recordZone.ckOwnerName"];
+        fetchRequest.affectedStores = @[store];
+        
+        // x25
+        NSArray<NSDictionary<NSString *, id> *> * _Nullable dictionaries = [context executeFetchRequest:fetchRequest error:&contextError];
+        if (dictionaries == nil) {
+            if (contextError == nil) {
+                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            } else {
+                if (error) *error = contextError;
+            }
+            
+            [results release];
+            results = nil;
+            break;
+        } else {
+            // x27
+            for (NSDictionary<NSString *, id> *dictionary in dictionaries) {
+                // original : getCloudKitCKRecordZoneIDClass
+                // x20
+                CKRecordZoneID *zoneID = [[CKRecordZoneID alloc] initWithZoneName:dictionary[@"recordZone.ckRecordZoneName"] ownerName:dictionary[@"recordZone.ckOwnerName"]];
+                [results addObject:zoneID];
+                [zoneID release];
+            }
+        }
+    }
+    
+    [entityIDToPrimaryKeySet release];
+    
+    return [results autorelease];
 }
 
 + (NSString *)entityPath {

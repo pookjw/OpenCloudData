@@ -16,8 +16,8 @@ OC_PRIVATE_EXTERN NSString * const OCCKRecordIDAttributeName;
 #warning TODO
 
 @interface OCCloudKitMetadataModel : NSObject <_PFAncillaryModelFactory>
-+ (NSDictionary<NSNumber *, NSSet<NSNumber *> *> *)createMapOfEntityIDToPrimaryKeySetForObjectIDs:(NSArray<NSManagedObjectID *> *)objectIDs NS_RETURNS_RETAINED;
-+ (NSDictionary<NSNumber *, NSSet<NSNumber *> *> *)createMapOfEntityIDToPrimaryKeySetForObjectIDs:(NSArray<NSManagedObjectID *> *)objectIDs fromStore:(__kindof NSPersistentStore * _Nullable)store NS_RETURNS_RETAINED;
++ (NSDictionary<NSNumber *, NSSet<NSNumber *> *> *)createMapOfEntityIDToPrimaryKeySetForObjectIDs:(NSObject<NSFastEnumeration> *)objectIDs NS_RETURNS_RETAINED;
++ (NSDictionary<NSNumber *, NSSet<NSNumber *> *> *)createMapOfEntityIDToPrimaryKeySetForObjectIDs:(NSObject<NSFastEnumeration> *)objectIDs fromStore:(__kindof NSPersistentStore * _Nullable)store NS_RETURNS_RETAINED;
 @end
 
 NS_ASSUME_NONNULL_END

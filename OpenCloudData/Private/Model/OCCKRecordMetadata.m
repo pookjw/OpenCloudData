@@ -1054,7 +1054,7 @@
         // sp + 0x78
         NSError * _Nullable _error = nil;
         // x27
-        NSArray<NSDictionary<NSString *, id> *> *_Nullable dictionaries = [managedObjectContext executeFetchRequest:fetchRequest error:&_error];
+        NSArray<NSDictionary<NSString *, id> *> * _Nullable dictionaries = [managedObjectContext executeFetchRequest:fetchRequest error:&_error];
         if (dictionaries == nil) {
             if (error == nil) error = [_error retain];
             continue;

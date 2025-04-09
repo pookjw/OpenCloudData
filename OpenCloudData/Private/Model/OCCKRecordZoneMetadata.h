@@ -13,7 +13,6 @@
 #import <OpenCloudData/OCCKRecordZoneQuery.h>
 
 NS_ASSUME_NONNULL_BEGIN
-// direct method 있음
 
 @interface OCCKRecordZoneMetadata : NSManagedObject
 + (OCCKRecordZoneMetadata * _Nullable)zoneMetadataForZoneID:(CKRecordZoneID *)zoneID inDatabaseWithScope:(CKDatabaseScope)databaseScope forStore:(__kindof NSPersistentStore *)store inContext:(NSManagedObjectContext *)context createIfMissing:(BOOL)createIfMissing error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
