@@ -10,6 +10,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface _PFRoutines : NSObject
++ (void)wrapBlockInGuardedAutoreleasePool:(void (^ NS_NOESCAPE)(void))block;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -10,7 +10,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol PFHistoryAnalyzerObjectState <NSObject>
-@property (readonly, nonatomic, null_unspecified) NSManagedObjectID *analyzedObjectID;
+@property (readonly, nonatomic, nullable) NSManagedObjectID *analyzedObjectID;
 @property (readonly, nonatomic, null_unspecified) NSNumber *originalTransactionNumber;
 @property (readonly, nonatomic) NSInteger originalChangeType;
 @property (readonly, nonatomic, null_unspecified) NSNumber *finalTransactionNumber;
