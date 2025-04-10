@@ -373,6 +373,7 @@
             recordZoneMetadataCount = ((NSInteger (*)(id, id, id *))symbol)(managedObjectContext, fetchRequest, error);
             
             if (recordZoneMetadataCount == NSNotFound) {
+#warning TODO
                 // <+476>
                 abort();
             }
