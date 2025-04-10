@@ -9,6 +9,7 @@
 #import <OpenCloudData/OCCloudKitMetadataModel.h>
 #import <OpenCloudData/Log.h>
 #import <CloudKit/CloudKit.h>
+@import ellekit;
 
 @implementation OCCKRecordZoneMoveReceipt
 @dynamic recordName;
@@ -113,7 +114,48 @@
 }
 
 + (NSArray<OCCKRecordZoneMoveReceipt *> * _Nullable)_fetchReceiptsMatchingSubPredicates:(NSArray<NSPredicate *> *)predicates inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext persistentStore:(__kindof NSPersistentStore *)persistentStore error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) {
-    abort();
+    /*
+     x22 = predicates
+     x21 = managedObjectContext
+     x20 = persistentStore
+     x19 = error
+     */
+    
+    NSFetchRequest<OCCKRecordZoneMoveReceipt *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordZoneMoveReceipt entityPath]];
+    fetchRequest.affectedStores = @[persistentStore];
+    fetchRequest.predicate = [NSCompoundPredicate orPredicateWithSubpredicates:predicates];
+    
+    return [managedObjectContext executeFetchRequest:fetchRequest error:error];
+}
+
++ (NSNumber *)countMoveReceiptsInStore:(__kindof NSPersistentStore *)store matchingPredicate:(NSPredicate *)predicate withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext rror:(NSError * _Nullable *)error {
+    /*
+     x23 = store
+     x22 = predicate
+     x20 = managedObjectContext
+     x19 = error
+     */
+    
+    // x21
+    NSFetchRequest<OCCKRecordZoneMoveReceipt *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordZoneMoveReceipt entityPath]];
+    fetchRequest.affectedStores = @[store];
+    fetchRequest.predicate = predicate;
+    fetchRequest.resultType = NSCountResultType;
+    
+    NSInteger count;
+    if (managedObjectContext == 0) {
+        count = 0;
+    } else {
+        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
+        const void *symbol = MSFindSymbol(image, "-[NSManagedObjectContext _countForFetchRequest_:error:]");
+        count = ((NSInteger (*)(id, id, id *))symbol)(managedObjectContext, fetchRequest, error);
+        
+        if (count == NSNotFound) {
+            return nil;
+        }
+    }
+    
+    return [NSNumber numberWithUnsignedInteger:count];
 }
 
 @end

@@ -18,7 +18,8 @@ NS_ASSUME_NONNULL_BEGIN
     NSMutableArray *_writtenAssetURLs;
 }
 - (instancetype)initWithOptions:(OCCloudKitExporterOptions *)options;
-- (BOOL)checkForObjectsNeedingExportInStore:(__kindof NSPersistentStore *)store andReturnCount:(NSUInteger *)count withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error;
+- (BOOL)processAnalyzedHistoryInStore:(__kindof NSPersistentStore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error;
+- (BOOL)checkForObjectsNeedingExportInStore:(__kindof NSPersistentStore *)store andReturnCount:(NSUInteger *)count withManagedObjectContext:(NSManagedObjectContext * _Nullable)managedObjectContext error:(NSError * _Nullable * _Nullable)error;
 @end
 
 NS_ASSUME_NONNULL_END

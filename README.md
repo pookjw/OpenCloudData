@@ -2,4 +2,3 @@
     - OCCloudKitExporterDelegate
     - OCCloudKitExporter
     - OCCloudKitExportContext
-    - OCCKMirroredRelationship

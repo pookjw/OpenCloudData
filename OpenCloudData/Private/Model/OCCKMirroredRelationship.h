@@ -42,7 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSSet<CKRecordID *> * _Nullable)markRelationshipsForDeletedRecordIDs:(NSArray<CKRecordID *> *)deletedRecordIDs inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 + (BOOL)updateMirroredRelationshipsMatchingRecords:(NSArray<CKRecord *> *)records forStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext usingBlock:(BOOL (^ NS_NOESCAPE)(OCCKMirroredRelationship *relationship, CKRecord *record, NSError * _Nullable *error))block error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 + (NSArray<OCCKMirroredRelationship *> * _Nullable)fetchMirroredRelationshipsMatchingPredicate:(NSPredicate *)predicate fromStore:(__kindof NSPersistentStore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
-+ (NSNumber * _Nullable)countMirroredRelationshipsInStore:(__kindof NSPersistentStore *)store matchingPredicate:(NSPredicate *)predicate withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
++ (NSNumber * _Nullable)countMirroredRelationshipsInStore:(__kindof NSPersistentStore *)store matchingPredicate:(NSPredicate *)predicate withManagedObjectContext:(NSManagedObjectContext * _Nullable)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

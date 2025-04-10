@@ -889,12 +889,18 @@
     fetchRequest.resultType = NSCountResultType;
     fetchRequest.affectedStores = @[store];
     
-    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-    const void *symbol = MSFindSymbol(image, "-[NSManagedObjectContext _countForFetchRequest_:error:]");
-    NSInteger count = ((NSInteger (*)(id, id, id *))symbol)(managedObjectContext, fetchRequest, error);
+    NSInteger count;
     
-    if (count == NSNotFound) {
-        return nil;
+    if (managedObjectContext == nil) {
+        count = 0;
+    } else {
+        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
+        const void *symbol = MSFindSymbol(image, "-[NSManagedObjectContext _countForFetchRequest_:error:]");
+        count = ((NSInteger (*)(id, id, id *))symbol)(managedObjectContext, fetchRequest, error);
+        
+        if (count == NSNotFound) {
+            return nil;
+        }
     }
     
     return [NSNumber numberWithUnsignedInteger:count];

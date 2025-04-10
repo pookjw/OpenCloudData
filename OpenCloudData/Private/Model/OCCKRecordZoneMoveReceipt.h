@@ -9,12 +9,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-
 @class OCCKRecordMetadata;
 
 @interface OCCKRecordZoneMoveReceipt : NSManagedObject
++ (NSNumber * _Nullable)countMoveReceiptsInStore:(__kindof NSPersistentStore *)store matchingPredicate:(NSPredicate *)predicate withManagedObjectContext:(NSManagedObjectContext * _Nullable)managedObjectContext rror:(NSError * _Nullable * _Nullable)error;
 + (NSString *)entityPath;
++ (NSArray<OCCKRecordZoneMoveReceipt *> * _Nullable)moveReceiptsMatchingRecordIDs:(NSArray<CKRecordID *> *)recordIDs inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext persistentStore:(__kindof NSPersistentStore *)persistentStore error:(NSError * _Nullable * _Nullable)error;
 
 @property (retain, nonatomic) NSString *recordName;
 @property (retain, nonatomic) NSString *zoneName;
@@ -24,7 +24,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (retain, nonatomic) OCCKRecordMetadata *recordMetadata;
 
 - (CKRecordID *)createRecordIDForMovedRecord NS_RETURNS_RETAINED;
-+ (NSArray<OCCKRecordZoneMoveReceipt *> * _Nullable)moveReceiptsMatchingRecordIDs:(NSArray<CKRecordID *> *)recordIDs inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext persistentStore:(__kindof NSPersistentStore *)persistentStore error:(NSError * _Nullable * _Nullable)error;
 @end
 
 NS_ASSUME_NONNULL_END
