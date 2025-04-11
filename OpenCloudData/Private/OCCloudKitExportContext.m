@@ -303,8 +303,88 @@
             }
         });
         
-        // <+840>
-        abort();
+        if (_succeed) {
+            /*
+             storeTokens = sp + 0xe0 = x19 + 0x20
+             store = ?? = x19 + 0x28
+             managedObjectContext = ?? = x19 + 0x30
+             objectIDs_0_1 = sp + 0xf8 = x19 + 0x38
+             entityIDToStatesSet = sp + 0x100 = x19 + 0x40
+             _error = sp + 0x108 = x19 + 0x48
+             count_0_1 = sp + 0x110 = x19 + 0x50
+             _succeed = sp + 0x118 = x19 + 0x58
+             */
+            [objc_lookUpClass("_PFRoutines") wrapBlockInGuardedAutoreleasePool:^{
+                // sp + 0x20
+                NSExpression *needsUploadExpr = [NSExpression expressionForConstantValue:@(YES)];
+                // sp + 0x28
+                NSExpression *needsCloudDeleteExpr = [NSExpression expressionForConstantValue:@(NO)];
+                // sp + 0x30
+                NSExpression *pendingExportTransactionNumberExpr = [NSExpression expressionForConstantValue:tokenNumber];
+                
+                NSDictionary<NSString *, NSExpression *> *keyToExprs = @{
+                    @"needsUpload": needsUploadExpr,
+                    @"needsCloudDelete": needsCloudDeleteExpr,
+                    @"pendingExportTransactionNumber": pendingExportTransactionNumberExpr
+                };
+                
+                NSSet<NSManagedObjectID *> * _Nullable objectIDs = [OCCKRecordMetadata batchUpdateMetadataMatchingEntityIdsAndPKs:entityIDToReferenceData64Set withUpdates:keyToExprs inStore:store withManagedObjectContext:managedObjectContext error:&_error];
+                
+                if (objectIDs == nil) {
+                    _succeed = NO;
+                    [_error retain];
+                } else {
+                    [objectIDs_0_1 minusSet:objectIDs];
+                    [entityIDToReferenceData64Set release];
+                    entityIDToReferenceData64Set = [[NSMutableDictionary alloc] init];
+                    count_0_1 = 0;
+                }
+            }];
+            
+            if (_succeed) {
+                [objc_lookUpClass("_PFRoutines") wrapBlockInGuardedAutoreleasePool:^{
+                    // sp + 0x20
+                    NSExpression *needsUploadExpr = [NSExpression expressionForConstantValue:@(YES)];
+                    // sp + 0x28
+                    NSExpression *needsCloudDeleteExpr = [NSExpression expressionForConstantValue:@(YES)];
+                    // sp + 0x30
+                    NSExpression *pendingExportTransactionNumberExpr = [NSExpression expressionForConstantValue:tokenNumber];
+                    
+                    NSDictionary<NSString *, NSExpression *> *keyToExprs = @{
+                        @"needsUpload": needsUploadExpr,
+                        @"needsCloudDelete": needsCloudDeleteExpr,
+                        @"pendingExportTransactionNumber": pendingExportTransactionNumberExpr
+                    };
+                    
+                    NSSet<NSManagedObjectID *> * _Nullable objectIDs = [OCCKRecordMetadata batchUpdateMetadataMatchingEntityIdsAndPKs:entityIDToReferenceData64Set withUpdates:keyToExprs inStore:store withManagedObjectContext:managedObjectContext error:&_error];
+                    
+                    if (objectIDs == nil) {
+                        _succeed = NO;
+                        [_error retain];
+                    } else {
+                        [objectIDs_2 minusSet:objectIDs];
+                        [entityIDToReferenceData64Set release];
+                        entityIDToReferenceData64Set = [[NSMutableDictionary alloc] init];
+                        count_2 = 0;
+                    }
+                }];
+            }
+        }
+        
+        os_log_info(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Finished processing analyzed history with %lu metadata objects to create, %lu deleted rows without metadata.", __func__, __LINE__, objectIDs_0_1.count, objectIDs_2.count);
+        
+        if (!_succeed) {
+            /*
+             objectIDs_0_1 = sp + 0x28 = x19 + 0x20
+             self = sp + 0x40
+             tokenNumber = sp + 0x48
+             _succeed = sp + 0x50
+             _error = sp + 0x58
+             */
+            [objc_lookUpClass("_PFRoutines") wrapBlockInGuardedAutoreleasePool:^{
+                
+            }];
+        }
     }];
     
     // <+176>
