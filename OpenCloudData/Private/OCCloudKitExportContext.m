@@ -15,6 +15,7 @@
 #import <OpenCloudData/OCCKHistoryAnalyzerState.h>
 #import <OpenCloudData/_PFRoutines.h>
 #import <OpenCloudData/NSManagedObjectID+Private.h>
+#import <OpenCloudData/NSSQLBlockRequestContext.h>
 #import <OpenCloudData/Log.h>
 #import <objc/runtime.h>
 #import <OpenCloudData/OCCloudKitSerializer.h>
@@ -599,12 +600,12 @@
                 }
                 
                 // x26
-                for (CKRecordZoneID *zoneID in zoneIDToEntityNameToObjectIDsSet) @autoreleasepool {
+                for (CKRecordZoneID *zoneID in zoneIDToEntityNameToObjectIDsSet) {
                     // x27
                     NSMutableDictionary<NSString *, NSMutableSet<NSManagedObjectID *> *> *entityNameToObjectIDsSet = zoneIDToEntityNameToObjectIDsSet[zoneID];
                     
                     // x20
-                    for (NSString *entityName in entityNameToObjectIDsSet) {
+                    for (NSString *entityName in entityNameToObjectIDsSet) @autoreleasepool {
                         // x22
                         NSMutableSet<NSManagedObjectID *> *objectIDsSet = entityNameToObjectIDsSet[entityName];
                         
@@ -667,7 +668,123 @@
                     }
                 }
                 
-                // __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke.28 <+880>
+                if (_succeed) {
+                    if (entityIDToReferenceData64Set.count != 0) {
+                        NSDictionary<NSString *, NSExpression *> *updates = @{
+                            @"needsUpload": [NSExpression expressionForConstantValue:@(YES)],
+                            @"needsCloudDelete": [NSExpression expressionForConstantValue:@(YES)]
+                        };
+                        
+                        NSSet<NSManagedObjectID *> * _Nullable objectIDs = [OCCKRecordMetadata batchUpdateMetadataMatchingEntityIdsAndPKs:entityIDToReferenceData64Set withUpdates:updates inStore:store withManagedObjectContext:managedObjectContext error:&_error];
+                        if (objectIDs == nil) {
+                            _succeed = NO;
+                            [_error retain];
+                        } else {
+                            [errorObjectIDs minusSet:objectIDs];
+                        }
+                    }
+                    
+                    if (managedObjectContext.hasChanges) {
+                        if (![managedObjectContext save:&_error]) {
+#warning TODO : Error가 있는 상태에서 Save할 때 Error가 발생하면 Leak이 발생함
+                            _succeed = NO;
+                            [_error retain];
+                        }
+                    }
+                }
+                
+                if (_succeed) {
+                    BOOL result = [OCCKHistoryAnalyzerState purgeAnalyzedHistoryFromStore:store withManagedObjectContext:managedObjectContext error:&_error];
+                    if (!result) {
+                        _succeed = NO;
+                        [_error retain];
+                    }
+                }
+                
+                [zoneIDToEntityNameToObjectIDsSet release];
+                [errorObjectIDs release];
+                [entityIDToReferenceData64Set release];
+                
+                [managedObjectContext reset];
+                
+                if (_succeed) {
+                    // original : NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey
+                    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:@"NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey" fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+                    if (!entry.boolValue) {
+                        // <+2844>
+                        abort();
+                    }
+                    
+                    OCCloudKitExporterOptions *options = self->_options;
+                    CKDatabase * _Nullable database;
+                    if (options == nil) {
+                        database = nil;
+                    } else {
+                        database = options->_database;
+                    }
+                    
+                    CKDatabaseScope databaseScope = database.databaseScope;
+                    if ((databaseScope != CKDatabaseScopePublic) && (databaseScope != CKDatabaseScopePrivate)) {
+                        // <+2844>
+                        abort();
+                    }
+                    
+                    CKRecordZoneID *zoneID = [OCCloudKitSerializer defaultRecordZoneIDForDatabaseScope:databaseScope];
+                    OCCKRecordZoneMetadata * _Nullable zoneMetadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:zoneID inDatabaseWithScope:databaseScope forStore:store inContext:managedObjectContext error:&_error];
+                    if (zoneMetadata == nil) {
+                        // <+2892>
+                        abort();
+                    }
+                    
+                    
+                    // sp + 0x50
+                    NSSQLModel *model = [store.model retain];
+                    
+                    // original : NSPersistentStoreMirroringDelegateOptionKey
+                    NSSQLModel *mirroringModel = [store autoContentAccessingProxy][@"NSPersistentStoreMirroringDelegateOptionKey"];
+#warning OC로 해야 하나?
+                    // sp + 0x20
+                    NSSQLEntity *recordMetadataEntity = [mirroringModel entityNamed:@"NSCKRecordMetadata"];
+                    
+                    // sp + 0x28
+                    NSArray<NSEntityDescription *> *entityDescriptions = [managedObjectContext.persistentStoreCoordinator.managedObjectModel entitiesForConfiguration:store.configurationName];
+                    
+                    // x20
+                    for (NSEntityDescription *entityDescription in entityDescriptions) @autoreleasepool {
+                        NSSQLEntity *entity = [model entityNamed:entityDescription.name];
+                        if (entity == nil) {
+                            // <+2680>
+                            abort();
+                        }
+                        
+                        NSSQLEntity * _Nullable _superentity;
+                        assert(object_getInstanceVariable(entity, "_superentity", (void **)&_superentity) != NULL);
+                        
+                        if (_superentity != nil) {
+                            // <+2680>
+                            abort();
+                        }
+                        
+                        // x20
+                        NSSQLBlockRequestContext *requestCpntext = [[NSSQLBlockRequestContext alloc] initWithBlock:^(NSSQLStoreRequestContext * _Nonnull context) {
+                            // __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke_2.48
+                        }
+                                                                                                           context:managedObjectContext
+                                                                                                           sqlCore:store];
+                        
+                        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
+                        const void *symbol = MSFindSymbol(image, "-[NSSQLCore dispatchRequest:withRetries:]");
+                        
+                        ((void (*)(Class, id, NSUInteger))symbol)(objc_lookUpClass("NSSQLCore"), requestCpntext, 0);
+                        // <+1960>
+                        abort();
+                    }
+                } else {
+                    // <+3100>
+                    abort();
+                }
+                
+                // __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke.28
                 abort();
             }];
         }
