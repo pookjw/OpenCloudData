@@ -376,13 +376,54 @@
         if (!_succeed) {
             /*
              objectIDs_0_1 = sp + 0x28 = x19 + 0x20
-             self = sp + 0x40
-             tokenNumber = sp + 0x48
-             _succeed = sp + 0x50
-             _error = sp + 0x58
+             q0 = x19, #0x20
+             -> store = x19 + 0x30
+             -> managedObjectContext = x19 + 0x28
+             self = sp + 0x40 = x19 + 0x38
+             tokenNumber = sp + 0x48 = x19 + 0x40
+             _succeed = sp + 0x50 = x19 + 0x48
+             _error = sp + 0x58 = x19 + 0x50
              */
             [objc_lookUpClass("_PFRoutines") wrapBlockInGuardedAutoreleasePool:^{
+                // x19 = x0
                 
+                // sp + 0x58
+                NSMutableDictionary *dictionary_1 = [[NSMutableDictionary alloc] init];
+                // sp + 0x50
+                NSMutableSet *set = [[NSMutableSet alloc] init];
+                // sp + 0x60
+                NSMutableDictionary *dictionary_2 = [[NSMutableDictionary alloc] init];
+                
+                if (!_succeed) {
+                    // <+944>
+                    abort();
+                }
+                
+                if (objectIDs_0_1.count > 0) {
+                    // x20
+                    NSManagedObjectID *objectID = [objectIDs_0_1 anyObject];
+                    [objectIDs_0_1 removeObject:objectID];
+                    
+                    /*
+                     managedObjectContext = sp + 0x298 = x19 + 0x20
+                     objectID = sp + 0x2a0 = x19 + 0x28
+                     
+                     <q0>
+                     store = x19 + 0x30
+                     self = x19 + 0x38
+                     
+                     dictionary_2 = sp + 0x2b8 = x19 + 0x40
+                     objectIDs_0_1 = sp + 0x2c0 = x19 + 0x48
+                     set = sp + 0x2c8 = x19 + 0x50
+                     dictionary_2 = sp + 0x2d0 = x19 + 0x58
+                     
+                     */
+                    [objc_lookUpClass("_PFRoutines") wrapBlockInGuardedAutoreleasePool:^{
+                        
+                    }];
+                }
+                
+                // <+284>
             }];
         }
     }];
