@@ -10,6 +10,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSManagedObjectID (Private)
+@property (nonatomic, readonly, nullable) NSString *entityName;
 - (long long)_referenceData64;
 @end
 

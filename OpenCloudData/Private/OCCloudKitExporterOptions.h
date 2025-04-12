@@ -11,7 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface OCCloudKitExporterOptions : NSObject <NSCopying> {
-    CKDatabase *_database;
+    @package CKDatabase *_database;
     OCCloudKitMirroringDelegateOptions *_options;
     NSUInteger _perOperationBytesThreshold;
     NSUInteger _perOperationObjectThreshold;

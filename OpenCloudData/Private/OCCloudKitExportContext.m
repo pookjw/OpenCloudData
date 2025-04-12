@@ -17,6 +17,7 @@
 #import <OpenCloudData/NSManagedObjectID+Private.h>
 #import <OpenCloudData/Log.h>
 #import <objc/runtime.h>
+#import <OpenCloudData/OCCloudKitSerializer.h>
 @import ellekit;
 
 @implementation OCCloudKitExportContext
@@ -306,8 +307,11 @@
         if (_succeed) {
             /*
              storeTokens = sp + 0xe0 = x19 + 0x20
-             store = ?? = x19 + 0x28
-             managedObjectContext = ?? = x19 + 0x30
+             
+             <q0>
+             store = x19 + 0x28
+             managedObjectContext = x19 + 0x30
+             
              objectIDs_0_1 = sp + 0xf8 = x19 + 0x38
              entityIDToStatesSet = sp + 0x100 = x19 + 0x40
              _error = sp + 0x108 = x19 + 0x48
@@ -373,7 +377,7 @@
         
         os_log_info(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Finished processing analyzed history with %lu metadata objects to create, %lu deleted rows without metadata.", __func__, __LINE__, objectIDs_0_1.count, objectIDs_2.count);
         
-        if (!_succeed) {
+        if (_succeed) {
             /*
              objectIDs_0_1 = sp + 0x28 = x19 + 0x20
              q0 = x19, #0x20
@@ -388,42 +392,283 @@
                 // x19 = x0
                 
                 // sp + 0x58
-                NSMutableDictionary *dictionary_1 = [[NSMutableDictionary alloc] init];
+                NSMutableDictionary<NSNumber *, NSMutableSet<NSNumber *> *> *entityIDToReferenceData64Set = [[NSMutableDictionary alloc] init];
                 // sp + 0x50
-                NSMutableSet *set = [[NSMutableSet alloc] init];
+                NSMutableSet<NSManagedObjectID *> *errorObjectIDs = [[NSMutableSet alloc] init];
                 // sp + 0x60
-                NSMutableDictionary *dictionary_2 = [[NSMutableDictionary alloc] init];
+                NSMutableDictionary<CKRecordZoneID *, NSMutableDictionary<NSString *, NSMutableSet<NSManagedObjectID *> *> *> *zoneIDToEntityNameToObjectIDsSet = [[NSMutableDictionary alloc] init];
+                
+                while (YES) {
+                    if (!_succeed) {
+                        // <+944>
+                        abort();
+                    }
+                    
+                    if (objectIDs_0_1.count == 0) {
+                        break;
+                    } else {
+                        // x20
+                        NSManagedObjectID *objectID = [objectIDs_0_1 anyObject];
+                        [objectIDs_0_1 removeObject:objectID];
+                        
+                        /*
+                         managedObjectContext = sp + 0x298 = x19 + 0x20
+                         objectID = sp + 0x2a0 = x19 + 0x28
+                         
+                         <q0>
+                         store = x19 + 0x30
+                         self = x19 + 0x38
+                         
+                         zoneIDToEntityNameToObjectIDsSet = sp + 0x2b8 = x19 + 0x40
+                         objectIDs_0_1 = sp + 0x2c0 = x19 + 0x48
+                         errorObjectIDs = sp + 0x2c8 = x19 + 0x50
+                         entityIDToReferenceData64Set = sp + 0x2d0 = x19 + 0x58
+                         
+                         <q0>
+                         _error = x19 + 0x60
+                         _succeed = x19 + 0x68
+                         */
+                        [objc_lookUpClass("_PFRoutines") wrapBlockInGuardedAutoreleasePool:^{
+                            void (^finish_1)(void) = ^{
+                                if (_succeed) {
+                                    if (managedObjectContext.insertedObjects.count >= 500) {
+                                        BOOL result = [managedObjectContext save:&_error];
+                                        if (result) {
+                                            [managedObjectContext reset];
+                                        } else {
+                                            _succeed = NO;
+                                            [_error retain];
+                                        }
+                                    }
+                                }
+                            };
+                            
+                            //
+                            
+                            // x22 | sp + 0x28
+                            NSManagedObject * _Nullable existingObject = [managedObjectContext existingObjectWithID:objectID error:&_error];
+                            if (existingObject == nil) {
+                                if ((_error.code == NSManagedObjectReferentialIntegrityError) && [_error.domain isEqualToString:NSCocoaErrorDomain]) {
+                                    _error = nil;
+                                    [errorObjectIDs addObject:objectID];
+                                    
+                                    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
+                                    const void *symbol = MSFindSymbol(image, "__sqlEntityForEntityDescription");
+                                    
+                                    NSSQLEntity * _Nullable entity = ((id (*)(id, id))symbol)(objectID.entity, store.model);
+                                    uint _entityID;
+                                    if (entity == nil) {
+                                        _entityID = 0;
+                                    } else {
+                                        Ivar ivar = object_getInstanceVariable(entity, "_entityID", NULL);
+                                        assert(ivar != NULL);
+                                        _entityID = *(uint *)((uintptr_t)entity + ivar_getOffset(ivar));
+                                    }
+                                    // x20
+                                    NSNumber *entityIDNumber = @(_entityID);
+                                    // x21
+                                    NSNumber *referenceData64Number = @([objectID _referenceData64]);
+                                    
+                                    // x22
+                                    NSMutableSet *referenceData64Set = [entityIDToReferenceData64Set[entityIDNumber] retain];
+                                    if (referenceData64Set == nil) {
+                                        entityIDToReferenceData64Set[entityIDNumber] = referenceData64Set;
+                                    }
+                                    [referenceData64Set addObject:referenceData64Number];
+                                    [referenceData64Set release];
+                                } else {
+                                    [_error retain];
+                                    _succeed = NO;
+                                }
+                                
+                                finish_1();
+                                return;
+                            }
+                            
+                            // x21
+                            NSSet<NSManagedObjectID *> *relatedObjectIDs = [[OCCloudKitSerializer createSetOfObjectIDsRelatedToObject:existingObject] autorelease];
+                            
+                            if (relatedObjectIDs.count == 0) {
+                                [managedObjectContext refreshObject:existingObject mergeChanges:existingObject.hasChanges];
+                                finish_1();
+                                return;
+                            }
+                            
+                            //
+                            
+                            // x25 | sp + 0x20 (retained)
+                            NSSet<CKRecordZoneID *> *zoneIDs = [OCCKRecordZoneMetadata fetchZoneIDsAssignedToObjectsWithIDs:relatedObjectIDs fromStore:store inContext:managedObjectContext error:&_error];
+                            
+                            //
+                            
+                            void (^finish_2)(void) = ^{
+                                [zoneIDs release];
+                                [managedObjectContext refreshObject:existingObject mergeChanges:existingObject.hasChanges];
+                                finish_1();
+                            };
+                            
+                            //
+                            
+                            if (zoneIDs == nil) {
+                                _succeed = NO;
+                                [_error retain];
+                                finish_2();
+                                return;
+                            }
+                            
+                            // x23
+                            CKRecordZoneID *zoneID;
+                            if (zoneIDs.count == 0) {
+                                if (self->_options->_database.databaseScope == CKDatabaseScopeShared) {
+                                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: %@ - Failed to assign an object to a record zone. This usually means the object exists in a shared database and must be assigned to a zone using -[%@ %@]: %@", __func__, __LINE__, self, store, NSStringFromClass([self class]), NSStringFromSelector(_cmd), existingObject);
+                                    _succeed = NO;
+                                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:2988 userInfo:@{
+                                        NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Failed to assign an object to a record zone. This usually means the object exists in a shared database and must be assigned to a zone using -[%@ %@]: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd), existingObject.objectID]}];
+                                    
+                                    finish_2();
+                                    return;
+                                } else {
+                                    zoneID = [OCCloudKitSerializer defaultRecordZoneIDForDatabaseScope:self->_options->_database.databaseScope];
+                                }
+                            } else if (zoneIDs.count != 1) {
+                                if (zoneIDs.count < 2) {
+                                    zoneID = nil;
+                                } else {
+                                    _succeed = NO;
+                                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:NSCoreDataError userInfo:@{
+                                        NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Object graph corruption detected. Objects related to '%@' are assigned to multiple zones: %@", objectID, zoneIDs]
+                                    }];
+                                    
+                                    finish_2();
+                                    return;
+                                }
+                            } else {
+                                zoneID = [[zoneIDs anyObject] retain];
+                            }
+                            
+                            if (_succeed) {
+                                // x24
+                                NSMutableDictionary<NSString *, NSMutableSet<NSManagedObjectID *> *> *entityNameToObjectIDsSet = [zoneIDToEntityNameToObjectIDsSet[zoneID] retain];
+                                if (entityNameToObjectIDsSet == nil) {
+                                    entityNameToObjectIDsSet = [[NSMutableDictionary alloc] init];
+                                    zoneIDToEntityNameToObjectIDsSet[zoneID] = entityNameToObjectIDsSet;
+                                }
+                                // x25
+                                NSMutableSet<NSManagedObjectID *> *objectIDsSet = [entityNameToObjectIDsSet[objectID.entityName] retain];
+                                if (objectIDsSet == nil) {
+                                    objectIDsSet = [[NSMutableSet alloc] init];
+                                    entityNameToObjectIDsSet[objectID.entityName] = objectIDsSet;
+                                }
+                                [objectIDsSet addObject:objectID];
+                                [objectIDsSet release];
+                                [entityNameToObjectIDsSet release];
+                                
+                                // x25
+                                for (NSManagedObjectID *relatedObjectID in relatedObjectIDs) {
+                                    if (![objectIDs_0_1 containsObject:relatedObjectID]) continue;
+                                    
+                                    [objectIDs_0_1 removeObject:relatedObjectID];
+                                    
+                                    // x26
+                                    NSMutableDictionary<NSString *, NSMutableSet<NSManagedObjectID *> *> *entityNameToObjectIDsSet = [zoneIDToEntityNameToObjectIDsSet[zoneID] retain];
+                                    if (entityNameToObjectIDsSet == nil) {
+                                        entityNameToObjectIDsSet = [[NSMutableDictionary alloc] init];
+                                        zoneIDToEntityNameToObjectIDsSet[zoneID] = entityNameToObjectIDsSet;
+                                    }
+                                    // x27
+                                    NSMutableSet<NSManagedObjectID *> *objectIDsSet = [entityNameToObjectIDsSet[relatedObjectID.entityName] retain];
+                                    if (objectIDsSet == nil) {
+                                        objectIDsSet = [[NSMutableSet alloc] init];
+                                        entityNameToObjectIDsSet[relatedObjectID.entityName] = objectIDsSet;
+                                    }
+                                    [objectIDsSet addObject:relatedObjectID];
+                                    [objectIDsSet release];
+                                    [entityNameToObjectIDsSet release];
+                                }
+                            }
+                            
+                            [zoneID release];
+                            finish_2();
+                        }];
+                    }
+                }
                 
                 if (!_succeed) {
                     // <+944>
                     abort();
                 }
                 
-                if (objectIDs_0_1.count > 0) {
-                    // x20
-                    NSManagedObjectID *objectID = [objectIDs_0_1 anyObject];
-                    [objectIDs_0_1 removeObject:objectID];
+                // x26
+                for (CKRecordZoneID *zoneID in zoneIDToEntityNameToObjectIDsSet) @autoreleasepool {
+                    // x27
+                    NSMutableDictionary<NSString *, NSMutableSet<NSManagedObjectID *> *> *entityNameToObjectIDsSet = zoneIDToEntityNameToObjectIDsSet[zoneID];
                     
-                    /*
-                     managedObjectContext = sp + 0x298 = x19 + 0x20
-                     objectID = sp + 0x2a0 = x19 + 0x28
-                     
-                     <q0>
-                     store = x19 + 0x30
-                     self = x19 + 0x38
-                     
-                     dictionary_2 = sp + 0x2b8 = x19 + 0x40
-                     objectIDs_0_1 = sp + 0x2c0 = x19 + 0x48
-                     set = sp + 0x2c8 = x19 + 0x50
-                     dictionary_2 = sp + 0x2d0 = x19 + 0x58
-                     
-                     */
-                    [objc_lookUpClass("_PFRoutines") wrapBlockInGuardedAutoreleasePool:^{
+                    // x20
+                    for (NSString *entityName in entityNameToObjectIDsSet) {
+                        // x22
+                        NSMutableSet<NSManagedObjectID *> *objectIDsSet = entityNameToObjectIDsSet[entityName];
                         
-                    }];
+                        NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:entityName];
+                        fetchRequest.predicate = [NSPredicate predicateWithFormat:@"SELF IN %@", objectIDsSet];
+                        fetchRequest.fetchBatchSize = 500;
+                        
+                        // x22 / w22
+                        BOOL preserveLegacyRecordMetadataBehavior = self->_options->_options.preserveLegacyRecordMetadataBehavior;
+                        if (preserveLegacyRecordMetadataBehavior) {
+                            // original : NSCKRecordIDAttributeName
+                            NSPropertyDescription *propertyDescription = managedObjectContext.persistentStoreCoordinator.managedObjectModel.entitiesByName[entityName].propertiesByName[@"ckRecordID"];
+                            if (propertyDescription != nil) {
+                                fetchRequest.propertiesToFetch = @[propertyDescription];
+                            }
+                        }
+                        
+                        /*
+                         zoneID = sp + 0x1c0 = x20 + 0x20
+                         tokenNumber = sp + 0x1c8 = x20 + 0x28
+                         managedObjectContext = sp + 0x1d0 = x20 + 0x30
+                         _error = x20 + 0x38
+                         _succeed = x20 + 0x40
+                         
+                         */
+                        ((void (*)(Class, id, id, id))symbol)(objc_lookUpClass("_PFRoutines"), fetchRequest, managedObjectContext, ^(NSArray<OCCKHistoryAnalyzerState *> * _Nullable states, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
+                            if (states == nil) {
+                                _succeed = NO;
+                                _error = [__error retain];
+                                return;
+                            }
+                            
+                            /*
+                             x20 = self
+                             x21 = states
+                             x19 = checkChanges
+                             */
+                            
+                            for (OCCKHistoryAnalyzerState *state in states) {
+                                // x23
+                                OCCKRecordMetadata * _Nullable metadata = [OCCKRecordMetadata insertMetadataForObject:state setRecordName:preserveLegacyRecordMetadataBehavior inZoneWithID:zoneID recordNamePrefix:nil error:&_error];
+                                
+                                if (metadata == nil) {
+                                    [_error retain];
+                                    _succeed = NO;
+                                    break;
+                                } else {
+                                    metadata.needsUpload = YES;
+                                    metadata.needsCloudDelete = NO;
+                                    metadata.pendingExportTransactionNumber = tokenNumber;
+                                }
+                            }
+                            
+#warning TODO : Error가 있는 상태에서 Save할 때 Error가 발생하면 Leak이 발생함
+                            if (![managedObjectContext save:&_error]) {
+                                _succeed = NO;
+                                [_error retain];
+                            }
+                        });
+                    }
                 }
                 
-                // <+284>
+                // __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke.28 <+880>
+                abort();
             }];
         }
     }];

@@ -81,6 +81,7 @@
 				Private/OCCloudKitMirroringDelegate.h,
 				Private/OCCloudKitMirroringDelegateOptions.h,
 				Private/OCCloudKitMirroringDelegateProgressProvider.h,
+				Private/OCCloudKitSerializer.h,
 				Private/OCCloudKitStoreMonitor.h,
 				"Private/OCPersistentCloudKitContainer+OpenCloudData_Private.h",
 				Private/OCPersistentCloudKitContainerActivity.h,

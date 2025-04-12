@@ -151,7 +151,7 @@
     
     [entityIDToPrimaryKeySet release];
     
-    return [results autorelease];
+    return results;
 }
 
 + (NSString *)entityPath {

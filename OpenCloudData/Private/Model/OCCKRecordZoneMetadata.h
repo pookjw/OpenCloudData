@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface OCCKRecordZoneMetadata : NSManagedObject
 + (OCCKRecordZoneMetadata * _Nullable)zoneMetadataForZoneID:(CKRecordZoneID *)zoneID inDatabaseWithScope:(CKDatabaseScope)databaseScope forStore:(__kindof NSPersistentStore *)store inContext:(NSManagedObjectContext *)context createIfMissing:(BOOL)createIfMissing error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 + (OCCKRecordZoneMetadata * _Nullable)zoneMetadataForZoneID:(CKRecordZoneID *)zoneID inDatabaseWithScope:(CKDatabaseScope)databaseScope forStore:(__kindof NSPersistentStore *)store inContext:(NSManagedObjectContext *)context error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
-+ (NSSet<CKRecordZoneID *> * _Nullable)fetchZoneIDsAssignedToObjectsWithIDs:(NSSet<NSManagedObjectID *> *)objectIDs fromStore:(__kindof NSPersistentStore *)store inContext:(NSManagedObjectContext *)context error:(NSError * _Nullable * _Nullable)error;
++ (NSSet<CKRecordZoneID *> * _Nullable)fetchZoneIDsAssignedToObjectsWithIDs:(NSSet<NSManagedObjectID *> *)objectIDs fromStore:(__kindof NSPersistentStore *)store inContext:(NSManagedObjectContext *)context error:(NSError * _Nullable * _Nullable)error NS_RETURNS_RETAINED;
 + (NSString *)entityPath;
 
 @property (retain, nonatomic, nullable) NSNumber *hasRecordZoneNum;

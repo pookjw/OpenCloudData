@@ -97,7 +97,7 @@
     NSError * _Nullable _error;
     
     if ((entityObjectID == nil) || (inverseEntityObjectID == nil)) {
-        _error = [NSError errorWithDomain:NSCocoaErrorDomain code:134413 userInfo:nil];
+        _error = [NSError errorWithDomain:NSCocoaErrorDomain code:((entityObjectID == nil) ? 0x20d0c : 0x20d0d) userInfo:nil];
         result = NO;
     } else {
         // x26
