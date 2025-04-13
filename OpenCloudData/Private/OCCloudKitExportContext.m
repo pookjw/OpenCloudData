@@ -883,7 +883,7 @@
                             [objectID release];
                             
                             if ((count % 100) == 0) {
-                                BOOL result = [OCCloudKitExportContext insertRecordMetadataForObjectIDsInBatch:objectIDs inManagedObjectContext:managedObjectContext withPendingTransactionNumber:tokenNumber error:&_error];
+                                BOOL result = [self insertRecordMetadataForObjectIDsInBatch:objectIDs inManagedObjectContext:managedObjectContext withPendingTransactionNumber:tokenNumber error:&_error];
 #warning TODO : Error나면 break가 없는듯?
                                 if (result) {
                                     result = [managedObjectContext save:&_error];
@@ -904,7 +904,7 @@
                         }
                         
                         if (objectIDs.count != 0) {
-                            BOOL result = [OCCloudKitExportContext insertRecordMetadataForObjectIDsInBatch:objectIDs inManagedObjectContext:managedObjectContext withPendingTransactionNumber:tokenNumber error:&_error];
+                            BOOL result = [self insertRecordMetadataForObjectIDsInBatch:objectIDs inManagedObjectContext:managedObjectContext withPendingTransactionNumber:tokenNumber error:&_error];
                             if (result) {
                                 _succeed = NO;
                                 [_error retain];
