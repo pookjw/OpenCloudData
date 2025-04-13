@@ -401,8 +401,10 @@
                 
                 while (YES) {
                     if (!_succeed) {
-                        // <+944>
-                        abort();
+                        [zoneIDToEntityNameToObjectIDsSet release];
+                        [errorObjectIDs release];
+                        [entityIDToReferenceData64Set release];
+                        return;
                     }
                     
                     if (objectIDs_0_1.count == 0) {
@@ -453,7 +455,6 @@
                                     _error = nil;
                                     [errorObjectIDs addObject:objectID];
                                     
-                                    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
                                     const void *symbol = MSFindSymbol(image, "__sqlEntityForEntityDescription");
                                     
                                     NSSQLEntity * _Nullable entity = ((id (*)(id, id))symbol)(objectID.entity, store.model);
@@ -595,8 +596,10 @@
                 }
                 
                 if (!_succeed) {
-                    // <+944>
-                    abort();
+                    [zoneIDToEntityNameToObjectIDsSet release];
+                    [errorObjectIDs release];
+                    [entityIDToReferenceData64Set release];
+                    return;
                 }
                 
                 // x26
@@ -707,12 +710,75 @@
                 
                 [managedObjectContext reset];
                 
+                void (^final)(void) = ^{
+                    NSFetchRequest<OCCKRecordZoneMoveReceipt *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordZoneMoveReceipt entityPath]];
+                    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"needsCloudDelete == 1"];
+                    fetchRequest.fetchBatchSize = 500;
+                    fetchRequest.returnsObjectsAsFaults = NO;
+                    fetchRequest.affectedStores = @[store];
+                    
+                    const void *symbol = MSFindSymbol(image, "+[_PFRoutines efficientlyEnumerateManagedObjectsInFetchRequest:usingManagedObjectContext:andApplyBlock:]");
+                    
+                    ((void (*)(Class, id, id, id))symbol)(objc_lookUpClass("_PFRoutines"), fetchRequest, managedObjectContext, ^(NSArray<OCCKRecordZoneMoveReceipt *> * _Nullable receipts, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
+                        /*
+                         self = x20
+                         states = x22
+                         checkChanges = x19
+                         */
+                        
+                        // x21
+                        NSMutableArray<CKRecordID *> *recordIDs = [[NSMutableArray alloc] init];
+                        
+                        for (OCCKRecordZoneMoveReceipt *receipt in receipts) {
+                            CKRecordID *recordID = [receipt createRecordIDForMovedRecord];
+                            [recordIDs addObject:recordID];
+                            [recordID release];
+                        }
+                        
+                        // x22
+                        NSArray<OCCKMirroredRelationship *> * _Nullable mirroredRelationships = [OCCKMirroredRelationship fetchMirroredRelationshipsMatchingRelatingRecords:@[] andRelatingRecordIDs:recordIDs fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+                        
+                        BOOL hasError;
+                        if (mirroredRelationships != nil) {
+                            // x23
+                            NSNumber *noNumber = @NO;
+                            // x24
+                            NSNumber *yesNumber = @YES;
+                            
+                            // x26
+                            for (OCCKMirroredRelationship *relationship in mirroredRelationships) {
+                                relationship.isUploaded = noNumber;
+                                relationship.needsDelete = yesNumber;
+                            }
+                            
+                            hasError = [managedObjectContext save:&_error];
+                        } else {
+                            hasError = YES;
+                        }
+                        
+                        if (hasError) {
+                            [_error retain];
+                            _succeed = NO;
+                        }
+                        
+                        [recordIDs release];
+                    });
+                };
+                
                 if (_succeed) {
                     // original : NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey
                     OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:@"NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey" fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
                     if (!entry.boolValue) {
-                        // <+2844>
-                        abort();
+                        if (_error != nil) {
+                            _succeed = NO;
+                            [_error retain];
+                        }
+                        
+                        if (_succeed) {
+                            final();
+                        }
+                        
+                        return;
                     }
                     
                     OCCloudKitExporterOptions *options = self->_options;
@@ -725,15 +791,24 @@
                     
                     CKDatabaseScope databaseScope = database.databaseScope;
                     if ((databaseScope != CKDatabaseScopePublic) && (databaseScope != CKDatabaseScopePrivate)) {
-                        // <+2844>
-                        abort();
+                        if (_error != nil) {
+                            _succeed = NO;
+                            [_error retain];
+                        }
+                        
+                        if (_succeed) {
+                            final();
+                        }
+                        
+                        return;
                     }
                     
                     CKRecordZoneID *zoneID = [OCCloudKitSerializer defaultRecordZoneIDForDatabaseScope:databaseScope];
                     OCCKRecordZoneMetadata * _Nullable zoneMetadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:zoneID inDatabaseWithScope:databaseScope forStore:store inContext:managedObjectContext error:&_error];
                     if (zoneMetadata == nil) {
-                        // <+2892>
-                        abort();
+                        _succeed = NO;
+                        [_error retain];
+                        return;
                     }
                     
                     
@@ -741,7 +816,7 @@
                     NSSQLModel *model = [store.model retain];
                     
                     // original : NSPersistentStoreMirroringDelegateOptionKey
-                    NSSQLModel *mirroringModel = [store autoContentAccessingProxy][@"NSPersistentStoreMirroringDelegateOptionKey"];
+                    NSSQLModel *mirroringModel = [store ancillarySQLModels][@"NSPersistentStoreMirroringDelegateOptionKey"];
 #warning OC로 해야 하나?
                     // sp + 0x20
                     NSSQLEntity *recordMetadataEntity = [mirroringModel entityNamed:@"NSCKRecordMetadata"];
@@ -753,45 +828,146 @@
                     for (NSEntityDescription *entityDescription in entityDescriptions) @autoreleasepool {
                         NSSQLEntity *entity = [model entityNamed:entityDescription.name];
                         if (entity == nil) {
-                            // <+2680>
-                            abort();
+                            continue;
                         }
                         
                         NSSQLEntity * _Nullable _superentity;
                         assert(object_getInstanceVariable(entity, "_superentity", (void **)&_superentity) != NULL);
                         
                         if (_superentity != nil) {
-                            // <+2680>
-                            abort();
+                            continue;
                         }
                         
-                        // x20
-                        NSSQLBlockRequestContext *requestCpntext = [[NSSQLBlockRequestContext alloc] initWithBlock:^(NSSQLStoreRequestContext * _Nonnull context) {
-                            // __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke_2.48
+                        /*
+                         entity = sp + 0x118 = x19 + 0x20
+                         recordMetadataEntity = sp + 0x120 = x19 + 0x28
+                         */
+                        
+                        // sp + 0x170
+                        __block NSArray<NSArray<NSNumber *> *> *arrayOfPrimaryKeysAndEntityIDs;
+                        // x20 / sp + 0x38
+                        NSSQLBlockRequestContext *requestCpntext = [[objc_lookUpClass("NSSQLBlockRequestContext") alloc] initWithBlock:^(NSSQLStoreRequestContext * _Nonnull context) {
+                            const void *symbol = MSFindSymbol(image, "-[NSSQLiteConnection createArrayOfPrimaryKeysAndEntityIDsForRowsWithoutRecordMetadataWithEntity:metadataEntity:]");
+                            arrayOfPrimaryKeysAndEntityIDs = ((id (*)(Class, id, id))symbol)(objc_lookUpClass("NSSQLiteConnection"), entry, recordMetadataEntity);
                         }
                                                                                                            context:managedObjectContext
                                                                                                            sqlCore:store];
                         
-                        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
                         const void *symbol = MSFindSymbol(image, "-[NSSQLCore dispatchRequest:withRetries:]");
-                        
                         ((void (*)(Class, id, NSUInteger))symbol)(objc_lookUpClass("NSSQLCore"), requestCpntext, 0);
-                        // <+1960>
-                        abort();
+                        
+                        // x23 / x28
+                        NSMutableArray<NSManagedObjectID *> *objectIDs = [[NSMutableArray alloc] init];
+                        
+                        // x20
+                        NSUInteger count = 0;
+                        // x24
+                        for (NSArray<NSNumber *> *primaryKeyAndEntityID in arrayOfPrimaryKeysAndEntityIDs) @autoreleasepool {
+                            count += 1;
+                            
+                            if (primaryKeyAndEntityID.count != 2) {
+                                [model release];
+                                model = nil;
+                                [objectIDs release];
+                                @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                                               reason:[NSString stringWithFormat:@"Unexpected number of items in the pk / ent array: %@", primaryKeyAndEntityID]
+                                                             userInfo:nil];
+                            }
+                            
+                            const void *symbol = MSFindSymbol(image, "__sqlCoreLookupSQLEntityForEntityID");
+                            NSSQLEntity * _Nullable sqlEntity = ((id (*)(id, unsigned long))symbol)(store, primaryKeyAndEntityID[1].unsignedLongValue);
+                            
+                            // x21
+                            NSManagedObjectID *objectID = [store newObjectIDForEntity:sqlEntity pk:primaryKeyAndEntityID[0].integerValue];
+                            [objectIDs addObject:objectID];
+                            [objectID release];
+                            
+                            if ((count % 100) == 0) {
+                                BOOL result = [OCCloudKitExportContext insertRecordMetadataForObjectIDsInBatch:objectIDs inManagedObjectContext:managedObjectContext withPendingTransactionNumber:tokenNumber error:&_error];
+#warning TODO : Error나면 break가 없는듯?
+                                if (result) {
+                                    result = [managedObjectContext save:&_error];
+                                    if (!result) {
+                                        _succeed = NO;
+                                        [_error retain];
+                                    }
+                                    
+                                    [objectIDs release];
+                                    objectIDs = [[NSMutableArray alloc] init];
+                                } else {
+                                    _succeed = NO;
+                                    [_error retain];
+                                }
+                                
+                                [managedObjectContext reset];
+                            }
+                        }
+                        
+                        if (objectIDs.count != 0) {
+                            BOOL result = [OCCloudKitExportContext insertRecordMetadataForObjectIDsInBatch:objectIDs inManagedObjectContext:managedObjectContext withPendingTransactionNumber:tokenNumber error:&_error];
+                            if (result) {
+                                _succeed = NO;
+                                [_error retain];
+                            }
+                        }
+                        
+                        if (_succeed && managedObjectContext.hasChanges) {
+                            BOOL result = [managedObjectContext save:&_error];
+                            
+                            if (!result) {
+                                _succeed = NO;
+                                [_error retain];
+                            }
+                            
+                            [managedObjectContext reset];
+                        }
+                        
+                        [objectIDs release];
+                        objectIDs = nil;
+                        [requestCpntext release];
+                        
+                        [arrayOfPrimaryKeysAndEntityIDs release];
                     }
-                } else {
-                    // <+3100>
-                    abort();
+                    
+                    // original : NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey
+                    OCCKMetadataEntry * _Nullable entry_2 = [OCCKMetadataEntry entryForKey:@"NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey" fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+                    if (entry_2 != nil) {
+                        [managedObjectContext deleteObject:entry_2];
+                    } else {
+                        [_error retain];
+                        _succeed = NO;
+                    }
+                    
+                    if (_succeed) {
+                        BOOL result = [managedObjectContext save:&_error];
+                        if (!result) {
+                            _succeed = NO;
+                            [_error retain];
+                        }
+                    }
+                    
+                    [model release];
+                    
+                    
+                    if (_succeed) {
+                        final();
+                    }
                 }
-                
-                // __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke.28
-                abort();
             }];
         }
     }];
     
-    // <+176>
-    abort();
+    if (!_succeed) {
+        if (_error == nil) {
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d", __func__, __LINE__);
+        } else {
+            if (error) *error = [[_error retain] autorelease];
+        }
+    }
+    
+    [_error release];
+    return _succeed;
 }
 
 - (BOOL)checkForObjectsNeedingExportInStore:(__kindof NSPersistentStore *)store andReturnCount:(NSUInteger *)count withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
@@ -827,7 +1003,7 @@
                                                                                           withManagedObjectContext:managedObjectContext
                                                                                                              error:&_error];
     if (mirroredRelationshipsCountNumber == nil) {
-        if (error == nil) {
+        if (_error == nil) {
             os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d", __func__, __LINE__);
             os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d", __func__, __LINE__);
         } else {
@@ -853,12 +1029,17 @@
         } else {
             const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
             const void *symbol = MSFindSymbol(image, "-[NSManagedObjectContext _countForFetchRequest_:error:]");
-            recordZoneMetadataCount = ((NSInteger (*)(id, id, id *))symbol)(managedObjectContext, fetchRequest, error);
+            recordZoneMetadataCount = ((NSInteger (*)(id, id, id *))symbol)(managedObjectContext, fetchRequest, &_error);
             
             if (recordZoneMetadataCount == NSNotFound) {
-#warning TODO
-                // <+476>
-                abort();
+                if (_error == nil) {
+                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d", __func__, __LINE__);
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d", __func__, __LINE__);
+                } else {
+                    if (error) *error = _error;
+                }
+                
+                return NO;
             }
         }
     }
@@ -875,10 +1056,10 @@
         } else {
             const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
             const void *symbol = MSFindSymbol(image, "-[NSManagedObjectContext _countForFetchRequest_:error:]");
-            recordZoneMoveReceiptsCount = ((NSInteger (*)(id, id, id *))symbol)(managedObjectContext, fetchRequest, error);
+            recordZoneMoveReceiptsCount = ((NSInteger (*)(id, id, id *))symbol)(managedObjectContext, fetchRequest, &_error);
             
             if (recordZoneMoveReceiptsCount == NSNotFound) {
-                if (error == nil) {
+                if (_error == nil) {
                     os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d", __func__, __LINE__);
                     os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d", __func__, __LINE__);
                 } else {
