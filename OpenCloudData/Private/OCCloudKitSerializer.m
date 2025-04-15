@@ -9,4 +9,8 @@
 
 @implementation OCCloudKitSerializer
 
++ (size_t)estimateByteSizeOfRecordID:(CKRecordID *)recordID {
+    abort();
+}
+
 @end

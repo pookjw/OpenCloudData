@@ -19,6 +19,8 @@
 #import <OpenCloudData/Log.h>
 #import <objc/runtime.h>
 #import <OpenCloudData/OCCloudKitSerializer.h>
+#import <OpenCloudData/OCCloudKitOperationBatch.h>
+#import <OpenCloudData/OCCloudKitMetadataCache.h>
 @import ellekit;
 
 @implementation OCCloudKitExportContext
@@ -617,7 +619,13 @@
                         fetchRequest.fetchBatchSize = 500;
                         
                         // x22 / w22
-                        BOOL preserveLegacyRecordMetadataBehavior = self->_options->_options.preserveLegacyRecordMetadataBehavior;
+                        BOOL preserveLegacyRecordMetadataBehavior;
+                        OCCloudKitExporterOptions * _Nullable options = self->_options;
+                        if (options == nil) {
+                            preserveLegacyRecordMetadataBehavior = NO;
+                        } else {
+                            preserveLegacyRecordMetadataBehavior = options->_options.preserveLegacyRecordMetadataBehavior;
+                        }
                         if (preserveLegacyRecordMetadataBehavior) {
                             // original : NSCKRecordIDAttributeName
                             NSPropertyDescription *propertyDescription = managedObjectContext.persistentStoreCoordinator.managedObjectModel.entitiesByName[entityName].propertiesByName[@"ckRecordID"];
@@ -1073,6 +1081,193 @@
     
     *count = (recordMetadataCount + mirroredRelationshipsCount + recordZoneMetadataCount + recordZoneMoveReceiptsCount);
     return YES;
+}
+
+- (BOOL)insertRecordMetadataForObjectIDsInBatch:(NSArray<NSManagedObjectID *> *)objectIDs inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext withPendingTransactionNumber:(NSNumber *)transactionNumner error:(NSError * _Nullable *)error {
+    /*
+     self = x21
+     objectIDs = x23
+     managedObjectContext = x22
+     error = x19
+     */
+    
+    // sp + 0x68
+    NSError * _Nullable contextError = nil;
+    
+    NSEntityDescription * _Nullable entity = objectIDs.lastObject.entity;
+    
+    NSEntityDescription * _Nullable rootEntity;
+    if (entity == nil) {
+        rootEntity = nil;
+    } else {
+        BOOL _isImmutable;
+        assert(object_getInstanceVariable(entity, "_isImmutable", (void **)&_isImmutable) != NULL);
+        
+        if (_isImmutable) {
+            assert(object_getInstanceVariable(entity, "_rootentity", (void **)&rootEntity) != NULL);
+        } else {
+            rootEntity = entity;
+            NSEntityDescription * _Nullable superEntity = rootEntity.superentity;
+            while (superEntity != nil) {
+                rootEntity = superEntity;
+                superEntity = rootEntity.superentity;
+            }
+        }
+    }
+    
+    // x24
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:rootEntity.name];
+    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"SELF in %@", objectIDs];
+    
+    // x24
+    NSArray<NSManagedObject *> * _Nullable fetchedObjects = [managedObjectContext executeFetchRequest:fetchRequest error:&contextError];
+    
+    if (fetchedObjects == nil) {
+        if (contextError == nil) {
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        } else {
+            if (error) *error = contextError;
+        }
+        
+        return NO;
+    }
+    
+    BOOL hasError = NO;
+    // x27
+    for (NSManagedObject *object in fetchedObjects) @autoreleasepool {
+        CKDatabaseScope databaseScope;
+        {
+            OCCloudKitExporterOptions * _Nullable options = self->_options;
+            if (options == nil) {
+                databaseScope = 0;
+            } else {
+                databaseScope = options->_database.databaseScope;
+            }
+        }
+        
+        // x26
+        CKRecordZoneID *zoneID = [OCCloudKitSerializer defaultRecordZoneIDForDatabaseScope:databaseScope];
+        
+        BOOL preserveLegacyRecordMetadataBehavior;
+        {
+            OCCloudKitExporterOptions * _Nullable options = self->_options;
+            if (options == nil) {
+                preserveLegacyRecordMetadataBehavior = NO;
+            } else {
+                preserveLegacyRecordMetadataBehavior = options->_options.preserveLegacyRecordMetadataBehavior;
+            }
+        }
+        
+        // x27
+        OCCKRecordMetadata * _Nullable metadata = [OCCKRecordMetadata insertMetadataForObject:object setRecordName:preserveLegacyRecordMetadataBehavior inZoneWithID:zoneID recordNamePrefix:nil error:&contextError];
+        if (metadata == nil) {
+            hasError = YES;
+            [contextError retain];
+            break;
+        }
+        
+        metadata.needsUpload = YES;
+        metadata.pendingExportTransactionNumber = transactionNumner;
+        metadata.pendingExportChangeTypeNumber = @0;
+    }
+    
+    if (hasError) {
+        if (contextError == nil) {
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        } else {
+            if (error) *error = [contextError autorelease];
+        }
+        
+        return NO;
+    }
+    
+    return YES;
+}
+
+- (CKModifyRecordsOperation *)newOperationBySerializingDirtyObjectsInStore:(NSSQLCore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
+    /*
+     self = x20
+     store = x24
+     managedObjectContext = x23
+     error = x19
+     */
+    
+    // sp, #0x90
+    __block NSError * _Nullable _error = nil;
+    // x29, #0x80
+    __block BOOL _succeed = NO;
+    // sp, #0x60
+    __block OCCloudKitSerializer * _Nullable serializer = nil;
+    
+    // x22
+    OCCloudKitOperationBatch *operationBatch = [[OCCloudKitOperationBatch alloc] init];
+    
+    // x21
+    NSMutableSet *set = [[NSMutableSet alloc] init];
+    
+    /*
+     store = sp + 0x20 = x21 + 0x20
+     self = sp + 0x28 = x21 + 0x28
+     managedObjectContext = sp + 0x30 = x21 + 0x30
+     operationBatch = sp + 0x38 = x21 + 0x38
+     set = sp + 0x40 = x21 + 0x40
+     _error = sp + 0x48 = x21 + 0x48
+     _succeed = sp + 0x50 = x21 + 0x50
+     serializer = sp + 0x58 = x21 + 0x58
+     */
+    [managedObjectContext performBlockAndWait:^{
+        // x21 = block
+        
+        // x19
+        NSMutableArray<NSManagedObjectID *> *objectIDs = [[NSMutableArray alloc] init];
+        
+        // x20
+        NSFetchRequest<OCCKRecordMetadata *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordMetadata entityPath]];
+        fetchRequest.returnsObjectsAsFaults = NO;
+        fetchRequest.affectedStores = @[store];
+        
+        NSUInteger fetchLimit;
+        {
+            OCCloudKitExporterOptions * _Nullable options = self->_options;
+            if (options == nil) {
+                fetchLimit = 0;
+            } else {
+                fetchLimit = options->_perOperationObjectThreshold;
+            }
+        }
+        fetchRequest.fetchLimit = fetchLimit;
+        
+        fetchRequest.propertiesToFetch = @[@"entityId", @"entityPK"];
+        fetchRequest.predicate = [NSPredicate predicateWithFormat:@"needsUpload = YES"];
+        
+        // sp, #0x78
+        OCCloudKitMetadataCache *cache = nil;
+        
+        // x22
+        NSArray<OCCKRecordMetadata *> * _Nullable fetchedRecordMetadataArray = [managedObjectContext executeFetchRequest:fetchRequest error:&_error];
+        
+        if (fetchedRecordMetadataArray == nil) {
+            _succeed = NO;
+            cache = nil;
+            [_error retain];
+            // <+3200>
+            abort();
+        }
+        
+        // x24
+        for (OCCKRecordMetadata *recordMetadata in fetchedRecordMetadataArray) @autoreleasepool {
+            // x24
+            NSManagedObjectID *objectID = [recordMetadata createObjectIDForLinkedRow];
+            [objectIDs addObject:objectID];
+        }
+        
+        // <+464>
+        abort();
+    }];
+    
+    abort();
 }
 
 @end

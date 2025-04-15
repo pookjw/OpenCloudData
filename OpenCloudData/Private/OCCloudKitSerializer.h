@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface OCCloudKitSerializer : NSObject
 + (CKRecordZoneID *)defaultRecordZoneIDForDatabaseScope:(CKDatabaseScope)databaseScope;
++ (size_t)estimateByteSizeOfRecordID:(CKRecordID *)recordID __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END
