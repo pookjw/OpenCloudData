@@ -1263,8 +1263,40 @@
             [objectIDs addObject:objectID];
         }
         
-        // <+464>
-        abort();
+        cache = [[OCCloudKitMetadataCache alloc] init];
+        
+        OCCloudKitMirroringDelegateOptions * _Nullable options;
+        {
+            OCCloudKitExporterOptions * _Nullable _options = self->_options;
+            if (_options == nil) {
+                options = nil;
+            } else {
+                options = _options->_options;
+            }
+        }
+        
+        BOOL result = [cache cacheMetadataForObjectsWithIDs:objectIDs andRecordsWithIDs:@[] inStore:store withManagedObjectContext:managedObjectContext mirroringOptions:options error:&_error];
+        if (!result) {
+            // <+3208>
+            abort();
+        }
+        
+        serializer = [[OCCloudKitSerializer alloc] initWithMirroringOptions:options metadataCache:cache recordNamePrefix:nil];
+        
+        // x26
+        for (OCCKRecordMetadata *recordMetadata in fetchedRecordMetadataArray) @autoreleasepool {
+            // sp, #0x50
+            NSManagedObjectID *objectID = [recordMetadata createObjectIDForLinkedRow];
+            // sp, #0x60
+            CKRecordType recordType = [OCCloudKitSerializer recordTypeForEntity:objectID.entity];
+            // sp, #0x80
+            CKRecordID *recordID = [recordMetadata createRecordID];
+            
+            CKRecordZoneID *zoneID = recordID.zoneID;
+            
+            // <+820>
+            abort();
+        }
     }];
     
     abort();

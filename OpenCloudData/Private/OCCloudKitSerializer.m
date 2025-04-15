@@ -13,4 +13,8 @@
     abort();
 }
 
++ (CKRecordType)recordTypeForEntity:(NSEntityDescription *)entity {
+    abort();
+}
+
 @end
