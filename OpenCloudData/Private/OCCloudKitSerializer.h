@@ -20,6 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (CKRecordType)recordTypeForEntity:(NSEntityDescription *)entity __attribute__((objc_direct));
 
 - (instancetype)initWithMirroringOptions:(OCCloudKitMirroringDelegateOptions * _Nullable)mirroringOptions metadataCache:(OCCloudKitMetadataCache *)metadataCache recordNamePrefix:(NSString * _Nullable)recordNamePrefix;
+
+- (NSArray<CKRecord *> * /* 정확하지 않음*/)newCKRecordsFromObject:(NSManagedObject *)object fullyMaterializeRecords:(BOOL)fullyMaterializeRecords includeRelationships:(BOOL)includeRelationships error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

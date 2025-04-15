@@ -8,6 +8,7 @@
 #import <CoreData/CoreData.h>
 #import <OpenCloudData/OCCloudKitExporterOptions.h>
 #import <OpenCloudData/NSSQLCore.h>
+#import <OpenCloudData/OCCloudKitOperationBatch.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -23,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)checkForObjectsNeedingExportInStore:(__kindof NSPersistentStore *)store andReturnCount:(NSUInteger *)count withManagedObjectContext:(NSManagedObjectContext * _Nullable)managedObjectContext error:(NSError * _Nullable * _Nullable)error;
 - (BOOL)insertRecordMetadataForObjectIDsInBatch:(NSArray<NSManagedObjectID *> *)objectIDs inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext withPendingTransactionNumber:(NSNumber *)transactionNumner error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 - (CKModifyRecordsOperation * _Nullable)newOperationBySerializingDirtyObjectsInStore:(NSSQLCore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error;
+- (BOOL)currentBatchExceedsThresholds:(OCCloudKitOperationBatch *)batch __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

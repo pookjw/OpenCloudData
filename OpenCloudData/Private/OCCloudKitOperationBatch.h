@@ -10,7 +10,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface OCCloudKitOperationBatch : NSObject {
-    NSMutableSet<CKRecordID *> *_deletedRecordIDs;
+    @package NSMutableSet<CKRecordID *> *_deletedRecordIDs;
     NSMutableDictionary<CKRecordType, NSMutableSet<CKRecordID *> *> *_recordTypeToDeletedRecordID;
     NSMutableArray<CKRecord *> *_records;
     NSMutableSet<CKRecordID *> *_recordIDs;

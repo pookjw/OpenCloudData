@@ -19,7 +19,6 @@
 #import <OpenCloudData/Log.h>
 #import <objc/runtime.h>
 #import <OpenCloudData/OCCloudKitSerializer.h>
-#import <OpenCloudData/OCCloudKitOperationBatch.h>
 #import <OpenCloudData/OCCloudKitMetadataCache.h>
 @import ellekit;
 
@@ -1205,14 +1204,14 @@
     OCCloudKitOperationBatch *operationBatch = [[OCCloudKitOperationBatch alloc] init];
     
     // x21
-    NSMutableSet *set = [[NSMutableSet alloc] init];
+    NSMutableSet<NSManagedObjectID *> *deletedObjectIDsSet = [[NSMutableSet alloc] init];
     
     /*
      store = sp + 0x20 = x21 + 0x20
      self = sp + 0x28 = x21 + 0x28
      managedObjectContext = sp + 0x30 = x21 + 0x30
      operationBatch = sp + 0x38 = x21 + 0x38
-     set = sp + 0x40 = x21 + 0x40
+     deletedObjectIDsSet = sp + 0x40 = x21 + 0x40
      _error = sp + 0x48 = x21 + 0x48
      _succeed = sp + 0x50 = x21 + 0x50
      serializer = sp + 0x58 = x21 + 0x58
@@ -1294,11 +1293,143 @@
             
             CKRecordZoneID *zoneID = recordID.zoneID;
             
-            // <+820>
+            BOOL shouldFinish;
+            if (zoneID == nil) {
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Ignoring dirty metadata for record in immutable zone: %@", __func__, __LINE__, self, recordID);
+                recordMetadata.needsUpload = NO;
+                recordMetadata.needsCloudDelete = NO;
+                shouldFinish = YES;
+            } else if (![cache->_mutableZoneIDs containsObject:zoneID]) {
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Ignoring dirty metadata for record in immutable zone: %@", __func__, __LINE__, self, recordID);
+                recordMetadata.needsUpload = NO;
+                recordMetadata.needsCloudDelete = NO;
+                shouldFinish = YES;
+            } else {
+                if (recordMetadata.needsCloudDelete) {
+                    [operationBatch addDeletedRecordID:recordID forRecordOfType:recordType];
+                    shouldFinish = YES;
+                } else {
+                    shouldFinish = NO;
+                }
+            }
+            
+            if (shouldFinish) {
+                // 이게 <+1072>. 여러 군데에서 쓰임
+                [recordID release];
+                [objectID release];
+                
+                if (managedObjectContext.hasChanges) {
+                    // x20
+                    NSUInteger insertedCount = managedObjectContext.insertedObjects.count;
+                    // x23
+                    NSUInteger updatedCount = managedObjectContext.updatedObjects.count;
+                    NSUInteger deletedCount = managedObjectContext.deletedObjects.count;
+                    
+                    if (((insertedCount & updatedCount) + deletedCount) >= 0xc9) {
+                        BOOL result = [managedObjectContext save:&_error];
+                        if (!result) {
+                            _succeed = NO;
+                            [_error retain];
+                            // <+5184>
+                            abort();
+                        }
+                    }
+                }
+                
+                if (_succeed) {
+                    if ([self currentBatchExceedsThresholds:operationBatch]) {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+                
+                continue;
+            }
+            
+            // x24
+            NSManagedObject * _Nullable object = [managedObjectContext existingObjectWithID:objectID error:&_error];
+            
+            if (object == nil) {
+                // <+1728>
+                abort();
+            }
+            
+            // x20
+            if (![object.objectID.persistentStore.identifier isEqualToString:store.identifier]) {
+                // <+1072>
+                abort();
+            }
+            
+            // sp + 0x18
+            NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+            
+            if (serializer == nil) {
+                // <+2152>
+                abort();
+            }
+            
+            // sp + 0x30
+            NSArray<CKRecord *> * _Nullable records = [serializer newCKRecordsFromObject:object fullyMaterializeRecords:NO includeRelationships:YES error:&_error];
+            [managedObjectContext refreshObject:object mergeChanges:managedObjectContext.hasChanges];
+            
+            if (records == nil) {
+                // <+1872>
+                abort();
+            }
+            
+            // x20
+            for (CKRecord *record in records) {
+                NSMutableSet<CKRecordID *> * _Nullable deletedRecordIDs;
+                if (operationBatch == nil) {
+                    deletedRecordIDs = nil;
+                } else {
+                    deletedRecordIDs = operationBatch->_deletedRecordIDs;
+                }
+                
+                if ([deletedRecordIDs containsObject:record.recordID]) {
+                    [operationBatch addDeletedRecordID:record.recordID forRecordOfType:recordType];
+                } else {
+                    [operationBatch addRecord:record];
+                }
+                
+                BOOL result = [self currentBatchExceedsThresholds:operationBatch];
+                
+                if (result) {
+                    break;
+                }
+            }
+            
+            // x20
+            for (OCCKRecordZoneMoveReceipt *moveReceipt in recordMetadata.moveReceipts) {
+                if (!moveReceipt.needsCloudDelete) continue;
+                
+                BOOL result = [self currentBatchExceedsThresholds:operationBatch];
+                if (result) break;
+                
+                // x27
+                CKRecordID *recordID = [moveReceipt createRecordIDForMovedRecord];
+                
+                [operationBatch addDeletedRecordID:recordID forRecordOfType:recordType];
+                [deletedObjectIDsSet addObject:moveReceipt.objectID];
+                
+                [recordID release];
+            }
+            
+            [pool release];
+            
+            // <+1072>
             abort();
         }
+        
+        // <+2316>
+        abort();
     }];
     
+    abort();
+}
+
+- (BOOL)currentBatchExceedsThresholds:(OCCloudKitOperationBatch *)batch {
     abort();
 }
 
