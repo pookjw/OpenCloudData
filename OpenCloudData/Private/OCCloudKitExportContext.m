@@ -20,6 +20,8 @@
 #import <objc/runtime.h>
 #import <OpenCloudData/OCCloudKitSerializer.h>
 #import <OpenCloudData/OCCloudKitMetadataCache.h>
+#import <OpenCloudData/PFMirroredManyToManyRelationshipV2.h>
+#import <OpenCloudData/CKRecord+Private.h>
 @import ellekit;
 
 @implementation OCCloudKitExportContext
@@ -1251,8 +1253,11 @@
             _succeed = NO;
             cache = nil;
             [_error retain];
-            // <+3200>
-            abort();
+            
+            [objectIDs release];
+            [cache release];
+            
+            return;
         }
         
         // x24
@@ -1276,8 +1281,13 @@
         
         BOOL result = [cache cacheMetadataForObjectsWithIDs:objectIDs andRecordsWithIDs:@[] inStore:store withManagedObjectContext:managedObjectContext mirroringOptions:options error:&_error];
         if (!result) {
-            // <+3208>
-            abort();
+            _succeed = NO;
+            [_error retain];
+            
+            [objectIDs release];
+            [cache release];
+            
+            return;
         }
         
         serializer = [[OCCloudKitSerializer alloc] initWithMirroringOptions:options metadataCache:cache recordNamePrefix:nil];
@@ -1313,8 +1323,9 @@
                 }
             }
             
-            if (shouldFinish) {
-                // 이게 <+1072>. 여러 군데에서 쓰임
+            // 5 = break, 0 = continue
+            int (^finalize)(void) = ^int {
+                /* <+1076> */
                 [recordID release];
                 [objectID release];
                 
@@ -1330,73 +1341,99 @@
                         if (!result) {
                             _succeed = NO;
                             [_error retain];
-                            // <+5184>
-                            abort();
                         }
                     }
                 }
                 
                 if (_succeed) {
                     if ([self currentBatchExceedsThresholds:operationBatch]) {
-                        break;
+                        return 5;
+                    } else {
+                        return 0;
                     }
                 } else {
-                    break;
+                    return 5;
                 }
-                
-                continue;
+            };
+            
+            if (shouldFinish) {
+                if (finalize() != 0) {
+                    break;
+                } else {
+                    continue;
+                }
             }
             
             // x24
             NSManagedObject * _Nullable object = [managedObjectContext existingObjectWithID:objectID error:&_error];
             
             if (object == nil) {
-                // <+1728>
-                abort();
+                if (_error == nil) {
+                    if (finalize() != 0) {
+                        break;
+                    } else {
+                        continue;
+                    }
+                }
+                
+                if ([_error.domain isEqualToString:NSCocoaErrorDomain] && (_error.code == NSManagedObjectReferentialIntegrityError)) {
+                    recordMetadata.needsCloudDelete = YES;
+                    [operationBatch addDeletedRecordID:recordID forRecordOfType:recordType];
+                    
+                    if (finalize() != 0) {
+                        break;
+                    } else {
+                        continue;
+                    }
+                }
             }
             
             // x20
             if (![object.objectID.persistentStore.identifier isEqualToString:store.identifier]) {
-                // <+1072>
-                abort();
+                if (finalize() != 0) {
+                    break;
+                } else {
+                    continue;
+                }
             }
             
             // sp + 0x18
             NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
             
+            // sp + 0x30
+            NSArray<CKRecord *> * _Nullable records;
             if (serializer == nil) {
-                // <+2152>
-                abort();
+                records = nil;
+            } else {
+                records = [serializer newCKRecordsFromObject:object fullyMaterializeRecords:NO includeRelationships:YES error:&_error];
             }
             
-            // sp + 0x30
-            NSArray<CKRecord *> * _Nullable records = [serializer newCKRecordsFromObject:object fullyMaterializeRecords:NO includeRelationships:YES error:&_error];
             [managedObjectContext refreshObject:object mergeChanges:managedObjectContext.hasChanges];
             
             if (records == nil) {
-                // <+1872>
-                abort();
-            }
-            
-            // x20
-            for (CKRecord *record in records) {
-                NSMutableSet<CKRecordID *> * _Nullable deletedRecordIDs;
-                if (operationBatch == nil) {
-                    deletedRecordIDs = nil;
-                } else {
-                    deletedRecordIDs = operationBatch->_deletedRecordIDs;
-                }
-                
-                if ([deletedRecordIDs containsObject:record.recordID]) {
-                    [operationBatch addDeletedRecordID:record.recordID forRecordOfType:recordType];
-                } else {
-                    [operationBatch addRecord:record];
-                }
-                
-                BOOL result = [self currentBatchExceedsThresholds:operationBatch];
-                
-                if (result) {
-                    break;
+                _succeed = NO;
+                [_error retain];
+            } else {
+                // x20
+                for (CKRecord *record in records) {
+                    NSMutableSet<CKRecordID *> * _Nullable deletedRecordIDs;
+                    if (operationBatch == nil) {
+                        deletedRecordIDs = nil;
+                    } else {
+                        deletedRecordIDs = operationBatch->_deletedRecordIDs;
+                    }
+                    
+                    if ([deletedRecordIDs containsObject:record.recordID]) {
+                        [operationBatch addDeletedRecordID:record.recordID forRecordOfType:recordType];
+                    } else {
+                        [operationBatch addRecord:record];
+                    }
+                    
+                    BOOL result = [self currentBatchExceedsThresholds:operationBatch];
+                    
+                    if (result) {
+                        break;
+                    }
                 }
             }
             
@@ -1418,11 +1455,185 @@
             
             [pool release];
             
-            // <+1072>
-            abort();
+            if (finalize() != 0) {
+                break;
+            } else {
+                continue;
+            }
         }
         
-        // <+2316>
+        /* <+2316> */
+        
+        if (!_succeed) {
+            [objectIDs release];
+            [cache release];
+            return;
+        }
+        
+        void (^batch)(void) = ^{
+            /* <+4884> */
+            
+            NSMutableSet<CKRecordID *> * _Nullable deletedRecordIDs;
+            if (operationBatch != nil) {
+                deletedRecordIDs = operationBatch->_deletedRecordIDs;
+            } else {
+                deletedRecordIDs = nil;
+            }
+            
+            // x20
+            NSSet<CKRecordID *> * _Nullable markedRecordIDs = [OCCKMirroredRelationship markRelationshipsForDeletedRecordIDs:deletedRecordIDs.allObjects inStore:store withManagedObjectContext:managedObjectContext error:&_error];
+            
+            if (markedRecordIDs == nil) {
+                _succeed = NO;
+                [_error retain];
+            } else {
+                // x24
+                for (CKRecordID *recordID in markedRecordIDs) {
+                    if ([self currentBatchExceedsThresholds:operationBatch]) {
+                        [objectIDs release];
+                        [cache release];
+                        return;
+                    }
+                    
+                    NSMutableSet<CKRecordID *> * _Nullable deletedRecordIDs;
+                    if (operationBatch != nil) {
+                        deletedRecordIDs = operationBatch->_deletedRecordIDs;
+                    } else {
+                        deletedRecordIDs = nil;
+                    }
+                    
+                    if (![deletedRecordIDs containsObject:recordID]) {
+                        [operationBatch addDeletedRecordID:recordID forRecordOfType:@"CDMR"];
+                    }
+                }
+            }
+            
+            /* <+3236> */
+            if (_succeed && ![self currentBatchExceedsThresholds:operationBatch]) {
+                NSFetchRequest<OCCKRecordZoneMetadata *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordZoneMetadata entityPath]];
+                fetchRequest.predicate = [NSPredicate predicateWithFormat:@"needsShareUpdate = YES OR needsShareDelete = YES"];
+                fetchRequest.propertiesToFetch = @[@"encodedShareData"];
+                
+                BOOL result = [managedObjectContext executeFetchRequest:fetchRequest error:&_error];
+                // <+3380>
+                abort();
+            } else {
+                // <+4188>
+                abort();
+            }
+        };
+        
+        if ([self currentBatchExceedsThresholds:operationBatch]) {
+            batch();
+            return;
+        }
+        
+        // sp, #0x80
+        NSArray<OCCKMirroredRelationship *> * _Nullable mirroredRelationships = [OCCKMirroredRelationship fetchMirroredRelationshipsMatchingPredicate:[NSPredicate predicateWithFormat:@"isUploaded = NO"] fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+        
+        if (mirroredRelationships == nil) {
+            /* <+4856> */
+            _succeed = NO;
+            [_error retain];
+            
+#warning error Leak
+            batch();
+            return;
+        }
+        
+        // sp, #0x58
+        NSManagedObjectModel *managedObjectModel = managedObjectContext.persistentStoreCoordinator.managedObjectModel;
+        
+        // x28
+        for (OCCKMirroredRelationship *mirroredRelationship in mirroredRelationships) {
+            if ([self currentBatchExceedsThresholds:operationBatch]) {
+                batch();
+                return;
+            }
+            
+            // x20
+            CKRecordID *recordID = [mirroredRelationship createRecordID];
+            
+            if (cache != nil) {
+                if ([cache->_mutableZoneIDs containsObject:recordID.zoneID]) {
+                    BOOL flag;
+                    
+                    if (operationBatch != nil) {
+                        if ([operationBatch->_recordIDs containsObject:recordID]) {
+                            flag = NO;
+                        } else {
+                            if ([operationBatch->_deletedRecordIDs containsObject:recordID]) {
+                                flag = NO;
+                            } else {
+                                flag = YES;
+                            }
+                        }
+                    } else {
+                        flag = NO;
+                    }
+                    
+                    if (flag) {
+                        if (mirroredRelationship.needsDelete) {
+                            [operationBatch addDeletedRecordID:recordID forRecordOfType:@"CDMR"];
+                            [recordID release];
+                            continue;
+                        } else {
+                            // go to <+2876>
+                        }
+                    } else {
+                        [recordID release];
+                        continue;
+                    }
+                } else {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Ignoring update to dirty mirrored relationship because the zone is not mutable: %@", __func__, __LINE__, self, recordID);
+                    [recordID release];
+                    continue;
+                }
+            } else {
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Ignoring update to dirty mirrored relationship because the zone is not mutable: %@", __func__, __LINE__, self, recordID);
+                [recordID release];
+                continue;
+            }
+            
+            /* <+2876> */
+            
+            // x23
+            CKRecordID *recordIDForRecord = [mirroredRelationship createRecordIDForRecord];
+            // x25
+            CKRecordID *recordIDForRelatedRecord = [mirroredRelationship createRecordIDForRelatedRecord];
+            // x26
+            NSDictionary<NSString *, NSEntityDescription *> *entitiesByName = managedObjectModel.entitiesByName;
+            // x26
+            NSDictionary<NSString *, NSRelationshipDescription *> *relationshipsByName = entitiesByName[mirroredRelationship.cdEntityName].relationshipsByName;
+            // x26
+            NSRelationshipDescription *relationship = relationshipsByName[mirroredRelationship.relationshipName];
+            
+            // x28
+            PFMirroredManyToManyRelationshipV2 *mirroredManyToManyRelationship = [[objc_lookUpClass("PFMirroredManyToManyRelationshipV2") alloc] initWithRecordID:recordID forRecordWithID:recordIDForRecord relatedToRecordWithID:recordIDForRelatedRecord byRelationship:relationship withInverse:relationship.inverseRelationship andType:0];
+            
+            // original : getCloudKitCKRecordClass
+            // x26
+            CKRecord *record = [[CKRecord alloc] initWithRecordType:@"CDMR" recordID:recordID];
+            
+            BOOL useDeviceToDeviceEncryption;
+            if (self == nil) {
+                useDeviceToDeviceEncryption = NO;
+            } else {
+                useDeviceToDeviceEncryption = self->_options->_options.useDeviceToDeviceEncryption;
+            }
+            
+            [mirroredManyToManyRelationship populateRecordValues:(useDeviceToDeviceEncryption ? record.encryptedValueStore : record)];
+            [operationBatch addRecord:record];
+            
+            [record release];
+            [mirroredManyToManyRelationship release];
+            [recordIDForRecord release];
+            [recordIDForRelatedRecord release];
+            
+            [recordID release];
+        }
+        
+        // <+3236>
         abort();
     }];
     

@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
     @package NSMutableSet<CKRecordID *> *_deletedRecordIDs;
     NSMutableDictionary<CKRecordType, NSMutableSet<CKRecordID *> *> *_recordTypeToDeletedRecordID;
     NSMutableArray<CKRecord *> *_records;
-    NSMutableSet<CKRecordID *> *_recordIDs;
+    @package NSMutableSet<CKRecordID *> *_recordIDs;
     size_t _sizeInBytes;
 }
 - (void)addRecord:(CKRecord *)record __attribute__((objc_direct));
