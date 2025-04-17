@@ -10,6 +10,7 @@
 #import <OpenCloudData/OCCloudKitExporterOptions.h>
 #import <OpenCloudData/OCCloudKitStoreMonitor.h>
 #import <OpenCloudData/OCCloudKitExportContext.h>
+#import <OpenCloudData/OCCloudKitMirroringResult.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -21,17 +22,18 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface OCCloudKitExporter : NSObject {
-    NSMutableDictionary *_operationIDToResult;
-#warning TODO
-    id _exportCompletionBlock;
+    NSMutableDictionary<NSString *, OCCloudKitMirroringResult *> *_operationIDToResult;
+    void (^ _exportCompletionBlock)(OCCloudKitMirroringResult *result);
     OCCloudKitExporterOptions *_options;
     dispatch_queue_t _workQueue;
-    __kindof OCCloudKitMirroringRequest *_request;
-    __weak id<OCCloudKitExporterDelegate> delegate;
+    __kindof OCCloudKitMirroringRequest * _Nullable _request;
+    __weak NSObject<OCCloudKitExporterDelegate> *_delegate;
     OCCloudKitExportContext *_exportContext;
     OCCloudKitStoreMonitor *_monitor;
 }
-- (instancetype)initWithOptions:(OCCloudKitExporterOptions *)options request:(__kindof OCCloudKitMirroringRequest *)request monitor:(OCCloudKitStoreMonitor *)monitor workQueue:(dispatch_queue_t)workQueue;
+- (instancetype)initWithOptions:(OCCloudKitExporterOptions *)options request:(__kindof OCCloudKitMirroringRequest * _Nullable)request monitor:(OCCloudKitStoreMonitor *)monitor workQueue:(dispatch_queue_t)workQueue;
+- (void)exportIfNecessaryWithCompletion:(void (^)(OCCloudKitMirroringResult *result))completion __attribute__((objc_direct));
+- (void)checkForZonesNeedingExport __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

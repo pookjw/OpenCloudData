@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface OCCloudKitSerializer : NSObject {
     @package NSMutableArray *_writtenAssetURLs; // 0x28
 }
-+ (CKRecordZoneID *)defaultRecordZoneIDForDatabaseScope:(CKDatabaseScope)databaseScope;
++ (CKRecordZoneID *)defaultRecordZoneIDForDatabaseScope:(CKDatabaseScope)databaseScope NS_RETURNS_RETAINED;
 + (size_t)estimateByteSizeOfRecordID:(CKRecordID *)recordID __attribute__((objc_direct));
 + (CKRecordType)recordTypeForEntity:(NSEntityDescription *)entity __attribute__((objc_direct));
 + (BOOL)isMirroredRelationshipRecordType:(CKRecordType)recordType __attribute__((objc_direct));

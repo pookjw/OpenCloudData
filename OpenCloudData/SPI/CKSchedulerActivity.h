@@ -10,6 +10,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CKSchedulerActivity : NSObject <NSCopying/*, CKPropertiesDescription*/>
+@property BOOL shouldDefer;
 @end
 
 NS_ASSUME_NONNULL_END

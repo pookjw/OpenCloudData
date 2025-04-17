@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 // original : (readonly, nonatomic)
 @property (retain, readonly, nonatomic, nullable) NSError* error;
 
-- (instancetype)initWithRequest:(__kindof OCCloudKitMirroringResult *)request storeIdentifier:(NSString *)storeIdentifier success:(BOOL)success madeChanges:(BOOL)madeChanges error:(NSError * _Nullable)error;
+- (instancetype)initWithRequest:(__kindof OCCloudKitMirroringRequest *)request storeIdentifier:(NSString *)storeIdentifier success:(BOOL)success madeChanges:(BOOL)madeChanges error:(NSError * _Nullable)error;
 @end
 
 NS_ASSUME_NONNULL_END

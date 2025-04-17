@@ -129,7 +129,7 @@
              */
             
             if (__error != nil) {
-                __error = [_error retain];
+                _error = [__error retain];
                 return;
             }
             
@@ -1269,6 +1269,7 @@
             // x24
             NSManagedObjectID *objectID = [recordMetadata createObjectIDForLinkedRow];
             [objectIDs addObject:objectID];
+            [objectID release];
         }
         
         cache = [[OCCloudKitMetadataCache alloc] init];
@@ -1458,6 +1459,7 @@
             }
             
             [pool release];
+            [records release];
             
             if (finalize() != 0) {
                 break;
@@ -1711,6 +1713,7 @@
                     }
                     
                     if (flag) {
+#warning needsDelete는 NSNumber임
                         if (mirroredRelationship.needsDelete) {
                             [operationBatch addDeletedRecordID:recordID forRecordOfType:@"CDMR"];
                             [recordID release];
@@ -2198,7 +2201,17 @@
         [wideShareRecordIDs release];
     }];
     
-    abort();
+    if (!_succeed) {
+        if (_error == nil) {
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d", __func__, __LINE__);
+        } else {
+            if (error) *error = [[_error retain] autorelease];
+        }
+    }
+    
+    [_error release];
+    return _succeed;
 }
 
 @end

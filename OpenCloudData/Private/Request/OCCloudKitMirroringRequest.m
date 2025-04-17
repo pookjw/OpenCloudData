@@ -7,15 +7,8 @@
 
 #import <OpenCloudData/OCCloudKitMirroringRequest.h>
 #import <OpenCloudData/OCCloudKitMirroringInitializeSchemaRequest.h>
-#import <OpenCloudData/OCPersistentCloudKitContainerEventActivity.h>
 
-@implementation OCCloudKitMirroringRequest {
-    BOOL _deferredByBackgroundTimeout;
-    NSMutableArray *_containerBlocks;
-    BOOL _isContainerRequest;
-    CKSchedulerActivity *_schedulerActivity;
-    OCPersistentCloudKitContainerEventActivity *_activity;
-}
+@implementation OCCloudKitMirroringRequest
 
 + (NSSet<Class> *)allRequestClasses {
     /*

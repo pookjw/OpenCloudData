@@ -9,25 +9,11 @@
 #import <OpenCloudData/NSPersistentStoreCoordinator+Private.h>
 #import <OpenCloudData/NSManagedObjectContext+Private.h>
 #import <OpenCloudData/Log.h>
-#import <os/lock.h>
 #import <objc/runtime.h>
 
 //COREDATA_EXTERN NSNotificationName const _NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification;
 
 # define OS_UNFAIR_LOCK_FLAG_DATA_SYNCHRONIZATION (0x00010000)
-
-@interface OCCloudKitStoreMonitor () {
-    dispatch_group_t _monitorGroup;
-    os_unfair_lock _aliveLock;
-    BOOL _storeIsAlive;
-    BOOL _declaredDead;
-    int _retryCount;
-    int _timeoutSeconds;
-    __weak NSPersistentStoreCoordinator *_monitoredCoordinator;
-    __weak NSPersistentStore *_monitoredStore;
-    NSString *_storeIdentifier;
-}
-@end
 
 @implementation OCCloudKitStoreMonitor
 

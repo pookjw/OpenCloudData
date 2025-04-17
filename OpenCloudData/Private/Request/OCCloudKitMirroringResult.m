@@ -11,7 +11,7 @@
 
 @implementation OCCloudKitMirroringResult
 
-- (instancetype)initWithRequest:(__kindof OCCloudKitMirroringResult *)request storeIdentifier:(NSString *)storeIdentifier success:(BOOL)success madeChanges:(BOOL)madeChanges error:(NSError *)error {
+- (instancetype)initWithRequest:(__kindof OCCloudKitMirroringRequest *)request storeIdentifier:(NSString *)storeIdentifier success:(BOOL)success madeChanges:(BOOL)madeChanges error:(NSError *)error {
     if (self = [self init]) {
         _request = [request retain];
         _storeIdentifier = [storeIdentifier retain];

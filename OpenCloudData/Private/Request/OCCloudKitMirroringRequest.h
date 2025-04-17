@@ -9,10 +9,17 @@
 #import <OpenCloudData/OCCloudKitMirroringRequestOptions.h>
 #import <OpenCloudData/OCCloudKitMirroringResult.h>
 #import <OpenCloudData/CKSchedulerActivity.h>
+#import <OpenCloudData/OCPersistentCloudKitContainerEventActivity.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OCCloudKitMirroringRequest : NSPersistentStoreRequest
+@interface OCCloudKitMirroringRequest : NSPersistentStoreRequest{
+    @package BOOL _deferredByBackgroundTimeout;
+    NSMutableArray *_containerBlocks;
+    BOOL _isContainerRequest;
+    @package CKSchedulerActivity *_schedulerActivity;
+    OCPersistentCloudKitContainerEventActivity *_activity;
+}
 + (NSSet<Class> *)allRequestClasses;
 
 // original : (nonatomic, readonly) 내부적으로 retain/release하고 있음
