@@ -1199,7 +1199,7 @@
     __block NSError * _Nullable _error = nil;
     // x29, #0x80
     __block BOOL _succeed = NO;
-    // sp, #0x60
+    // sp, #0x60 / [[sp, #0x60], #0x28]
     __block OCCloudKitSerializer * _Nullable serializer = nil;
     
     // x22
@@ -1470,7 +1470,144 @@
             return;
         }
         
-        void (^batch)(void) = ^{
+        void (^batch_3236)(void) = ^{
+            /* <+3236> */
+            if (_succeed && ![self currentBatchExceedsThresholds:operationBatch]) {
+                NSFetchRequest<OCCKRecordZoneMetadata *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordZoneMetadata entityPath]];
+                fetchRequest.predicate = [NSPredicate predicateWithFormat:@"needsShareUpdate = YES OR needsShareDelete = YES"];
+                fetchRequest.propertiesToFetch = @[@"encodedShareData"];
+                
+                // x20
+                NSArray<OCCKRecordZoneMetadata *> * _Nullable fetchedMetadataArray = [managedObjectContext executeFetchRequest:fetchRequest error:&_error];
+                
+                if (fetchedMetadataArray != nil) {
+                    // x26
+                    for (OCCKRecordZoneMetadata *metadata in fetchedMetadataArray) {
+                        // x28
+                        CKRecordZoneID *zoneID = [metadata createRecordZoneID];
+                        
+                        if (metadata.encodedShareData == nil) {
+                            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Zone metadata is missing it's encoded share data but is marked for a mutation: %@ - %@\n", zoneID, metadata);
+                            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Zone metadata is missing it's encoded share data but is marked for a mutation: %@ - %@\n", zoneID, metadata);
+                        }
+                        
+                        // x27
+                        OCCloudKitArchivingUtilities * _Nullable _archivingUtilities;
+                        if (self->_options == nil) {
+                            _archivingUtilities = nil;
+                        } else if (self->_options->_options == nil) {
+                            _archivingUtilities = nil;
+                        } else {
+                            _archivingUtilities = self->_options->_options->_archivingUtilities;
+                        }
+                        
+                        // x27
+                        CKShare * _Nullable share = [_archivingUtilities shareFromEncodedData:metadata.encodedShareData inZoneWithID:zoneID error:&_error];
+                        
+                        if (share == nil) {
+                            _succeed = NO;
+                            [_error retain];
+                            [zoneID release];
+                            break;
+                        } else {
+                            if (metadata.needsShareUpdate) {
+                                [operationBatch addRecord:share];
+                                
+                                if ([self currentBatchExceedsThresholds:operationBatch]) {
+                                    [zoneID release];
+                                    [share release];
+                                    break;
+                                } else {
+                                    [zoneID release];
+                                    [share release];
+                                    continue;
+                                }
+                            } else {
+                                if (metadata.needsShareDelete) {
+                                    // x24
+                                    CKRecordID *recordID = share.recordID;
+                                    [operationBatch addDeletedRecordID:recordID forRecordOfType:share.recordType];
+                                    
+                                    if ([self currentBatchExceedsThresholds:operationBatch]) {
+                                        [zoneID release];
+                                        [share release];
+                                        break;
+                                    } else {
+                                        [zoneID release];
+                                        [share release];
+                                        continue;
+                                    }
+                                } else {
+                                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Fetched dirty zone that didn't need a share update or delete: %@\n", metadata);
+                                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Fetched dirty zone that didn't need a share update or delete: %@\n", metadata);
+                                    [zoneID release];
+                                    [share release];
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    _succeed = NO;
+                    [_error retain];
+                }
+            }
+            
+            /* <+4188> */
+            if (_succeed && ![self currentBatchExceedsThresholds:operationBatch]) {
+                NSFetchRequest<OCCKRecordZoneMoveReceipt *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordZoneMoveReceipt entityPath]];
+                fetchRequest.affectedStores = @[store];
+                
+                OCCloudKitExporterOptions * _Nullable _options = self->_options;
+                NSUInteger fetchLimit;
+                if (_options == nil) {
+                    fetchLimit = 0; 
+                } else {
+                    fetchLimit = _options->_perOperationObjectThreshold;
+                }
+                fetchRequest.fetchLimit = fetchLimit;
+                
+                fetchRequest.relationshipKeyPathsForPrefetching = @[@"recordMetadata"];
+                fetchRequest.predicate = [NSPredicate predicateWithFormat:@"(needsCloudDelete == 1) AND !(SELF IN %@)"];
+                fetchRequest.returnsObjectsAsFaults = NO;
+                
+                // sp, #0x80
+                NSArray<OCCKRecordZoneMoveReceipt *> * _Nullable fetchedMoveReceipts = [managedObjectContext executeFetchRequest:fetchRequest error:&_error];
+                
+                if (fetchedMoveReceipts != nil) {
+                    // x26
+                    for (OCCKRecordZoneMoveReceipt *moveReceipt in fetchedMoveReceipts) @autoreleasepool {
+                        if ([self currentBatchExceedsThresholds:operationBatch]) {
+                            continue;
+                        }
+                        
+                        // x25
+                        CKRecordID *recordIDForMovedRecord = [moveReceipt createRecordIDForMovedRecord];
+                        // x26
+                        NSManagedObjectID *objectIDForLinkedRow = [moveReceipt.recordMetadata createObjectIDForLinkedRow];
+                        
+                        CKRecordType recordType = [OCCloudKitSerializer recordTypeForEntity:moveReceipt.entity];
+                        [operationBatch addDeletedRecordID:recordIDForMovedRecord forRecordOfType:recordType];
+                        
+                        [recordIDForMovedRecord release];
+                        [objectIDForLinkedRow release]; // x26으로 아무것도 안함
+                    }
+                } else {
+                    _succeed = NO;
+                    [_error retain];
+                }
+            }
+            
+            /* <+4696> */
+            if (_succeed && managedObjectContext.hasChanges) {
+                BOOL result = [managedObjectContext save:&_error];
+                _succeed = result;
+                if (_error != nil) [_error retain];
+            }
+        };
+        
+        
+        void (^batch_4884)(void) = ^{
             /* <+4884> */
             
             NSMutableSet<CKRecordID *> * _Nullable deletedRecordIDs;
@@ -1508,23 +1645,15 @@
                 }
             }
             
-            /* <+3236> */
-            if (_succeed && ![self currentBatchExceedsThresholds:operationBatch]) {
-                NSFetchRequest<OCCKRecordZoneMetadata *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordZoneMetadata entityPath]];
-                fetchRequest.predicate = [NSPredicate predicateWithFormat:@"needsShareUpdate = YES OR needsShareDelete = YES"];
-                fetchRequest.propertiesToFetch = @[@"encodedShareData"];
-                
-                BOOL result = [managedObjectContext executeFetchRequest:fetchRequest error:&_error];
-                // <+3380>
-                abort();
-            } else {
-                // <+4188>
-                abort();
-            }
+            batch_3236();
         };
         
         if ([self currentBatchExceedsThresholds:operationBatch]) {
-            batch();
+            batch_4884();
+            
+            /* <+4780> */
+            [objectIDs release];
+            [cache release];
             return;
         }
         
@@ -1537,7 +1666,12 @@
             [_error retain];
             
 #warning error Leak
-            batch();
+            batch_4884();
+            
+            /* <+4780> */
+            [objectIDs release];
+            [cache release];
+            
             return;
         }
         
@@ -1547,7 +1681,7 @@
         // x28
         for (OCCKMirroredRelationship *mirroredRelationship in mirroredRelationships) {
             if ([self currentBatchExceedsThresholds:operationBatch]) {
-                batch();
+                batch_4884();
                 return;
             }
             
@@ -1633,10 +1767,12 @@
             [recordID release];
         }
         
-        // <+3236>
-        abort();
+        batch_3236();
+        [objectIDs release];
+        [cache release];
     }];
     
+    self->_totalRecordIDs;
     abort();
 }
 

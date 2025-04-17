@@ -25,6 +25,7 @@
 }
 
 - (void)dealloc {
+#warning TODO: ivar 정의 안한거 있고 _archivingUtilities는 안 살펴봄
     [_defaultOperationConfiguration release];
     [_containerIdentifier release];
     [_ckAssetThresholdBytes release];

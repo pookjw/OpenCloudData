@@ -73,6 +73,7 @@
 				Private/Model/OCCKRecordZoneMoveReceipt.h,
 				Private/Model/OCCKRecordZoneQuery.h,
 				"Private/NSPersistentStore+OpenCloudData_Private.h",
+				Private/OCCloudKitArchivingUtilities.h,
 				Private/OCCloudKitExportContext.h,
 				Private/OCCloudKitExporter.h,
 				Private/OCCloudKitExporterOptions.h,
