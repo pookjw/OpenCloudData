@@ -486,6 +486,7 @@
                                     _succeed = NO;
                                 }
                                 
+#warning Error Leak
                                 finish_1();
                                 return;
                             }
@@ -517,6 +518,7 @@
                             if (zoneIDs == nil) {
                                 _succeed = NO;
                                 [_error retain];
+#warning Error Leak
                                 finish_2();
                                 return;
                             }
@@ -530,6 +532,7 @@
                                     _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:2988 userInfo:@{
                                         NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Failed to assign an object to a record zone. This usually means the object exists in a shared database and must be assigned to a zone using -[%@ %@]: %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd), existingObject.objectID]}];
                                     
+    #warning Error Leak
                                     finish_2();
                                     return;
                                 } else {
@@ -544,6 +547,7 @@
                                         NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Object graph corruption detected. Objects related to '%@' are assigned to multiple zones: %@", objectID, zoneIDs]
                                     }];
                                     
+    #warning Error Leak
                                     finish_2();
                                     return;
                                 }
@@ -1195,10 +1199,10 @@
      error = x19
      */
     
-    // sp, #0x90
+    // sp, #0x90 / [[sp, #0x98], #0x28]
     __block NSError * _Nullable _error = nil;
-    // x29, #0x80
-    __block BOOL _succeed = NO;
+    // x29 - #0x80, [[x29, #-0x78], #0x18]
+    __block BOOL _succeed = YES;
     // sp, #0x60 / [[sp, #0x60], #0x28]
     __block OCCloudKitSerializer * _Nullable serializer = nil;
     
@@ -1772,11 +1776,428 @@
         [cache release];
     }];
     
-    self->_totalRecordIDs;
-    abort();
+    {
+        // x23
+        NSMutableArray *writtenAssetURLs_1 = self->_writtenAssetURLs;
+        NSMutableArray * _Nullable writtenAssetURLs_2;
+        if (serializer == nil) {
+            writtenAssetURLs_2 = nil;
+        } else {
+            writtenAssetURLs_2 = serializer->_writtenAssetURLs;
+        }
+        [writtenAssetURLs_1 addObjectsFromArray:[[writtenAssetURLs_2 copy] autorelease]];
+    }
+    
+    // x23
+    CKModifyRecordsOperation * _Nullable result = nil;
+    if (_succeed && (serializer != nil)) {
+        if (operationBatch->_records.count != operationBatch->_deletedRecordIDs.count) {
+            // original : getCloudKitCKModifyRecordsOperationClass
+            result = [[CKModifyRecordsOperation alloc] initWithRecordsToSave:operationBatch->_records recordIDsToDelete:operationBatch->_deletedRecordIDs.allObjects];
+            
+            self->_totalBytes += operationBatch->_sizeInBytes;
+            self->_totalRecords += operationBatch->_records.count;
+            self->_totalRecordIDs += operationBatch->_deletedRecordIDs.count;
+        } else {
+            result = nil;
+        }
+    }
+    
+    [operationBatch release];
+    [serializer release];
+    serializer = nil;
+    [deletedObjectIDsSet release];
+    
+    if (_succeed) {
+        [_error release];
+    } else {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        } else {
+            if (error) *error = [_error autorelease];
+        }
+        
+        [result release];
+        result = nil;
+    }
+    
+    return result;
 }
 
 - (BOOL)currentBatchExceedsThresholds:(OCCloudKitOperationBatch *)batch {
+    // x9
+    NSUInteger count;
+    if (batch == nil) {
+        count = 0;
+    } else {
+        count = batch->_records.count + batch->_deletedRecordIDs.count;
+    }
+    
+    OCCloudKitExporterOptions * _Nullable options = self->_options;
+    
+    // x10
+    NSUInteger perOperationObjectThreshold;
+    if (options == nil) {
+        perOperationObjectThreshold = 0;
+    } else {
+        perOperationObjectThreshold = options->_perOperationObjectThreshold;
+    }
+    
+    if (count == perOperationObjectThreshold) {
+        return YES;
+    }
+    
+    // x9
+    size_t sizeInBytes;
+    if (batch == nil) {
+        sizeInBytes = 0;
+    } else {
+        sizeInBytes = batch->_sizeInBytes;
+    }
+    
+    // x8
+    NSUInteger perOperationBytesThreshold;
+    if (options == nil) {
+        perOperationBytesThreshold = 0;
+    } else {
+        perOperationBytesThreshold = options->_perOperationBytesThreshold;
+    }
+    
+    return perOperationBytesThreshold <= sizeInBytes;
+}
+
+- (BOOL)modifyRecordsOperationFinishedForStore:(NSSQLCore *)store withSavedRecords:(NSArray<CKRecord *> *)savedRecords deletedRecordIDs:(NSArray<CKRecordID *> *)deletedRecordIDs operationError:(NSError *)operationError managedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
+    // x19 = error
+    
+    // x29 - #0x50 / [x29, #-0x48]
+    __block BOOL _succeed = YES;
+    
+    // x29 - #0x38
+    __block NSError * _Nullable _error = nil;
+    
+    
+    /*
+     savedRecords = sp + 0x28 = x24 + 0x20
+     store = sp + 0x30 = x24 + 0x28
+     managedObjectContext = sp + 0x38 = x24 + 0x30
+     self = sp + 0x40 = x24 + 0x38
+     deletedRecordIDs = sp + 0x48 = x24 + 0x40
+     _succeed = sp + 0x50 = x24 + 0x48
+     _error = sp + 0x58 = x24 + 0x50
+     */
+    [managedObjectContext performBlockAndWait:^{
+        if (!_succeed) {
+            return;
+        }
+        
+        // self = x24
+        
+        // x20 / sp + 0x50
+        NSMutableDictionary<CKRecordID *, CKRecord *> *otherRecordIDToRecord = [[NSMutableDictionary alloc] initWithCapacity:savedRecords.count];
+        // sp + 0x58
+        NSMutableArray<CKRecord *> *mirroredRelationshipRecords = [[NSMutableArray alloc] init];
+        // sp + 0x48
+        NSMutableArray<CKRecord *> *shareRecords = [[NSMutableArray alloc] init];
+        // sp + 0x38
+        NSMutableArray<CKRecordID *> *wideShareRecordIDs = [[NSMutableArray alloc] init];
+        
+        // x25
+        for (CKRecord *record in savedRecords) {
+            if ([OCCloudKitSerializer isMirroredRelationshipRecordType:record.recordType]) {
+                [mirroredRelationshipRecords addObject:record];
+            } else {
+                // original : getCloudKitCKRecordTypeShare
+                if ([record.recordType isEqualToString:CKRecordTypeShare]) {
+                    [shareRecords addObject:record];
+                } else {
+                    otherRecordIDToRecord[record.recordID] = record;
+                }
+            }
+        }
+        
+        // sp + 0x40
+        NSDictionary<CKRecordID *, OCCKRecordMetadata *> * _Nullable mapOfMetadata = [OCCKRecordMetadata createMapOfMetadataMatchingRecords:savedRecords andRecordIDs:@[] inStore:store withManagedObjectContext:managedObjectContext error:&_error];
+        
+        if (mapOfMetadata == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to fetch record metadata for saved records: %@\n%@", __func__, __LINE__, _error, savedRecords);
+            _succeed = NO;
+            [_error retain];
+        } else {
+            // x28
+            for (CKRecordID *recordID in otherRecordIDToRecord.allKeys) {
+                // x23
+                CKRecord *record = otherRecordIDToRecord[recordID];
+                OCCKRecordMetadata *recordMedatata = mapOfMetadata[recordID];
+                
+                if (record == nil) {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Can't find record for recordID '%@' even though it was supposedly saved in these records: %@", __func__, __LINE__, self, recordID, savedRecords);
+                    continue;
+                }
+                
+                // recordMedatata = x20
+                
+                if (recordMedatata == nil) {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Can't find metadata for recordID '%@' even though it was supposedly saved in these records: %@", __func__, __LINE__, self, recordID, savedRecords);
+                    continue;
+                }
+                
+                recordMedatata.needsUpload = NO;
+                
+                OCCloudKitArchivingUtilities * _Nullable archivingUtilities;
+                {
+                    OCCloudKitExporterOptions * _Nullable options = self->_options;
+                    if (options == nil) {
+                        archivingUtilities = nil;
+                    } else {
+                        OCCloudKitMirroringDelegateOptions * _Nullable delegateOptions = options->_options;
+                        if (delegateOptions == nil) {
+                            archivingUtilities = nil;
+                        } else {
+                            archivingUtilities = delegateOptions->_archivingUtilities;
+                        }
+                    }
+                }
+                
+                // x23
+                NSData * _Nullable encodedRecord = [archivingUtilities encodeRecord:record error:&_error];
+                
+                if (encodedRecord == nil) {
+                    _succeed = NO;
+                    [_error retain];
+                    continue;
+                }
+                
+                recordMedatata.encodedRecord = encodedRecord;
+                [encodedRecord release];
+            }
+        }
+        
+        if (!_succeed) {
+            [mirroredRelationshipRecords release];
+            [mapOfMetadata release];
+            [otherRecordIDToRecord release];
+            [shareRecords release];
+            [wideShareRecordIDs release];
+            return;
+        }
+        
+        // x25
+        for (CKRecord *record in shareRecords) {
+            // x26
+            CKRecordZoneID *zoneID = record.recordID.zoneID;
+            
+            CKDatabaseScope databaseScope;
+            {
+                OCCloudKitExporterOptions * _Nullable options = self->_options;
+                if (options == nil) {
+                    databaseScope = 0;
+                } else {
+                    databaseScope = options->_database.databaseScope;
+                }
+            }
+            
+            // x23
+            OCCKRecordZoneMetadata * _Nullable recordZoneMetadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:zoneID inDatabaseWithScope:databaseScope forStore:store inContext:managedObjectContext error:&_error];
+            
+            if (recordZoneMetadata == nil) {
+                _succeed = NO;
+                [_error retain];
+            } else {
+                OCCloudKitArchivingUtilities * _Nullable archivingUtilities;
+                {
+                    OCCloudKitExporterOptions * _Nullable options = self->_options;
+                    if (options == nil) {
+                        archivingUtilities = nil;
+                    } else {
+                        OCCloudKitMirroringDelegateOptions * _Nullable delegateOptions = options->_options;
+                        if (delegateOptions == nil) {
+                            archivingUtilities = nil;
+                        } else {
+                            archivingUtilities = delegateOptions->_archivingUtilities;
+                        }
+                    }
+                }
+                
+                // x25
+                NSData * _Nullable encodedRecord = [archivingUtilities encodeRecord:record error:&_error];
+                if (encodedRecord == nil) {
+                    _succeed = NO;
+                    [_error retain];
+                } else {
+                    recordZoneMetadata.encodedShareData = encodedRecord;
+                    recordZoneMetadata.needsShareUpdate = YES;
+                }
+                
+                [encodedRecord release];
+            }
+        }
+        
+        if (!_succeed) {
+            [mirroredRelationshipRecords release];
+            [mapOfMetadata release];
+            [otherRecordIDToRecord release];
+            [shareRecords release];
+            [wideShareRecordIDs release];
+            return;
+        }
+        
+        /*
+         self = sp + 0x148 = x21 + 0x20
+         */
+        BOOL result = [OCCKMirroredRelationship updateMirroredRelationshipsMatchingRecords:mirroredRelationshipRecords
+                                                                                  forStore:store
+                                                                  withManagedObjectContext:managedObjectContext
+                                                                                usingBlock:^BOOL(OCCKMirroredRelationship * _Nonnull relationship, CKRecord * _Nonnull record, NSError * _Nullable * _Nullable error) {
+            /*
+             x21 = self
+             x19 = relationship
+             x20 = record
+             */
+            
+            relationship.isUploaded = @YES;
+            
+            OCCloudKitArchivingUtilities * _Nullable archivingUtilities;
+            {
+                OCCloudKitExporterOptions * _Nullable options = self->_options;
+                if (options == nil) {
+                    archivingUtilities = nil;
+                } else {
+                    OCCloudKitMirroringDelegateOptions * _Nullable delegateOptions = options->_options;
+                    if (delegateOptions == nil) {
+                        archivingUtilities = nil;
+                    } else {
+                        archivingUtilities = delegateOptions->_archivingUtilities;
+                    }
+                }
+            }
+            
+            NSData *ckRecordSystemFields = [archivingUtilities newArchivedDataForSystemFieldsOfRecord:record];
+            relationship.ckRecordSystemFields = ckRecordSystemFields;
+            [ckRecordSystemFields release];
+            
+            return YES;
+        }
+                                                                                     error:&_error];
+        
+        if (!result) {
+            _succeed = NO;
+            [_error retain];
+        }
+        
+        if (!_succeed) {
+            [mirroredRelationshipRecords release];
+            [mapOfMetadata release];
+            [otherRecordIDToRecord release];
+            [shareRecords release];
+            [wideShareRecordIDs release];
+            return;
+        }
+        
+        result = [OCCKMirroredRelationship purgeMirroredRelationshipsWithRecordIDs:deletedRecordIDs fromStore:store withManagedObjectContext:managedObjectContext error:&_error];
+        
+        if (!result) {
+            _succeed = NO;
+            [_error retain];
+        }
+        
+        if (!_succeed) {
+            [mirroredRelationshipRecords release];
+            [mapOfMetadata release];
+            [otherRecordIDToRecord release];
+            [shareRecords release];
+            [wideShareRecordIDs release];
+            return;
+        }
+        
+        // x25
+        NSMutableDictionary<CKRecordZoneID *, NSMutableSet<NSString *> *> *zoneIDToRecordNamesSet = [[NSMutableDictionary alloc] init];
+        
+        // x27
+        for (CKRecordID *deletedRecordID in deletedRecordIDs) {
+            NSMutableSet<NSString *> *recordNamesSet = [zoneIDToRecordNamesSet[deletedRecordID.zoneID] retain];
+            if (recordNamesSet == nil) {
+                recordNamesSet = [[NSMutableSet alloc] init];
+                zoneIDToRecordNamesSet[deletedRecordID.zoneID] = recordNamesSet;
+            }
+            [recordNamesSet addObject:deletedRecordID.recordName];
+            [recordNamesSet release];
+            
+            // original : getCloudKitCKRecordNameZoneWideShare
+            if ([deletedRecordID.recordName isEqualToString:CKRecordNameZoneWideShare]) {
+                [wideShareRecordIDs addObject:deletedRecordID];
+            }
+        }
+        
+        // x20
+        for (CKRecordZoneID *zoneID in zoneIDToRecordNamesSet) {
+            // x26 / sp + 0x10
+            NSMutableSet<NSString *> *recordNamesSet = [zoneIDToRecordNamesSet[zoneID] retain];
+            // x27
+            NSBatchUpdateRequest *request = [[NSBatchUpdateRequest alloc] initWithEntityName:[OCCKRecordZoneMoveReceipt entityPath]];
+            // x28 / sp
+            NSString *zoneName = zoneID.zoneName;
+            // sp + 0x8
+            NSString *ownerName = zoneID.ownerName;
+            
+            request.predicate = [NSPredicate predicateWithFormat:@"zoneName = %@ AND ownerName = %@ AND recordName in %@", zoneName, ownerName, recordNamesSet];
+            request.affectedStores = @[store];
+            request.propertiesToUpdate = @{@"needsCloudDelete": [NSExpression expressionForConstantValue:@NO]};
+            request.resultType = NSStatusOnlyResultType;
+            
+            BOOL result = ((NSNumber *)((NSBatchUpdateResult *)[managedObjectContext executeRequest:request error:&_error]).result).boolValue;
+            if (!result) {
+                // NO이면 break만 하고 아무것도 안하고 <+3376>, <+3380>에서 release함
+                [recordNamesSet release]; // <+3376>
+                [request release]; // <+3380>
+                break;
+            }
+            
+            // 원래 x26, x27에 0x0이 할당하지만 필요 없음
+            [recordNamesSet release];
+            [request release];
+        }
+        
+        for (CKRecordID *recordID in wideShareRecordIDs) {
+            // x28
+            CKRecordZoneID *zoneID = recordID.zoneID;
+            
+            CKDatabaseScope databaseScope;
+            {
+                OCCloudKitExporterOptions * _Nullable options = self->_options;
+                if (options == nil) {
+                    databaseScope = 0;
+                } else {
+                    databaseScope = options->_database.databaseScope;
+                }
+            }
+            
+            OCCKRecordZoneMetadata * _Nullable recordZoneMetadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:zoneID inDatabaseWithScope:databaseScope forStore:store inContext:managedObjectContext error:&_error];
+            if (recordZoneMetadata == nil) {
+                _succeed = NO;
+                [_error retain];
+                break;
+            }
+            
+            recordZoneMetadata.needsShareDelete = NO;
+        }
+        
+#warning Error Leak : wideShareRecordIDs에서 error가 발생하여 break 되면 leak
+        result = [managedObjectContext save:&_error];
+        if (!result) {
+            _succeed = NO;
+            [_error retain];
+        }
+        
+        [zoneIDToRecordNamesSet release]; // x25
+        
+        [mirroredRelationshipRecords release];
+        [mapOfMetadata release];
+        [otherRecordIDToRecord release];
+        [shareRecords release];
+        [wideShareRecordIDs release];
+    }];
+    
     abort();
 }
 

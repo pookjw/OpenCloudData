@@ -541,7 +541,6 @@
     NSMutableDictionary<CKRecordZoneID *, NSManagedObjectID *> *zoneIDToZoneMetadataObjectID = [[NSMutableDictionary alloc] init];
     
     // sp + 0x30
-    // 아마 원래 코드에는 없는 flag 같고, ARC에서 쓰이는 값 같음
     BOOL success = YES;
     
     // x28
