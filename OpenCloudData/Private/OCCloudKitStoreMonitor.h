@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
     BOOL _declaredDead;
     int _retryCount;
     int _timeoutSeconds;
-    __weak NSPersistentStoreCoordinator *_monitoredCoordinator;
+    @package __weak NSPersistentStoreCoordinator *_monitoredCoordinator;
     __weak NSPersistentStore *_monitoredStore;
     @package NSString *_storeIdentifier; // 0x30
 }

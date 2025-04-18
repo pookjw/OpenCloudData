@@ -7,6 +7,8 @@
 
 #import <OpenCloudData/OCCloudKitExporter.h>
 #import <OpenCloudData/Log.h>
+#import <objc/runtime.h>
+@import ellekit;
 
 @implementation OCCloudKitExporter
 
@@ -89,8 +91,13 @@
     // x22
     OCCloudKitMirroringRequest * _Nullable request = _request;
     
-    BOOL succeed = YES;;
-    NSError * _Nullable error = nil;
+    // sp + 0xb8
+    __block BOOL succeed = YES;
+    // sp, #0x88
+    __block NSError * _Nullable error = nil;
+    // sp, #0x58
+    __block CKModifyRecordZonesOperation * _Nullable operation = nil;
+    
     if (request != nil) {
         CKSchedulerActivity *schedulerActivity = request->_schedulerActivity;
         if (schedulerActivity.shouldDefer || request->_deferredByBackgroundTimeout) {
@@ -98,9 +105,91 @@
             error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134419 userInfo:@{NSLocalizedFailureReasonErrorKey: @"The request was aborted because it was deferred by the system."}];
         }
     } else {
-        // <+332>
+        /*
+         monitor = sp + 0x20 = x19 + 0x20
+         self = sp + 0x28 = x19 + 0x28
+         array = sp + 0x30 = x19 + 0x30
+         error = sp + 0x38 = x19 + 0x38
+         succeed = sp + 0x40 = x19 + 0x40
+         operation = sp + 0x48 = x19 + 0x48
+         */
         [_monitor performBlock:^{
-            // __48-[PFCloudKitExporter checkForZonesNeedingExport]_block_invoke
+            __kindof NSPersistentStore * _Nullable monitoredStore = [self->_monitor retainedMonitoredStore];
+            if (monitoredStore == nil) {
+                succeed = NO;
+                error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134407 userInfo:@{NSLocalizedFailureReasonErrorKey: self->_request.requestIdentifier}];
+                return;
+            }
+            
+            // self = x19
+            // monitoredStore = x20
+            
+            // x21
+            NSPersistentStoreCoordinator * _Nullable monitoredCoordinator;
+            {
+                OCCloudKitStoreMonitor * _Nullable monitor = self->_monitor;
+                if (monitor == nil) {
+                    monitoredCoordinator = nil;
+                } else {
+                    monitoredCoordinator = monitor->_monitoredCoordinator;
+                }
+            }
+            
+            // x22
+            NSManagedObjectContext *backgroundContextForMonitoredCoordinator = [monitor newBackgroundContextForMonitoredCoordinator];
+            // original : NSCloudKitMirroringDelegateExportContextName
+#warning TODO 바꿔도 되나?
+            backgroundContextForMonitoredCoordinator.transactionAuthor = @"NSCloudKitMirroringDelegate.export";
+            
+            /*
+             monitoredStore = sp + 0x30 = x19 + 0x20
+             backgroundContextForMonitoredCoordinator = sp + 0x38 = x19 + 0x28
+             self = sp + 0x40 = x19 + 0x30
+             array = sp + 0x48 = x19 + 0x38
+             error = sp + 0x50 = x19 + 0x40
+             succeed = sp + 0x58 = x19 + 0x48
+             operation = sp + 0x60 = x19 + 0x50
+             */
+            [backgroundContextForMonitoredCoordinator performBlockAndWait:^{
+                const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
+                const void *symbol = MSFindSymbol(image, "+[_PFRoutines _isInMemoryStore:]");
+                BOOL isInMemoryStore = ((BOOL (*)(Class, id))symbol)(objc_lookUpClass("_PFRoutines"), monitoredStore);
+                
+                // self = sp + 0x10
+                
+                if (!isInMemoryStore) {
+                    // sp + 0x80
+                    NSError * _Nullable _error = nil;
+                    
+                    // x20
+                    NSManagedObjectContext *context = backgroundContextForMonitoredCoordinator;
+                    BOOL result = [context setQueryGenerationFromToken:[NSQueryGenerationToken currentQueryGenerationToken] error:&_error];
+                    if (!result) {
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Unable to set query generation on moc: %@", __func__, __LINE__, self, _error);
+                    }
+                }
+                
+                // x21
+                CKDatabaseScope databaseScope;
+                {
+                    if (self == nil) {
+                        databaseScope = 0;
+                    } else {
+                        OCCloudKitExporterOptions * _Nullable options = self->_options;
+                        if (options == nil) {
+                            databaseScope = 0;
+                        } else {
+                            databaseScope = options->_database.databaseScope;
+                        }
+                    }
+                }
+                
+                // <+316>
+                abort();
+            }];
+            
+            // <+184>
+            abort();
         }];
         abort();
     }
