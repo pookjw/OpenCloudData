@@ -10,12 +10,14 @@
 #import <OpenCloudData/CKContainerOptions.h>
 #import <OpenCloudData/OCPersistentCloudKitContainerActivityVoucher.h>
 #import <OpenCloudData/OCCloudKitArchivingUtilities.h>
+#import <OpenCloudData/OCCloudKitMetricsClient.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO Nullale
+#warning TODO Nullable
 
 @interface OCCloudKitMirroringDelegateOptions : NSObject <NSCopying> {
+    @package OCCloudKitMetricsClient *_metricsClient; // 0x48
     @package OCCloudKitArchivingUtilities *_archivingUtilities; // 0x88
 }
 @property (weak, nonatomic) NSObject<OCCloudKitMirroringDelegateProgressProvider> *progressProvider;

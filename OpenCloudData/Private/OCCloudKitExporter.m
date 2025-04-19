@@ -9,6 +9,7 @@
 #import <OpenCloudData/Log.h>
 #import <OpenCloudData/OCCloudKitSerializer.h>
 #import <OpenCloudData/OCCKRecordZoneMetadata.h>
+#import <OpenCloudData/OCCloudKitExportedRecordBytesMetric.h>
 #import <objc/runtime.h>
 @import ellekit;
 
@@ -100,12 +101,21 @@
     // sp, #0x58
     __block CKModifyRecordZonesOperation * _Nullable operation = nil;
     
+    BOOL deferred;
     if (request != nil) {
         CKSchedulerActivity *schedulerActivity = request->_schedulerActivity;
         if (schedulerActivity.shouldDefer || request->_deferredByBackgroundTimeout) {
-            succeed = NO;
-            error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134419 userInfo:@{NSLocalizedFailureReasonErrorKey: @"The request was aborted because it was deferred by the system."}];
+            deferred = YES;
+        } else {
+            deferred = NO;
         }
+    } else {
+        deferred = NO;
+    }
+    
+    if (deferred) {
+        succeed = NO;
+        error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134419 userInfo:@{NSLocalizedFailureReasonErrorKey: @"The request was aborted because it was deferred by the system."}];
     } else {
         /*
          __48-[PFCloudKitExporter checkForZonesNeedingExport]_block_invoke
@@ -381,51 +391,8 @@
             if (zoneIDs.count == 0) {
                 [self exportIfNecessary];
             } else {
-#warning TODO __ckLoggingOverride
-                os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData: %s(%d): %@: Fetching record zones: %@", __func__, __LINE__, self, zoneIDs);
-                
-                // x22
-                __kindof OCCloudKitMirroringRequest * _Nullable request = self->_request;
-                
-                BOOL flag;
-                if (request == nil) {
-                    flag = YES;
-                } else if (request->_schedulerActivity.shouldDefer) {
-                    flag = NO;
-                } else if (request->_deferredByBackgroundTimeout) {
-                    flag = YES;
-                } else {
-                    flag = NO;
-                }
-                
-                if (flag) {
-                    // x29, #0x70
-                    __weak OCCloudKitExporter *weakSelf = self;
-                    // original : getCloudKitCKFetchRecordZonesOperationClass
-                    // x22
-                    CKFetchRecordZonesOperation *operation = [[CKFetchRecordZonesOperation alloc] initWithRecordZoneIDs:zoneIDs];
-                    
-                    // <+1380>
-                    abort();
-                } else {
-                    // x23
-                    NSError *error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134419 userInfo:@{NSLocalizedFailureReasonErrorKey: @"The request was aborted because it was deferred by the system."}];
-                    NSString * _Nullable storeIdentifier;
-                    {
-                        OCCloudKitStoreMonitor * _Nullable monitor = self->_monitor;
-                        if (monitor == nil) {
-                            storeIdentifier = nil;
-                        } else {
-                            storeIdentifier = monitor->_storeIdentifier;
-                        }
-                    }
-                    // x22
-                    OCCloudKitMirroringResult *request = [[OCCloudKitMirroringResult alloc] initWithRequest:self->_request storeIdentifier:storeIdentifier success:NO madeChanges:NO error:error];
-                    [self finishExportWithResult:request];
-                    [request release];
-                    request = nil;
-                    [error release];
-                }
+                // inlined
+                [self fetchRecordZones:zoneIDs];
             }
         } else {
 #warning TODO __ckLoggingOverride
@@ -459,12 +426,93 @@
         [result release];
     }
     
-    // <+768>
-    abort();
+    [error autorelease];
+    error = nil;
+    [monitor release];
+    [operation release];
+    [zoneIDs release];
 }
 
 - (void)finishExportWithResult:(OCCloudKitMirroringResult *)result {
-    abort();
+    /*
+     self = x19 = sp + 0x8 = x20
+     result = sp
+     */
+    
+    // x21
+    NSFileManager *fileManager = [NSFileManager.defaultManager retain];
+    // x22
+    NSMutableArray<NSURL *> * _Nullable writtenAssetURLs;
+    {
+        OCCloudKitExportContext * _Nullable exportContext = self->_exportContext;
+        if (exportContext == nil) {
+            writtenAssetURLs = nil;
+        } else {
+            writtenAssetURLs = exportContext->_writtenAssetURLs;
+        }
+    }
+    
+    // sp, #0x68
+    NSError * _Nullable error = nil;
+    
+    // x27
+    for (NSURL *writtenAssetURL in writtenAssetURLs) {
+        BOOL result = [fileManager removeItemAtURL:writtenAssetURL error:&error];
+        if (result) continue;
+        if ([error.domain isEqualToString:NSCocoaErrorDomain] && (error.code == NSFileNoSuchFileError)) continue;
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to delete asset file: %@\n%@",  __func__, __LINE__, writtenAssetURL, error);
+    }
+    [fileManager release];
+    
+    OCCloudKitMirroringDelegateOptions * _Nullable delegateOptions;
+    {
+        OCCloudKitExporterOptions * _Nullable options = self->_options;
+        if (options == nil) {
+            delegateOptions = nil;
+        } else {
+            delegateOptions = options->_options;
+        }
+    }
+    
+    // x21
+    OCCloudKitExportedRecordBytesMetric *metric = [[OCCloudKitExportedRecordBytesMetric alloc] initWithContainerIdentifier:delegateOptions.containerIdentifier];
+    
+    size_t totalBytes;
+    {
+        OCCloudKitExportContext * _Nullable exportContext = self->_exportContext;
+        if (exportContext == nil) {
+            totalBytes = 0;
+        } else {
+            totalBytes = exportContext->_totalBytes;
+        }
+    }
+    
+    [metric addByteSize:totalBytes];
+    
+    OCCloudKitMetricsClient * _Nullable metricsClient;
+    {
+        OCCloudKitExporterOptions * _Nullable options = self->_options;
+        if (options == nil) {
+            metricsClient = nil;
+        } else {
+            OCCloudKitMirroringDelegateOptions * _Nullable delegateOptions = options->_options;
+            if (delegateOptions == nil) {
+                metricsClient = nil;
+            } else {
+                metricsClient = delegateOptions->_metricsClient;
+            }
+        }
+    }
+    
+    [metricsClient logMetric:metric];
+    [metric release];
+    
+    void (^block)(OCCloudKitMirroringResult *result) = self->_exportCompletionBlock;
+    if (block != nil) {
+        block(result);
+        [self->_exportCompletionBlock release];
+        self->_exportCompletionBlock = nil;
+    }
 }
 
 - (BOOL)updateMetadataForSavedZones:(NSArray<CKRecordZone *> *)savedZones error:(NSError * _Nullable *)error {
@@ -472,7 +520,219 @@
 }
 
 - (void)exportIfNecessary {
+    /*
+     self = x20
+     */
+    
+    // x29, #-0x50
+    __block BOOL succeed = YES;
+    // sp, #0x50
+    __block NSError * _Nullable error = nil;
+    // x19
+    OCCloudKitStoreMonitor *monitor = [self->_monitor retain];
+    
+    // sp, #0x58
+    __block CKModifyRecordZonesOperation * _Nullable operation = nil;
+    
+    // x21
+    OCCloudKitMirroringRequest * _Nullable request = _request;
+    
+    BOOL deferred;
+    if (request != nil) {
+        CKSchedulerActivity *schedulerActivity = request->_schedulerActivity;
+        if (schedulerActivity.shouldDefer || request->_deferredByBackgroundTimeout) {
+            deferred = YES;
+        } else {
+            deferred = NO;
+        }
+    } else {
+        deferred = NO;
+    }
+    
+    if (deferred) {
+        succeed = NO;
+        error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134419 userInfo:@{NSLocalizedFailureReasonErrorKey: @"The request was aborted because it was deferred by the system."}];
+    } else {
+        /*
+         __39-[PFCloudKitExporter exportIfNecessary]_block_invoke
+         monitor = sp + 0x28 = x19 + 0x20
+         self = sp + 0x30 = x19 + 0x28
+         succeed = sp + 0x38 = x19 + 0x30
+         error = sp + 0x40 = x19 + 0x38
+         */
+        [monitor performBlock:^{
+            /*
+             self = x19
+             */
+            // x20
+            __kindof NSPersistentStore * _Nullable retainedMonitoredStore = [monitor retainedMonitoredStore];
+            if (retainedMonitoredStore == nil) {
+                // <+220>
+                abort();
+            }
+            
+            // x21
+            NSPersistentStoreCoordinator * _Nullable monitoredCoordinator;
+            {
+                if (monitor == nil) {
+                    monitoredCoordinator = nil;
+                } else {
+                    monitoredCoordinator = [monitor->_monitoredCoordinator retain];
+                }
+            }
+            
+            // x22
+            NSManagedObjectContext *newBackgroundContextForMonitoredCoordinator = [monitor newBackgroundContextForMonitoredCoordinator];
+        }];
+    }
+    
+    // <+360>
     abort();
+}
+
+- (void)fetchRecordZones:(NSArray<CKRecordZoneID *> *)zoneIDs {
+#warning TODO __ckLoggingOverride
+    os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData: %s(%d): %@: Fetching record zones: %@", __func__, __LINE__, self, zoneIDs);
+    
+    // x22
+    __kindof OCCloudKitMirroringRequest * _Nullable request = self->_request;
+    
+    BOOL flag;
+    if (request == nil) {
+        flag = YES;
+    } else if (request->_schedulerActivity.shouldDefer) {
+        flag = NO;
+    } else if (request->_deferredByBackgroundTimeout) {
+        flag = YES;
+    } else {
+        flag = NO;
+    }
+    
+    if (flag) {
+        // x29, #0x70
+        __weak OCCloudKitExporter *weakSelf = self;
+        // original : getCloudKitCKFetchRecordZonesOperationClass
+        // x22
+        CKFetchRecordZonesOperation *operation = [[CKFetchRecordZonesOperation alloc] initWithRecordZoneIDs:zoneIDs];
+        
+        /*
+         __39-[PFCloudKitExporter fetchRecordZones:]_block_invoke
+         self = sp + 0xf0 = x22 + 0x20
+         weakSelf = sp + 0xf8 = x22 + 0x28
+         */
+        operation.fetchRecordZonesCompletionBlock = ^(NSDictionary<CKRecordZoneID *,CKRecordZone *> * _Nullable recordZonesByZoneID, NSError * _Nullable operationError) {
+            /*
+             self = x22
+             x21 = recordZonesByZoneID
+             x20 = operationError
+             */
+            
+            // x19
+            OCCloudKitExporter *loaded = [weakSelf retain];
+            if (loaded == nil) return;
+            
+            /*
+             __39-[PFCloudKitExporter fetchRecordZones:]_block_invoke_2
+             self = sp + 0x28 = x21 + 0x20
+             recordZonesByZoneID = sp + 0x30 = x21 + 0x28
+             operationError = sp + 0x38 = x21 + 0x30
+             */
+            dispatch_async(loaded->_workQueue, ^{
+                /*
+                 self = x21
+                 */
+                // x19
+                NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+                // x20
+#warning TODO loaded가 아니라 self를 capture하는 문제가 있음
+                OCCloudKitExporter *_self = self;
+                // x22
+                NSDictionary<CKRecordZoneID *, CKRecordZone *> * _Nullable _recordZonesByZoneID = recordZonesByZoneID;
+                // x21
+                NSError * _Nullable _operationError = operationError;
+                
+                if (self == nil) {
+                    [pool drain];
+                    return;
+                }
+                
+                os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "+CloudKit: %s(%d): %@: Finished fetching record zones: %@ - %@", __func__, __LINE__, _self, recordZonesByZoneID, operationError);
+                
+                if (_operationError != nil) {
+                    NSString * _Nullable storeIdentifier;
+                    {
+                        OCCloudKitStoreMonitor * _Nullable monitor = _self->_monitor;
+                        if (monitor == nil) {
+                            storeIdentifier = nil;
+                        } else {
+                            storeIdentifier = monitor->_storeIdentifier;
+                        }
+                    }
+                    
+                    // x21
+                    OCCloudKitMirroringResult *result = [[OCCloudKitMirroringResult alloc] initWithRequest:_self->_request storeIdentifier:storeIdentifier success:NO madeChanges:NO error:_operationError];
+                    [_self finishExportWithResult:result];
+                    [result release];
+                } else {
+                    NSError * _Nullable error = nil;
+                    BOOL result = [_self updateMetadataForSavedZones:_recordZonesByZoneID.allValues error:&error];
+                    
+                    if (result) {
+                        [self exportIfNecessary];
+                    } else {
+                        NSString * _Nullable storeIdentifier;
+                        {
+                            OCCloudKitStoreMonitor * _Nullable monitor = _self->_monitor;
+                            if (monitor == nil) {
+                                storeIdentifier = nil;
+                            } else {
+                                storeIdentifier = monitor->_storeIdentifier;
+                            }
+                        }
+                        
+                        // x21
+                        OCCloudKitMirroringResult *result = [[OCCloudKitMirroringResult alloc] initWithRequest:_self->_request storeIdentifier:storeIdentifier success:NO madeChanges:NO error:error];
+                        [_self finishExportWithResult:result];
+                        [result release];
+                    }
+                }
+                
+                [pool drain];
+            });
+            
+            [loaded release];
+        };
+        
+        CKDatabase * _Nullable database;
+        {
+            OCCloudKitExporterOptions * _Nullable options = self->_options;
+            if (options == nil) {
+                database = nil;
+            } else {
+                database = options->_database;
+            }
+        }
+        [database addOperation:operation];
+        [operation release];
+    } else {
+        // x23
+        NSError *error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134419 userInfo:@{NSLocalizedFailureReasonErrorKey: @"The request was aborted because it was deferred by the system."}];
+        NSString * _Nullable storeIdentifier;
+        {
+            OCCloudKitStoreMonitor * _Nullable monitor = self->_monitor;
+            if (monitor == nil) {
+                storeIdentifier = nil;
+            } else {
+                storeIdentifier = monitor->_storeIdentifier;
+            }
+        }
+        // x22
+        OCCloudKitMirroringResult *request = [[OCCloudKitMirroringResult alloc] initWithRequest:self->_request storeIdentifier:storeIdentifier success:NO madeChanges:NO error:error];
+        [self finishExportWithResult:request];
+        [request release];
+        request = nil;
+        [error release];
+    }
 }
 
 @end

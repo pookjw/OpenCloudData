@@ -14,10 +14,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface OCCloudKitExportContext : NSObject {
     OCCloudKitExporterOptions *_options;
-    NSUInteger _totalBytes;
+    @package size_t _totalBytes;
     NSUInteger _totalRecords;
     NSUInteger _totalRecordIDs;
-    NSMutableArray *_writtenAssetURLs;
+    @package NSMutableArray<NSURL *> *_writtenAssetURLs;
 }
 - (instancetype)initWithOptions:(OCCloudKitExporterOptions *)options;
 - (BOOL)processAnalyzedHistoryInStore:(NSSQLCore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error;

@@ -63,6 +63,9 @@
 			privateHeaders = (
 				"Helper/NSObject+Foundation_IvarDescription.h",
 				Private/Log.h,
+				Private/Metric/OCCloudKitBaseMetric.h,
+				Private/Metric/OCCloudKitExportedRecordBytesMetric.h,
+				Private/Metric/OCCloudKitSizeMetric.h,
 				Private/Model/OCCKDatabaseMetadata.h,
 				Private/Model/OCCKEvent.h,
 				Private/Model/OCCKHistoryAnalyzerState.h,
@@ -80,6 +83,7 @@
 				Private/OCCloudKitImportZoneContext.h,
 				Private/OCCloudKitMetadataCache.h,
 				Private/OCCloudKitMetadataModel.h,
+				Private/OCCloudKitMetricsClient.h,
 				Private/OCCloudKitMirroringDelegate.h,
 				Private/OCCloudKitMirroringDelegateOptions.h,
 				Private/OCCloudKitMirroringDelegateProgressProvider.h,

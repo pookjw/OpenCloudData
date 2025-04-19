@@ -37,6 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)finishExportWithResult:(OCCloudKitMirroringResult *)result __attribute__((objc_direct));
 - (BOOL)updateMetadataForSavedZones:(NSArray<CKRecordZone *> *)savedZones error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 - (void)exportIfNecessary __attribute__((objc_direct));
+- (void)fetchRecordZones:(NSArray<CKRecordZoneID *> *)zoneIDs __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END
