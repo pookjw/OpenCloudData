@@ -13,19 +13,19 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OCCloudKitMirroringRequest : NSPersistentStoreRequest{
-    @package BOOL _deferredByBackgroundTimeout;
+@interface OCCloudKitMirroringRequest : NSPersistentStoreRequest {
+    @package BOOL _deferredByBackgroundTimeout; // 0x28
     NSMutableArray *_containerBlocks;
     BOOL _isContainerRequest;
-    @package CKSchedulerActivity *_schedulerActivity;
-    OCPersistentCloudKitContainerEventActivity *_activity;
+    @package CKSchedulerActivity *_schedulerActivity; // 0x40
+    OCPersistentCloudKitContainerEventActivity *_activity; // 0x48
 }
 + (NSSet<Class> *)allRequestClasses;
 
 // original : (nonatomic, readonly) 내부적으로 retain/release하고 있음
 @property (retain, nonatomic, readonly) NSUUID* requestIdentifier;
 
-@property (copy, nonatomic, readonly) OCCloudKitMirroringRequestOptions *options;
+@property (copy, nonatomic, readonly, nullable) OCCloudKitMirroringRequestOptions *options;
 @property (copy, nonatomic, readonly) void (^ requestCompletionBlock)(OCCloudKitMirroringResult * result);
 
 - (instancetype)initWithOptions:(OCCloudKitMirroringRequestOptions * _Nullable)options completionBlock:(void (^ _Nullable)(OCCloudKitMirroringResult * result))requestCompletionBlock;
