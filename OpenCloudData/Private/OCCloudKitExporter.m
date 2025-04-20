@@ -10,8 +10,16 @@
 #import <OpenCloudData/OCCloudKitSerializer.h>
 #import <OpenCloudData/OCCKRecordZoneMetadata.h>
 #import <OpenCloudData/OCCloudKitExportedRecordBytesMetric.h>
+#import <OpenCloudData/NSManagedObjectContext+Private.h>
+#import <OpenCloudData/OCCKMetadataEntry.h>
+#import <OpenCloudData/OCCloudKitHistoryAnalyzer.h>
+#import <OpenCloudData/OCCloudKitHistoryAnalyzerContext.h>
+#import <OpenCloudData/OCCKHistoryAnalyzerState.h>
+#import <OpenCloudData/OCCKRecordZoneMoveReceipt.h>
 #import <objc/runtime.h>
 @import ellekit;
+
+COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
 
 @implementation OCCloudKitExporter
 
@@ -150,9 +158,7 @@
             
             // x22
             NSManagedObjectContext *backgroundContextForMonitoredCoordinator = [monitor newBackgroundContextForMonitoredCoordinator];
-            // original : NSCloudKitMirroringDelegateExportContextName
-#warning TODO 바꿔도 되나?
-            backgroundContextForMonitoredCoordinator.transactionAuthor = @"NSCloudKitMirroringDelegate.export";
+            backgroundContextForMonitoredCoordinator.transactionAuthor = NSCloudKitMirroringDelegateExportContextName;
             
             /*
              __48-[PFCloudKitExporter checkForZonesNeedingExport]_block_invoke_2
@@ -516,7 +522,161 @@
 }
 
 - (BOOL)updateMetadataForSavedZones:(NSArray<CKRecordZone *> *)savedZones error:(NSError * _Nullable *)error {
-    abort();
+    /*
+     self = x21
+     savedZones = x22
+     error = x19
+     */
+    
+    // sp, #0x88
+    __block BOOL _succeed = NO;
+    // sp, #0x58
+    __block NSError * _Nullable _error = nil;
+    // x20
+    OCCloudKitStoreMonitor *monitor = [self->_monitor retain];
+    
+    BOOL shouldDefer;
+    {
+        __kindof OCCloudKitMirroringRequest * _Nullable request = self->_request;
+        
+        if (request != nil) {
+            CKSchedulerActivity *schedulerActivity = request->_schedulerActivity;
+            if (schedulerActivity.shouldDefer || request->_deferredByBackgroundTimeout) {
+                shouldDefer = YES;
+            } else {
+                shouldDefer = NO;
+            }
+        } else {
+            shouldDefer = NO;
+        }
+    }
+    
+    if (shouldDefer) {
+        _succeed = NO;
+        _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134419 userInfo:@{NSLocalizedFailureReasonErrorKey: @"The request was aborted because it was deferred by the system."}];
+    } else {
+        /*
+         __56-[PFCloudKitExporter updateMetadataForSavedZones:error:]_block_invoke
+         monitor = sp + 0x28 = x19 + 0x20
+         savedZones = sp + 0x30 = x19 + 0x28
+         self = sp + 0x38 = x19 + 0x30
+         _error = sp + 0x40 = x19 + 0x38
+         _succeed = sp + 0x48 = x19 + 0x40
+         */
+        [monitor performBlock:^{
+            /*
+             self = x19
+             */
+            
+            // x20
+            __kindof NSPersistentStore *retainedMonitoredStore = [monitor retainedMonitoredStore];
+            
+            if (retainedMonitoredStore == nil) {
+                _succeed = NO;
+                _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134407 userInfo:@{NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Request '%@' was cancelled because the store was removed from the coordinator.", self->_request.requestIdentifier]}];
+            } else {
+                // x21
+                NSPersistentStoreCoordinator * _Nullable monitoredCoordinator;
+                {
+                    if (monitor == nil) {
+                        monitoredCoordinator = nil;
+                    } else {
+                        monitoredCoordinator = monitor->_monitoredCoordinator;
+                    }
+                }
+                
+                // x22
+                NSManagedObjectContext *newBackgroundContextForMonitoredCoordinator = [monitor newBackgroundContextForMonitoredCoordinator];
+                newBackgroundContextForMonitoredCoordinator.transactionAuthor = NSCloudKitMirroringDelegateExportContextName;
+                
+                /*
+                 __56-[PFCloudKitExporter updateMetadataForSavedZones:error:]_block_invoke_2
+                 savedZones = sp + 0x28 = x19 + 0x20
+                 self = sp + 0x30 = x19 + 0x28
+                 retainedMonitoredStore = sp + 0x38 = x19 + 0x30
+                 newBackgroundContextForMonitoredCoordinator = sp + 0x40 = x19 + x38
+                 _error = sp + 0x48 = x19 + 0x40
+                 _succeed = sp + 0x50 = x19 + 0x48
+                 */
+                [newBackgroundContextForMonitoredCoordinator performBlockAndWait:^{
+                    /*
+                     self = x19
+                     */
+                    
+                    @try {
+                        // x22
+                        for (CKRecordZone *zone in savedZones) {
+                            // x24
+                            CKRecordZoneID *zoneID = zone.zoneID;
+                            
+                            CKDatabaseScope databaseScope;
+                            {
+                                if (self == nil) {
+                                    databaseScope = 0;
+                                } else {
+                                    OCCloudKitExporterOptions * _Nullable options = self->_options;
+                                    if (options == nil) {
+                                        databaseScope = 0;
+                                    } else {
+                                        CKDatabase * _Nullable database = options->_database;
+                                        if (database == nil) {
+                                            databaseScope = 0;
+                                        } else {
+                                            databaseScope = database.databaseScope;
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // x23
+                            OCCKRecordZoneMetadata * _Nullable metadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:zoneID inDatabaseWithScope:databaseScope forStore:retainedMonitoredStore inContext:newBackgroundContextForMonitoredCoordinator error:&_error];
+                            
+                            if (metadata == nil) {
+                                _succeed = NO;
+                                [_error retain];
+                                break;
+                            }
+                            
+                            // x22
+                            CKRecordZoneCapabilities capabilities = zone.capabilities;
+                            metadata.supportsFetchChanges = (capabilities & CKRecordZoneCapabilityFetchChanges);
+                            metadata.supportsRecordSharing = (capabilities & CKRecordZoneCapabilitySharing);
+                            metadata.supportsAtomicChanges = (capabilities & CKRecordZoneCapabilityAtomic);
+                            metadata.supportsZoneSharing = (capabilities & CKRecordZoneCapabilityZoneWideSharing);
+                            metadata.hasRecordZone = YES;
+                            
+                            BOOL result = [newBackgroundContextForMonitoredCoordinator save:&_error];
+                            if (!result) {
+                                _succeed = NO;
+                                [_error retain];
+                                break;
+                            }
+                        }
+                    } @catch (NSException *exception) {
+                        _succeed = NO;
+                        _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{@"NSUnderlyingException": @"Export encountered an unhandled exception while analyzing history in the store."}];
+                    }
+                }];
+                
+                [newBackgroundContextForMonitoredCoordinator release];
+                [monitoredCoordinator release];
+                [retainedMonitoredStore release];
+            }
+        }];
+    }
+    
+    [monitor release];
+    
+    if (!_succeed) {
+        if (error == nil) {
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        } else {
+            if (error) *error = [_error autorelease];
+        }
+    }
+    
+    return _succeed;
 }
 
 - (void)exportIfNecessary {
@@ -530,9 +690,6 @@
     __block NSError * _Nullable error = nil;
     // x19
     OCCloudKitStoreMonitor *monitor = [self->_monitor retain];
-    
-    // sp, #0x58
-    __block CKModifyRecordZonesOperation * _Nullable operation = nil;
     
     // x21
     OCCloudKitMirroringRequest * _Nullable request = _request;
@@ -567,8 +724,9 @@
             // x20
             __kindof NSPersistentStore * _Nullable retainedMonitoredStore = [monitor retainedMonitoredStore];
             if (retainedMonitoredStore == nil) {
-                // <+220>
-                abort();
+                succeed = NO;
+                error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134407 userInfo:@{NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Request '%@' was cancelled because the store was removed from the coordinator.", self->_request.requestIdentifier]}];
+                return;
             }
             
             // x21
@@ -583,14 +741,178 @@
             
             // x22
             NSManagedObjectContext *newBackgroundContextForMonitoredCoordinator = [monitor newBackgroundContextForMonitoredCoordinator];
+            newBackgroundContextForMonitoredCoordinator.transactionAuthor = NSCloudKitMirroringDelegateExportContextName;
+            [newBackgroundContextForMonitoredCoordinator _setAllowAncillaryEntities:YES];
+            
+            /*
+             __39-[PFCloudKitExporter exportIfNecessary]_block_invoke_2
+             self = sp + 0x30 = + 0x20
+             retainedMonitoredStore = sp + 0x38 = + 0x28
+             newBackgroundContextForMonitoredCoordinator = sp + 0x40 = + 0x30
+             succeed = sp + 0x48 = + 0x38
+             error = sp + 0x50 = + 0x40
+             */
+            [newBackgroundContextForMonitoredCoordinator performBlockAndWait:^{
+#warning TODO __39-[PFCloudKitExporter executeOperation:]_block_invoke이 누락되어 있음 무언가 놓친듯
+                // <+2948>이 -[PFCloudKitExporter executeOperation:]이고, 내가 이걸 무조건 return 해버린 것 같음
+                
+                /*
+                 self(block) = sp + 0x20
+                 self = sp + 0x10
+                 */
+                
+                // sp + 0x50
+                NSError * _Nullable _error = nil;
+                
+                @try {
+                    BOOL result = [self analyzeHistoryInStore:retainedMonitoredStore withManagedObjectContext:newBackgroundContextForMonitoredCoordinator error:&_error];
+                    /* <+2344> */
+                    
+                    if (!result) {
+                        if (error == nil) {
+                            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+                            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+                        } else {
+                            error = [_error retain];
+                        }
+                        
+                        succeed = NO;
+                        
+                        return;
+                    }
+                } @catch (NSException *exception) {
+                    error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{@"NSUnderlyingException": @"Export encountered an unhandled exception while analyzing history in the store."}];
+                    succeed = NO;
+                    return;
+                }
+                
+                BOOL shouldDefer;
+                {
+                    __kindof OCCloudKitMirroringRequest * _Nullable request = self->_request;
+                    
+                    if (request != nil) {
+                        CKSchedulerActivity *schedulerActivity = request->_schedulerActivity;
+                        if (schedulerActivity.shouldDefer || request->_deferredByBackgroundTimeout) {
+                            shouldDefer = YES;
+                        } else {
+                            shouldDefer = NO;
+                        }
+                    } else {
+                        shouldDefer = NO;
+                    }
+                }
+                
+                if (!shouldDefer) {
+                    error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134419 userInfo:@{NSLocalizedFailureReasonErrorKey: @"The request was aborted because it was deferred by the system."}];
+                    succeed = NO;
+                    return;
+                }
+                
+                /* <+2892> */
+                
+                NSNumber * _Nullable countNumber = [OCCKHistoryAnalyzerState countAnalyzerStatesInStore:retainedMonitoredStore withManagedObjectContext:newBackgroundContextForMonitoredCoordinator error:&_error];
+                if (countNumber == nil) {
+                    succeed = NO;
+                    [_error retain];
+                    error = _error;
+                    return;
+                }
+                
+                NSInteger count = countNumber.integerValue;
+                if (count < 1) {
+                    // original : NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey
+                    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:@"NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey" fromStore:retainedMonitoredStore inManagedObjectContext:newBackgroundContextForMonitoredCoordinator error:&_error];
+                    if (entry == nil) {
+                        if (_error != nil) {
+                            succeed = NO;
+                            [_error retain];
+                            error = _error;
+                            return;
+                        }
+                    }
+                    
+                    if (!entry.boolValue) {
+                        NSNumber * _Nullable countNumber = [OCCKRecordZoneMoveReceipt countMoveReceiptsInStore:retainedMonitoredStore matchingPredicate:[NSPredicate predicateWithFormat:@"needsCloudDelete == 1"] withManagedObjectContext:newBackgroundContextForMonitoredCoordinator error:&_error];
+                        if (countNumber == nil) {
+                            succeed = NO;
+                            [_error retain];
+                            error = _error;
+                            return;
+                        }
+                        
+                        count = countNumber.integerValue;
+                    }
+                }
+                
+                /* <+3984> */
+                if (count <= 1) {
+                    return;
+                }
+                
+                BOOL result = [self->_exportContext processAnalyzedHistoryInStore:retainedMonitoredStore inManagedObjectContext:newBackgroundContextForMonitoredCoordinator error:&_error];
+                if (!result) {
+                    succeed = NO;
+                    [_error retain];
+                    error = _error;
+                    return;
+                }
+                
+                // x29, #0xa0
+                __block BOOL madeChanges = NO;
+                /*
+                 __39-[PFCloudKitExporter exportIfNecessary]_block_invoke.38
+                 */
+                [self->_operationIDToResult enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, OCCloudKitMirroringResult * _Nonnull obj, BOOL * _Nonnull stop) {
+                    if (obj.madeChanges) {
+                        madeChanges = YES;
+                        *stop = YES;
+                    }
+                }];
+                
+                NSString * _Nullable storeIdentifier;
+                {
+                    OCCloudKitStoreMonitor * _Nullable monitor = self->_monitor;
+                    if (monitor == nil) {
+                        storeIdentifier = nil;
+                    } else {
+                        storeIdentifier = monitor->_storeIdentifier;
+                    }
+                }
+                
+                // x19
+                OCCloudKitMirroringResult * _Nullable mirroringResult = [[OCCloudKitMirroringResult alloc] initWithRequest:self->_request storeIdentifier:storeIdentifier success:YES madeChanges:madeChanges error:NULL];
+                [self finishExportWithResult:mirroringResult];
+                [mirroringResult release];
+            }];
+            
+            [newBackgroundContextForMonitoredCoordinator release];
+            [monitoredCoordinator release];
+            [retainedMonitoredStore release];
         }];
     }
     
-    // <+360>
-    abort();
+    if (!succeed) {
+        NSString * _Nullable storeIdentifier;
+        {
+            OCCloudKitStoreMonitor * _Nullable monitor = self->_monitor;
+            if (monitor == nil) {
+                storeIdentifier = nil;
+            } else {
+                storeIdentifier = monitor->_storeIdentifier;
+            }
+        }
+        
+        OCCloudKitMirroringResult * _Nullable mirroringResult = [[OCCloudKitMirroringResult alloc] initWithRequest:self->_request storeIdentifier:storeIdentifier success:NO madeChanges:NO error:error];
+        [self finishExportWithResult:mirroringResult];
+        [mirroringResult release];
+    }
+    
+    [error release];
+    [monitor release];
 }
 
 - (void)fetchRecordZones:(NSArray<CKRecordZoneID *> *)zoneIDs {
+    /* inlined from -checkForZonesNeedingExport */
 #warning TODO __ckLoggingOverride
     os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData: %s(%d): %@: Fetching record zones: %@", __func__, __LINE__, self, zoneIDs);
     
@@ -733,6 +1055,217 @@
         request = nil;
         [error release];
     }
+}
+
+- (BOOL)analyzeHistoryInStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
+    /* inlined from __39-[PFCloudKitExporter exportIfNecessary]_block_invoke_2 */
+    /*
+     self = sp + 0x10
+     store = x24
+     managedObjectContext = x23
+     */
+    
+    // sp + 0x18
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+    // sp + 0x60
+    NSError * _Nullable _error = nil;
+    
+    // w25
+    BOOL _succeed;
+    
+    @try {
+        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
+        const void *symbol = MSFindSymbol(image, "+[_PFRoutines _isInMemoryStore:]");
+        BOOL isInMemoryStore = ((BOOL (*)(Class, id))symbol)(objc_lookUpClass("_PFRoutines"), store);
+        
+        if (!isInMemoryStore) {
+            // sp + 0x58
+            NSError * _Nullable __error = nil;
+            BOOL result = [managedObjectContext setQueryGenerationFromToken:NSQueryGenerationToken.currentQueryGenerationToken error:&_error];
+            if (!result) {
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Unable to set query generation on moc: %@", __func__, __LINE__, self, __error);
+            }
+        }
+        
+        // original : NSCloudKitMirroringDelegateLastHistoryTokenKey
+        OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:@"NSCloudKitMirroringDelegateLastHistoryTokenKey" fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+        
+        // x26
+        NSObject<NSSecureCoding> * _Nullable transformedValue;
+        // w27
+        BOOL boolValue;
+        // w28
+        BOOL shouldAnalyze;
+        
+        if (error != nil) {
+            _succeed = NO;
+            [_error retain];
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Unable to read the last history token: %@", __func__, __LINE__, _error);
+            transformedValue = nil;
+            boolValue = NO;
+            shouldAnalyze = NO;
+        } else {
+            transformedValue = entry.transformedValue;
+            // original : NSCloudKitMirroringDelegateBypassHistoryOnExportKey
+            OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:@"NSCloudKitMirroringDelegateBypassHistoryOnExportKey" fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+            
+            if (_error != nil) {
+                _succeed = NO;
+                [_error retain];
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Unable to read the bypass entry: %@", __func__, __LINE__, _error);
+                boolValue = NO;
+                transformedValue = nil;
+                shouldAnalyze = NO;
+            } else {
+                boolValue = entry.boolValue;
+                if ((transformedValue == nil) || boolValue) {
+                    // original : NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey
+                    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:@"NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey" boolValue:YES forStore:store intoManagedObjectContext:managedObjectContext error:&_error];
+                    
+                    if (entry == nil) {
+                        _succeed = NO;
+                        [_error retain];
+                        boolValue = NO;
+                        transformedValue = nil;
+                        shouldAnalyze = NO;
+                    } else {
+                        _succeed = YES;
+                        shouldAnalyze = YES;
+                    }
+                } else {
+                    _succeed = YES;
+                    shouldAnalyze = YES;
+                }
+            }
+        }
+        
+        BOOL flag;
+        if (managedObjectContext.hasChanges) {
+    #warning TODO Error Leak
+            BOOL result = [managedObjectContext save:&_error];
+            
+            if (!result) {
+                _succeed = NO;
+                [_error retain];
+                flag = NO;
+            } else {
+                if (shouldAnalyze) {
+                    flag = YES;
+                } else {
+                    flag = NO;
+                }
+            }
+        } else {
+            flag = YES;
+        }
+        
+        if (flag) {
+            // x21
+            OCCloudKitHistoryAnalyzerOptions *options = [[OCCloudKitHistoryAnalyzerOptions alloc] init];
+            options.request = self->_request;
+            
+            // x19
+            OCCloudKitHistoryAnalyzer *analyzer = [[OCCloudKitHistoryAnalyzer alloc] initWithOptions:options managedObjectContext:managedObjectContext];
+            
+            os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: Exporting changes since (%d): %@", __func__, __LINE__, self, boolValue, transformedValue);
+            
+            const void *symbol = MSFindSymbol(image, "-[PFHistoryAnalyzer newAnalyzerContextForStore:sinceLastHistoryToken:inManagedObjectContext:error:]");
+            // x26
+            OCCloudKitHistoryAnalyzerContext * _Nullable analyzerContext = ((id (*)(id, id, id, id, id *))symbol)(analyzer, store, transformedValue, managedObjectContext, &_error);
+            
+            if (analyzerContext == nil) {
+                if (_error == nil) {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: History analyzer should have set an error if the analyzer context is nil.\n");
+                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: History analyzer should have set an error if the analyzer context is nil.\n");
+                }
+                
+                _succeed = NO;
+                [_error retain];
+                
+                if (([_error.domain isEqualToString:NSCocoaErrorDomain]) && (_error.code == 134419)) {
+                    // sp + 0x58
+                    NSError * _Nullable __error = nil;
+                    
+                    NSPersistentHistoryToken * _Nullable lastProcessedToken;
+                    assert(object_getInstanceVariable(analyzer, "_lastProcessedToken", (void **)&lastProcessedToken) != NULL);
+                    
+                    // original : NSCloudKitMirroringDelegateLastHistoryTokenKey
+                    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:@"NSCloudKitMirroringDelegateLastHistoryTokenKey" transformedValue:lastProcessedToken forStore:store intoManagedObjectContext:managedObjectContext error:&__error];
+                    
+                    if (entry == nil) {
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Failed to update exporter history token after deferral: %@", __func__, __LINE__, self, __error);
+                    } else {
+                        BOOL result = [managedObjectContext save:&__error];
+                        if (!result) {
+                            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Failed to save exporter history token after deferral: %@", __func__, __LINE__, self, __error);
+                        }
+                    }
+                }
+                
+                [pool release];
+                [_error autorelease];
+                return _succeed;
+            }
+            
+            NSPersistentHistoryToken * _Nullable finalHistoryToken;
+            assert(object_getInstanceVariable(analyzerContext, "_finalHistoryToken", (void **)&finalHistoryToken) != NULL);
+            if (finalHistoryToken == nil) {
+                _succeed = YES;
+                [pool release];
+                return _succeed;
+            }
+            
+            // original : NSCloudKitMirroringDelegateLastHistoryTokenKey
+            [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:@"NSCloudKitMirroringDelegateLastHistoryTokenKey" transformedValue:finalHistoryToken forStore:store intoManagedObjectContext:managedObjectContext error:&_error];
+            
+            if (_error != nil) {
+                _succeed = NO;
+                [_error retain];
+                
+                [pool release];
+                [_error autorelease];
+                return _succeed;
+            }
+            
+            // original : NSCloudKitMirroringDelegateBypassHistoryOnExportKey
+            OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:@"NSCloudKitMirroringDelegateBypassHistoryOnExportKey" fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+            
+            if (_error != nil) {
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Unable to read the bypass entry: %@", __func__, __LINE__, _error);
+                [_error retain];
+                _succeed = NO;
+                
+                [pool release];
+                [_error autorelease];
+                return _succeed;
+            }
+            
+            if (entry != nil) {
+                [managedObjectContext deleteObject:entry];
+            }
+            
+            if (managedObjectContext.hasChanges) {
+                BOOL result = [managedObjectContext save:&_error];
+                
+                if (!result) {
+#warning TODO _succeed = NO은 원래 없음
+                    _succeed = NO;
+                    
+                    [_error retain];
+                }
+                
+                [managedObjectContext reset];
+            }
+        }
+    } @catch (NSException *exception) {
+        _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{@"NSUnderlyingException": @"Export encountered a fatal exception while analyzing history."}];
+        _succeed = NO;
+    }
+    
+    [pool release];
+    [_error autorelease];
+    return _succeed;
 }
 
 @end

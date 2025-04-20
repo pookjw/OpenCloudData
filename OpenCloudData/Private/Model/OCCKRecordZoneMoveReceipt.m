@@ -128,7 +128,7 @@
     return [managedObjectContext executeFetchRequest:fetchRequest error:error];
 }
 
-+ (NSNumber *)countMoveReceiptsInStore:(__kindof NSPersistentStore *)store matchingPredicate:(NSPredicate *)predicate withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext rror:(NSError * _Nullable *)error {
++ (NSNumber *)countMoveReceiptsInStore:(__kindof NSPersistentStore *)store matchingPredicate:(NSPredicate *)predicate withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
     /*
      x23 = store
      x22 = predicate

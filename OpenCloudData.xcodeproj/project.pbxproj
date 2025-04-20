@@ -62,6 +62,9 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			privateHeaders = (
 				"Helper/NSObject+Foundation_IvarDescription.h",
+				Private/Analyzer/OCCloudKitHistoryAnalyzer.h,
+				Private/Analyzer/OCCloudKitHistoryAnalyzerContext.h,
+				Private/Analyzer/OCCloudKitHistoryAnalyzerOptions.h,
 				Private/Log.h,
 				Private/Metric/OCCloudKitBaseMetric.h,
 				Private/Metric/OCCloudKitExportedRecordBytesMetric.h,
@@ -126,8 +129,11 @@
 				SPI/NSStoreMapping.h,
 				SPI/PFApplicationStateMonitor.h,
 				SPI/PFApplicationStateMonitorDelegate.h,
+				SPI/PFHistoryAnalyzer.h,
+				SPI/PFHistoryAnalyzerContext.h,
 				SPI/PFHistoryAnalyzerDefaultObjectState.h,
 				SPI/PFHistoryAnalyzerObjectState.h,
+				SPI/PFHistoryAnalyzerOptions.h,
 				SPI/PFMirroredManyToManyRelationship.h,
 				SPI/PFMirroredManyToManyRelationshipV2.h,
 				SPI/PFMirroredOneToManyRelationship.h,
