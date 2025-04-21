@@ -769,7 +769,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                     /* <+2344> */
                     
                     if (!result) {
-                        if (error == nil) {
+                        if (_error == nil) {
                             os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
                             os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
                         } else {
@@ -781,8 +781,9 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                         return;
                     }
                 } @catch (NSException *exception) {
-                    error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{@"NSUnderlyingException": @"Export encountered an unhandled exception while analyzing history in the store."}];
+                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{@"NSUnderlyingException": @"Export encountered an unhandled exception while analyzing history in the store."}];
                     succeed = NO;
+                    error = _error;
                     return;
                 }
                 
@@ -803,7 +804,8 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                 }
                 
                 if (!shouldDefer) {
-                    error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134419 userInfo:@{NSLocalizedFailureReasonErrorKey: @"The request was aborted because it was deferred by the system."}];
+                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134419 userInfo:@{NSLocalizedFailureReasonErrorKey: @"The request was aborted because it was deferred by the system."}];
+                    error = _error;
                     succeed = NO;
                     return;
                 }
@@ -845,44 +847,112 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                 }
                 
                 /* <+3984> */
-                if (count <= 1) {
-                    return;
+                if (count > 0) {
+                    BOOL result = [self->_exportContext processAnalyzedHistoryInStore:retainedMonitoredStore inManagedObjectContext:newBackgroundContextForMonitoredCoordinator error:&_error];
+                    if (!result) {
+                        succeed = NO;
+                        [_error retain];
+                        error = _error;
+                        return;
+                    }
                 }
                 
-                BOOL result = [self->_exportContext processAnalyzedHistoryInStore:retainedMonitoredStore inManagedObjectContext:newBackgroundContextForMonitoredCoordinator error:&_error];
-                if (!result) {
+                /* <+2620> */
+                BOOL shouldDefer2;
+                {
+                    __kindof OCCloudKitMirroringRequest * _Nullable request = self->_request;
+                    
+                    if (request != nil) {
+                        CKSchedulerActivity *schedulerActivity = request->_schedulerActivity;
+                        if (schedulerActivity.shouldDefer || request->_deferredByBackgroundTimeout) {
+                            shouldDefer2 = YES;
+                        } else {
+                            shouldDefer2 = NO;
+                        }
+                    } else {
+                        shouldDefer2 = NO;
+                    }
+                }
+                
+                if (shouldDefer2) {
                     succeed = NO;
-                    [_error retain];
+                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134419 userInfo:@{NSLocalizedFailureReasonErrorKey: @"The request was aborted because it was deferred by the system."}];
                     error = _error;
                     return;
                 }
                 
-                // x29, #0xa0
-                __block BOOL madeChanges = NO;
-                /*
-                 __39-[PFCloudKitExporter exportIfNecessary]_block_invoke.38
-                 */
-                [self->_operationIDToResult enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, OCCloudKitMirroringResult * _Nonnull obj, BOOL * _Nonnull stop) {
-                    if (obj.madeChanges) {
-                        madeChanges = YES;
-                        *stop = YES;
-                    }
-                }];
+                /* <+2948> */
+                const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
+                const void *symbol = MSFindSymbol(image, "+[_PFRoutines _isInMemoryStore:]");
+                BOOL isInMemoryStore = ((BOOL (*)(Class, id))symbol)(objc_lookUpClass("_PFRoutines"), retainedMonitoredStore);
                 
-                NSString * _Nullable storeIdentifier;
-                {
-                    OCCloudKitStoreMonitor * _Nullable monitor = self->_monitor;
-                    if (monitor == nil) {
-                        storeIdentifier = nil;
-                    } else {
-                        storeIdentifier = monitor->_storeIdentifier;
+                if (!isInMemoryStore) {
+                    NSError * _Nullable __error = nil;
+                    BOOL result = [newBackgroundContextForMonitoredCoordinator setQueryGenerationFromToken:NSQueryGenerationToken.currentQueryGenerationToken error:&__error];
+                    if (!result) {
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Unable to set query generation on moc: %@", __func__, __LINE__, self, __error);
                     }
                 }
                 
-                // x19
-                OCCloudKitMirroringResult * _Nullable mirroringResult = [[OCCloudKitMirroringResult alloc] initWithRequest:self->_request storeIdentifier:storeIdentifier success:YES madeChanges:madeChanges error:NULL];
-                [self finishExportWithResult:mirroringResult];
-                [mirroringResult release];
+                // sp, #0xb0
+                NSUInteger returnCount = 0;
+                BOOL result = [self->_exportContext checkForObjectsNeedingExportInStore:retainedMonitoredStore andReturnCount:&returnCount withManagedObjectContext:newBackgroundContextForMonitoredCoordinator error:&_error];
+                
+                if (!result) {
+                    succeed = NO;
+                    succeed = [_error retain];
+                    return;
+                }
+                
+                os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: Found %lu objects needing export.", __func__, __LINE__, self, returnCount);
+                
+                if (returnCount == 0) {
+                    /* <+4088> */
+                    // x29, #0xa0
+                    __block BOOL madeChanges = NO;
+                    /*
+                     __39-[PFCloudKitExporter exportIfNecessary]_block_invoke.38
+                     */
+                    [self->_operationIDToResult enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, OCCloudKitMirroringResult * _Nonnull obj, BOOL * _Nonnull stop) {
+                        if (obj.madeChanges) {
+                            madeChanges = YES;
+                            *stop = YES;
+                        }
+                    }];
+                    
+                    NSString * _Nullable storeIdentifier;
+                    {
+                        OCCloudKitStoreMonitor * _Nullable monitor = self->_monitor;
+                        if (monitor == nil) {
+                            storeIdentifier = nil;
+                        } else {
+                            storeIdentifier = monitor->_storeIdentifier;
+                        }
+                    }
+                    
+                    // x19
+                    OCCloudKitMirroringResult * _Nullable mirroringResult = [[OCCloudKitMirroringResult alloc] initWithRequest:self->_request storeIdentifier:storeIdentifier success:YES madeChanges:madeChanges error:NULL];
+                    [self finishExportWithResult:mirroringResult];
+                    [mirroringResult release];
+                    return; /* <+4272> */
+                }
+                
+                /* <+3424> */
+                
+                // x20
+                CKModifyRecordsOperation * _Nullable operation = [self->_exportContext newOperationBySerializingDirtyObjectsInStore:retainedMonitoredStore inManagedObjectContext:newBackgroundContextForMonitoredCoordinator error:&_error];
+                
+                if (operation == nil) {
+                    succeed = NO;
+                    error = [_error retain];
+                    return;
+                }
+                
+                [self->_delegate exporter:self willScheduleOperations:@[operation]];
+                
+                /* <3524> */
+                // inlined
+                [self executeOperation:operation];
             }];
             
             [newBackgroundContextForMonitoredCoordinator release];
@@ -1266,6 +1336,47 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
     [pool release];
     [_error autorelease];
     return _succeed;
+}
+
+- (void)executeOperation:(CKModifyRecordsOperation *)operation {
+    // inlined from __48-[PFCloudKitExporter checkForZonesNeedingExport]_block_invoke_2 <+3524>
+    
+    /*
+     self = x21
+     operation = x20
+     */
+    
+    __weak OCCloudKitExporter *weakSelf = self;
+    
+    if (self->_request.options != nil) {
+        [self->_request.options applyToOperation:operation];
+    }
+    
+    operation.savePolicy = CKRecordSaveChangedKeys;
+    
+    BOOL test_useLegacySavePolicy;
+    {
+        OCCloudKitExporterOptions * _Nullable options = self->_options;
+        if (options == nil) {
+            test_useLegacySavePolicy = NO;
+        } else {
+            OCCloudKitMirroringDelegateOptions * _Nullable delegateOptions = options->_options;
+            if (delegateOptions == nil) {
+                test_useLegacySavePolicy = NO;
+            } else {
+                test_useLegacySavePolicy = delegateOptions->_test_useLegacySavePolicy;
+            }
+        }
+    }
+    
+    if (!test_useLegacySavePolicy) {
+        operation.savePolicy = CKRecordSaveIfServerRecordUnchanged;
+    }
+    
+    CKOperationID operationID = operation.operationID;
+    
+    // <+3632>
+    abort();
 }
 
 @end

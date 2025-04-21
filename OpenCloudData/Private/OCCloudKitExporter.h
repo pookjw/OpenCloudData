@@ -39,6 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)exportIfNecessary __attribute__((objc_direct));
 - (void)fetchRecordZones:(NSArray<CKRecordZoneID *> *)zoneIDs __attribute__((objc_direct));
 - (BOOL)analyzeHistoryInStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
+- (void)executeOperation:(CKModifyRecordsOperation *)operation __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

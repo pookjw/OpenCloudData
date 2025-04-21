@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 #warning TODO Nullable
 
 @interface OCCloudKitMirroringDelegateOptions : NSObject <NSCopying> {
+    @package BOOL _test_useLegacySavePolicy; // 0x12
     @package OCCloudKitMetricsClient *_metricsClient; // 0x48
     @package OCCloudKitArchivingUtilities *_archivingUtilities; // 0x88
 }
