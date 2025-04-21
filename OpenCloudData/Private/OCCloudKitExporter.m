@@ -1346,6 +1346,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
      operation = x20
      */
     
+    // x29, #0xb0
     __weak OCCloudKitExporter *weakSelf = self;
     
     if (self->_request.options != nil) {
@@ -1373,6 +1374,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
         operation.savePolicy = CKRecordSaveIfServerRecordUnchanged;
     }
     
+    // x19
     CKOperationID operationID = operation.operationID;
     
     // <+3632>
