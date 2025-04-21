@@ -1401,22 +1401,71 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
          operationError = sp + 0x48 = x21 + 0x40
          */
         dispatch_async(loaded->_workQueue, ^{
+            // inlined
+            [self exportOperationFinished:operationID savedRecords:savedRecords deletedRecordIDs:deletedRecordIDs operationError:operationError];
+        });
+    };
+}
+
+- (void)exportOperationFinished:(CKOperationID)operationID savedRecords:(NSArray<CKRecord *> *)savedRecords deletedRecordIDs:(NSArray<CKRecordID *> *)deletedRecordIDs operationError:(NSError *)operationError {
+    // inlined from __39-[PFCloudKitExporter executeOperation:]_block_invoke_2
+    /*
+     __39-[PFCloudKitExporter executeOperation:]_block_invoke_2
+     self = x20
+     operationID = sp + 0x30 = x21 + 0x28 = x25
+     savedRecords = sp + 0x38 = x21 + 0x30 = x26
+     deletedRecordIDs = sp + 0x40 = x21 + 0x38 = x27
+     operationError = sp + 0x48 = x21 + 0x40 = x21
+     */
+    
+    // x19
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+    os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Modify records finished: %@\n%@\n%@", __func__, __LINE__, savedRecords, deletedRecordIDs, operationError);
+    
+    // x23
+    NSString * _Nullable storeIdentifier;
+    {
+        OCCloudKitStoreMonitor * _Nullable monitor = self->_monitor;
+        if (monitor == nil) {
+            storeIdentifier = nil;
+        } else {
+            storeIdentifier = monitor->_storeIdentifier;
+        }
+    }
+    
+    if (operationError != nil) {
+        // x21
+        OCCloudKitMirroringResult *result = [[OCCloudKitMirroringResult alloc] initWithRequest:self->_request storeIdentifier:storeIdentifier success:NO madeChanges:(self->_operationIDToResult.count != 0) error:operationError];
+        [self finishExportWithResult:result];
+        [result release];
+    } else {
+        // x21
+        OCCloudKitStoreMonitor *monitor = [self->_monitor retain];
+        
+        /*
+         __95-[PFCloudKitExporter exportOperationFinished:withSavedRecords:deletedRecordIDs:operationError:]_block_invoke
+         monitor = sp + 0x20 = x20 + 0x20
+         self = sp + 0x28 = x20 + 0x28
+         savedRecords = sp + 0x30 = x20 + 0x30
+         deletedRecordIDs = sp + 0x38 = x20 + 0x38
+         nil = sp + 0x40 = x20 + 0x40
+         operationID = sp + 0x48 = x20 + 0x48
+         */
+        [monitor performBlock:^{
             /*
-             self = x21
+             self(block) = x20
              */
             
             // x19
-            NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-            // x20
-            OCCloudKitExporter *_self = loaded;
+            __kindof NSPersistentStore *retainedMonitoredStore = [monitor retainedMonitoredStore];
             
-            if (_self != nil) {
-                os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Modify records finished: %@\n%@\n%@", __func__, __LINE__, savedRecords, deletedRecordIDs, operationError);
+            if (retainedMonitoredStore == nil) {
+                NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:134407 userInfo:@{NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Request '%@' was cancelled because the store was removed from the coordinator.", self->_request.requestIdentifier]}];
                 
-                // x23
                 NSString * _Nullable storeIdentifier;
                 {
-                    OCCloudKitStoreMonitor * _Nullable monitor = _self->_monitor;
+                    OCCloudKitStoreMonitor * _Nullable monitor = self->_monitor;
                     if (monitor == nil) {
                         storeIdentifier = nil;
                     } else {
@@ -1424,47 +1473,115 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                     }
                 }
                 
-                if (operationError != nil) {
-                    // x21
-                    OCCloudKitMirroringResult *result = [[OCCloudKitMirroringResult alloc] initWithRequest:_self->_request storeIdentifier:storeIdentifier success:NO madeChanges:(loaded->_operationIDToResult.count != 0) error:operationError];
-                    [_self finishExportWithResult:result];
-                    [result release];
+                // x19
+                OCCloudKitMirroringResult *result = [[OCCloudKitMirroringResult alloc] initWithRequest:self->_request storeIdentifier:storeIdentifier success:NO madeChanges:NO error:error];
+                [self finishExportWithResult:result];
+                [result release];
+                return;
+            }
+            
+            // x22
+            NSPersistentStoreCoordinator * _Nullable monitoredCoordinator;
+            {
+                OCCloudKitStoreMonitor * _Nullable monitor = self->_monitor;
+                if (monitor == nil) {
+                    monitoredCoordinator = nil;
                 } else {
-                    // x21
-                    OCCloudKitStoreMonitor *monitor = [_self->_monitor retain];
-                    
-                    /*
-                     __95-[PFCloudKitExporter exportOperationFinished:withSavedRecords:deletedRecordIDs:operationError:]_block_invoke
-                     monitor = sp + 0x20
-                     _self = sp + 0x28
-                     savedRecords = sp + 0x30
-                     deletedRecordIDs = sp + 0x38
-                     nil = sp + 0x40
-                     operationID = sp + 0x48
-                     */
-                    [monitor performBlock:^{
-                        /*
-                         self = x20
-                         */
-                        
-                        // x19
-                        __kindof NSPersistentStore *retainedMonitoredStore = [monitor retainedMonitoredStore];
-                        
-                        if (retainedMonitoredStore == nil) {
-                            // <+400>
-                            abort();
-                        }
-                        
-                        
-                    }];
-                    
-                    [monitor release];
+                    monitoredCoordinator = monitor->_monitoredCoordinator;
                 }
             }
             
-            [pool drain];
-        });
-    };
+            // x21
+            NSManagedObjectContext *newBackgroundContextForMonitoredCoordinator = [self->_monitor newBackgroundContextForMonitoredCoordinator];
+            
+            newBackgroundContextForMonitoredCoordinator.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
+            newBackgroundContextForMonitoredCoordinator.transactionAuthor = NSCloudKitMirroringDelegateExportContextName;
+            
+            // x29, #-0x78
+            __block BOOL success = NO;
+            
+            // sp, #0x78
+            __block NSError * _Nullable error = nil;
+            
+            /*
+             __95-[PFCloudKitExporter exportOperationFinished:withSavedRecords:deletedRecordIDs:operationError:]_block_invoke_2
+             self = sp + 0x30
+             retainedMonitoredStore = sp + 0x38
+             savedRecords = sp + 0x40
+             deletedRecordIDs = sp + 0x48
+             nil = sp + 0x50
+             newBackgroundContextForMonitoredCoordinator = sp + 0x58
+             operationID = sp + 0x60
+             error = sp + 0x68
+             success = sp + 0x70
+             */
+            [newBackgroundContextForMonitoredCoordinator performBlockAndWait:^{
+                /*
+                 self = sp + 0x38
+                 */
+#warning TODO 2
+                abort();
+            }];
+            
+            NSString * _Nullable storeIdentifier;
+            {
+                OCCloudKitStoreMonitor * _Nullable monitor = self->_monitor;
+                if (monitor == nil) {
+                    storeIdentifier = nil;
+                } else {
+                    storeIdentifier = monitor->_storeIdentifier;
+                }
+            }
+            
+            // x23
+            OCCloudKitMirroringResult *result = [[OCCloudKitMirroringResult alloc] initWithRequest:self->_request storeIdentifier:storeIdentifier success:success madeChanges:success error:error];
+            self->_operationIDToResult[operationID] = result;
+            
+            if (success) {
+                [self exportIfNecessary];
+            }
+            
+            [result release];
+            [error release];
+        }];
+        
+        [monitor release];
+    }
+    
+    [pool drain];
+}
+
+- (BOOL)modifyRecordsOperationFinishedForStore:(__kindof NSPersistentStore *)store withSavedRecords:(NSArray<CKRecord *> *)savedRecords deletedRecordIDs:(NSArray<CKRecordID *> *)deletedRecordIDs operationError:(NSError *)operationError managedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
+    // x29, #-0x50
+    __block BOOL _succeed = YES;
+    // x29, #-0x38
+    __block NSError * _Nullable _error = nil;
+    /*
+     __142-[PFCloudKitExportContext modifyRecordsOperationFinishedForStore:withSavedRecords:deletedRecordIDs:operationError:managedObjectContext:error:]_block_invoke
+     savedRecords = sp + 0x28
+     store = sp + 0x30
+     managedObjectContext = sp + 0x38
+     self = sp + 0x40
+     deletedRecordIDs = sp + 0x48
+     _succeed = sp + 0x50
+     _error = sp + 0x58
+     */
+    [managedObjectContext performBlockAndWait:^{
+#warning TODO 1
+        abort();
+    }];
+    
+    if (!_succeed) {
+        if (error == nil) {
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        } else {
+            if (error) *error = [[_error retain] autorelease];
+        }
+    }
+    
+    [_error release];
+    return _succeed;
 }
 
 @end
