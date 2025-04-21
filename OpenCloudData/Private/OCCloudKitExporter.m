@@ -753,9 +753,6 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
              error = sp + 0x50 = + 0x40
              */
             [newBackgroundContextForMonitoredCoordinator performBlockAndWait:^{
-#warning TODO __39-[PFCloudKitExporter executeOperation:]_block_invoke이 누락되어 있음 무언가 놓친듯
-                // <+2948>이 -[PFCloudKitExporter executeOperation:]이고, 내가 이걸 무조건 return 해버린 것 같음
-                
                 /*
                  self(block) = sp + 0x20
                  self = sp + 0x10
@@ -1346,7 +1343,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
      operation = x20
      */
     
-    // x29, #0xb0
+    // x29 - #0xb0
     __weak OCCloudKitExporter *weakSelf = self;
     
     if (self->_request.options != nil) {
@@ -1377,8 +1374,97 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
     // x19
     CKOperationID operationID = operation.operationID;
     
-    // <+3632>
-    abort();
+    /*
+     __39-[PFCloudKitExporter executeOperation:]_block_invoke
+     operationID = x29 - 0x80 = x23 + 0x20
+     weakSelf = x29 - 0x78 = x23 + 0x28
+     */
+    operation.modifyRecordsCompletionBlock = ^(NSArray<CKRecord *> * _Nullable savedRecords, NSArray<CKRecordID *> * _Nullable deletedRecordIDs, NSError * _Nullable operationError) {
+        /*
+         self(block) = x23
+         savedRecords = x22
+         deletedRecordIDs = x21
+         operationError = x20
+         */
+        
+        // x19
+        OCCloudKitExporter *loaded = weakSelf;
+        if (loaded == nil) return;
+        
+        
+        /*
+         __39-[PFCloudKitExporter executeOperation:]_block_invoke_2
+         loaded = sp + 0x28 = x21 + 0x20
+         operationID = sp + 0x30 = x21 + 0x28
+         savedRecords = sp + 0x38 = x21 + 0x30
+         deletedRecordIDs = sp + 0x40 = x21 + 0x38
+         operationError = sp + 0x48 = x21 + 0x40
+         */
+        dispatch_async(loaded->_workQueue, ^{
+            /*
+             self = x21
+             */
+            
+            // x19
+            NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+            // x20
+            OCCloudKitExporter *_self = loaded;
+            
+            if (_self != nil) {
+                os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Modify records finished: %@\n%@\n%@", __func__, __LINE__, savedRecords, deletedRecordIDs, operationError);
+                
+                // x23
+                NSString * _Nullable storeIdentifier;
+                {
+                    OCCloudKitStoreMonitor * _Nullable monitor = _self->_monitor;
+                    if (monitor == nil) {
+                        storeIdentifier = nil;
+                    } else {
+                        storeIdentifier = monitor->_storeIdentifier;
+                    }
+                }
+                
+                if (operationError != nil) {
+                    // x21
+                    OCCloudKitMirroringResult *result = [[OCCloudKitMirroringResult alloc] initWithRequest:_self->_request storeIdentifier:storeIdentifier success:NO madeChanges:(loaded->_operationIDToResult.count != 0) error:operationError];
+                    [_self finishExportWithResult:result];
+                    [result release];
+                } else {
+                    // x21
+                    OCCloudKitStoreMonitor *monitor = [_self->_monitor retain];
+                    
+                    /*
+                     __95-[PFCloudKitExporter exportOperationFinished:withSavedRecords:deletedRecordIDs:operationError:]_block_invoke
+                     monitor = sp + 0x20
+                     _self = sp + 0x28
+                     savedRecords = sp + 0x30
+                     deletedRecordIDs = sp + 0x38
+                     nil = sp + 0x40
+                     operationID = sp + 0x48
+                     */
+                    [monitor performBlock:^{
+                        /*
+                         self = x20
+                         */
+                        
+                        // x19
+                        __kindof NSPersistentStore *retainedMonitoredStore = [monitor retainedMonitoredStore];
+                        
+                        if (retainedMonitoredStore == nil) {
+                            // <+400>
+                            abort();
+                        }
+                        
+                        
+                    }];
+                    
+                    [monitor release];
+                }
+            }
+            
+            [pool drain];
+        });
+    };
 }
 
 @end
