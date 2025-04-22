@@ -108,7 +108,7 @@
     Class loopClass = self.class;
     
     while (loopClass) {
-        NSString *description = [self _fd__ivarDescriptionForClass:loopClass];
+        NSString *description = [self _fd__ivarDescriptionForClass:loopClass resolveValue:YES];
         [result appendFormat:@"\n%@", description];
         loopClass = loopClass.superclass;
     }
@@ -123,6 +123,10 @@
 }
 
 - (NSString *)_fd__ivarDescriptionForClass:(Class)arg1 {
+    return [NSObject _fd__ivarDescriptionForClass:arg1 resolveValue:YES];
+}
+
+- (NSString *)_fd__ivarDescriptionForClass:(Class)arg1 resolveValue:(BOOL)resolveValue {
     unsigned int *ivarsCount = new unsigned int;
     Ivar *ivars = class_copyIvarList(arg1, ivarsCount);
     
@@ -136,7 +140,7 @@
             uintptr_t base = reinterpret_cast<uintptr_t>(self);
             ptrdiff_t offset = ivar_getOffset(ivar);
             
-            NSString *propertyString = [self _fd_propertyStringFromBase:base offset:offset name:name encodedType:encodedType];
+            NSString *propertyString = [self _fd_propertyStringFromBase:base offset:offset name:name encodedType:encodedType resolveValue:resolveValue];
             [results appendFormat:@"\n%@", propertyString];
         }
     }
@@ -635,11 +639,16 @@
 #endif
 }
 
-- (NSString *)_fd_propertyStringFromBase:(uintptr_t)base offset:(ptrdiff_t)offset name:(const char *)name encodedType:(const char *)encodedType {
+- (NSString *)_fd_propertyStringFromBase:(uintptr_t)base offset:(ptrdiff_t)offset name:(const char *)name encodedType:(const char *)encodedType resolveValue:(BOOL)resolveValue {
     void *location = reinterpret_cast<void *>(base + offset);
     
     NSString *typeName = [self _fd_decodedTypeFromEncodedType:encodedType];
-    NSString *valueString = [self _fd_valueStringFromLocation:location encodedType:encodedType];
+    NSString * _Nullable valueString;
+    if (resolveValue) {
+        valueString = [self _fd_valueStringFromLocation:location encodedType:encodedType];
+    } else {
+        valueString = @"(ignored)";
+    }
     
     return [NSString stringWithFormat:@"\t%s <%p (0x%lx + 0x%tx)> (%@): %@", name, location, base, offset, typeName, valueString];
 }

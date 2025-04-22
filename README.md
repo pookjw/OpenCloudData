@@ -1,4 +1,2 @@
 - OCCloudKitMirroringDelegate
-    - OCCloudKitExporterDelegate
-    - OCCloudKitExporter
-    - OCCloudKitExportContext
+    - OCCloudKitStoreComparer

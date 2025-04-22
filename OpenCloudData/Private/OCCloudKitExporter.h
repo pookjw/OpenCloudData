@@ -14,8 +14,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-
 @class OCCloudKitExporter;
 @protocol OCCloudKitExporterDelegate <NSObject>
 - (void)exporter:(OCCloudKitExporter *)exporter willScheduleOperations:(NSArray<__kindof CKOperation *> *)operations;
@@ -41,7 +39,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)analyzeHistoryInStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 - (void)executeOperation:(CKModifyRecordsOperation *)operation __attribute__((objc_direct));
 - (void)exportOperationFinished:(CKOperationID)operationID savedRecords:(NSArray<CKRecord *> * _Nullable)savedRecords deletedRecordIDs:(NSArray<CKRecordID *> * _Nullable)deletedRecordIDs operationError:(NSError * _Nullable)operationError __attribute__((objc_direct));
-- (BOOL)modifyRecordsOperationFinishedForStore:(__kindof NSPersistentStore *)store withSavedRecords:(NSArray<CKRecord *> * _Nullable)savedRecords deletedRecordIDs:(NSArray<CKRecordID *> * _Nullable)deletedRecordIDs operationError:(NSError * _Nullable)operationError managedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

@@ -11,6 +11,7 @@
 // ivar 직접 정의해야 하는 것들이 있음
 
 @implementation OCCloudKitMirroringDelegateOptions
+// TODO: sythensize
 
 - (instancetype)init {
     abort();
@@ -20,7 +21,7 @@
     abort();
 }
 
-- (instancetype)initWithCloudKitContainerOptions:(CKContainerOptions *)containerOptions {
+- (instancetype)initWithCloudKitContainerOptions:(OCPersistentCloudKitContainerOptions *)containerOptions {
     abort();
 }
 

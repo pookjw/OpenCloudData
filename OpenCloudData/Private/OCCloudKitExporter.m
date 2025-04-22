@@ -1498,29 +1498,197 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
             newBackgroundContextForMonitoredCoordinator.transactionAuthor = NSCloudKitMirroringDelegateExportContextName;
             
             // x29, #-0x78
-            __block BOOL success = NO;
+            __block BOOL succeed = NO;
             
             // sp, #0x78
             __block NSError * _Nullable error = nil;
             
+            NSError * const _Nullable operationError = nil;
+            
             /*
              __95-[PFCloudKitExporter exportOperationFinished:withSavedRecords:deletedRecordIDs:operationError:]_block_invoke_2
-             self = sp + 0x30
-             retainedMonitoredStore = sp + 0x38
-             savedRecords = sp + 0x40
-             deletedRecordIDs = sp + 0x48
-             nil = sp + 0x50
-             newBackgroundContextForMonitoredCoordinator = sp + 0x58
-             operationID = sp + 0x60
-             error = sp + 0x68
-             success = sp + 0x70
+             self = sp + 0x30 = + 0x20
+             retainedMonitoredStore = sp + 0x38 = + 0x28
+             savedRecords = sp + 0x40 = + 0x30
+             deletedRecordIDs = sp + 0x48 = + 0x38
+             operationError = sp + 0x50 = + 0x40
+             newBackgroundContextForMonitoredCoordinator = sp + 0x58 = + 0x48
+             operationID = sp + 0x60 = + 0x50
+             error = sp + 0x68 = + 0x58
+             succeed = sp + 0x70 = + 0x60
              */
             [newBackgroundContextForMonitoredCoordinator performBlockAndWait:^{
                 /*
                  self = sp + 0x38
                  */
-#warning TODO 2
-                abort();
+                BOOL result = [self->_exportContext modifyRecordsOperationFinishedForStore:retainedMonitoredStore withSavedRecords:savedRecords deletedRecordIDs:deletedRecordIDs operationError:operationError managedObjectContext:newBackgroundContextForMonitoredCoordinator error:&error];
+                
+                if (!result) {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@ - Failed to update metadadata after operation finished (%@): %@", __func__, __LINE__, self, operationID, error);
+                    [error retain];
+                    return;
+                }
+                
+                // sp + 0x40
+                OCCloudKitExporter *_self = self;
+                if (_self == nil) {
+                    succeed = NO;
+                    [error retain];
+                    return;
+                }
+                
+                // x9 / sp + 0x48
+                NSArray<CKRecord *> *_savedRecords = savedRecords;
+                // x23
+                NSArray<CKRecordID *> *_deletedRecordIDs = deletedRecordIDs;
+                // x20 / sp + 0x8
+                __kindof NSPersistentStore *_retainedMonitoredStore = retainedMonitoredStore;
+                // x25
+                NSManagedObjectContext *_newBackgroundContextForMonitoredCoordinator = newBackgroundContextForMonitoredCoordinator;
+                // error = sp + 0x20
+                
+                // sp + 0x118
+                NSError * _Nullable _error = nil;
+                
+                // ?????
+                // sp + 0x30
+                NSMutableDictionary *dictionary_1 = [[NSMutableDictionary alloc] init];
+                // sp + 0x28
+                NSMutableDictionary *dictionary_2 = [[NSMutableDictionary alloc] init];
+                
+                // x22
+                NSDictionary<CKRecordID *, OCCKRecordMetadata *> * _Nullable mapOfMetadata = [OCCKRecordMetadata createMapOfMetadataMatchingRecords:_savedRecords andRecordIDs:_deletedRecordIDs inStore:_retainedMonitoredStore withManagedObjectContext:_newBackgroundContextForMonitoredCoordinator error:&_error];
+                
+                if (mapOfMetadata == nil) {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@ - Failed to fetch metadata for post-export update: %@\n%@\n%@", __func__, __LINE__, _self, _error, _savedRecords, _deletedRecordIDs);
+                    
+                    if (_error != nil) {
+                        error = [_error retain];
+                    } else {
+                        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+                    }
+                    
+                    succeed = NO;
+                    
+                    [mapOfMetadata release];
+                    [dictionary_1 release];
+                    [dictionary_2 release];
+                    
+                    return;
+                }
+                
+                // x28
+                for (CKRecord *record in _savedRecords) {
+                    // original : getCloudKitCKRecordTypeShare
+                    if ([OCCloudKitSerializer isMirroredRelationshipRecordType:record.recordType] || [record.recordType isEqualToString:CKRecordTypeShare]) {
+                        continue;
+                    }
+                    
+                    // x20
+                    OCCKRecordMetadata *metadata = mapOfMetadata[record.recordID];
+                    
+                    if (metadata == nil) {
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Metadata Inconsistency: Missing metadata for record: %@\n", record);
+                        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Metadata Inconsistency: Missing metadata for record: %@", record);
+                        continue;
+                    }
+                    
+                    OCCloudKitArchivingUtilities * _Nullable _archivingUtilities;
+                    {
+                        OCCloudKitExporterOptions * _Nullable options = _self->_options;
+                        if (options == nil) {
+                            _archivingUtilities = nil;
+                        } else {
+                            OCCloudKitMirroringDelegateOptions * _Nullable delegateOptions = options->_options;
+                            if (delegateOptions == nil) {
+                                _archivingUtilities = nil;
+                            } else {
+                                _archivingUtilities = delegateOptions->_archivingUtilities;
+                            }
+                        }
+                    }
+                    
+                    // x28
+                    NSData * _Nullable encodedData = [_archivingUtilities encodeRecord:record error:&_error];
+                    
+                    if (encodedData != nil) {
+                        metadata.encodedRecord = encodedData;
+                        metadata.ckRecordSystemFields = nil;
+                    }
+                    
+                    [encodedData release];
+                    
+                    if (metadata.pendingExportTransactionNumber != nil ){
+                        metadata.lastExportedTransactionNumber = metadata.pendingExportTransactionNumber;
+                        metadata.pendingExportTransactionNumber = nil;
+                    }
+                    
+                    if (encodedData == nil) {
+                        if (_error != nil) {
+                            error = [_error retain];
+                        } else {
+                            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+                            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+                        }
+                        
+                        succeed = NO;
+                        
+                        [mapOfMetadata release];
+                        [dictionary_1 release];
+                        [dictionary_2 release];
+                        
+                        return;
+                    }
+                }
+                
+                for (CKRecordID *recordID in _deletedRecordIDs) {
+                    OCCKRecordMetadata *metadata = mapOfMetadata[recordID];
+                    
+                    if (metadata == nil) {
+                        continue;
+                    }
+                    
+                    [_newBackgroundContextForMonitoredCoordinator deleteObject:metadata];
+                }
+                
+                // x20
+                NSArray<OCCKRecordZoneMoveReceipt *> * _Nullable receipts = [OCCKRecordZoneMoveReceipt moveReceiptsMatchingRecordIDs:_deletedRecordIDs inManagedObjectContext:_newBackgroundContextForMonitoredCoordinator persistentStore:_retainedMonitoredStore error:&_error];
+                
+                if (receipts == nil) {
+                    if (_error != nil) {
+                        error = [_error retain];
+                    } else {
+                        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+                    }
+                    
+                    succeed = NO;
+                    
+                    [mapOfMetadata release];
+                    [dictionary_1 release];
+                    [dictionary_2 release];
+                    
+                    return;
+                }
+                
+                for (OCCKRecordZoneMoveReceipt *receipt in receipts) {
+                    receipt.needsCloudDelete = NO;
+                }
+                
+                result = [newBackgroundContextForMonitoredCoordinator save:&error];
+                
+                if (!result) {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d", __func__, __LINE__);
+                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d", __func__, __LINE__);
+                    
+                    succeed = NO;
+                    [error retain];
+                }
+                
+                [mapOfMetadata release];
+                [dictionary_1 release];
+                [dictionary_2 release];
             }];
             
             NSString * _Nullable storeIdentifier;
@@ -1534,10 +1702,10 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
             }
             
             // x23
-            OCCloudKitMirroringResult *result = [[OCCloudKitMirroringResult alloc] initWithRequest:self->_request storeIdentifier:storeIdentifier success:success madeChanges:success error:error];
+            OCCloudKitMirroringResult *result = [[OCCloudKitMirroringResult alloc] initWithRequest:self->_request storeIdentifier:storeIdentifier success:succeed madeChanges:succeed error:error];
             self->_operationIDToResult[operationID] = result;
             
-            if (success) {
+            if (succeed) {
                 [self exportIfNecessary];
             }
             
@@ -1549,39 +1717,6 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
     }
     
     [pool drain];
-}
-
-- (BOOL)modifyRecordsOperationFinishedForStore:(__kindof NSPersistentStore *)store withSavedRecords:(NSArray<CKRecord *> *)savedRecords deletedRecordIDs:(NSArray<CKRecordID *> *)deletedRecordIDs operationError:(NSError *)operationError managedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
-    // x29, #-0x50
-    __block BOOL _succeed = YES;
-    // x29, #-0x38
-    __block NSError * _Nullable _error = nil;
-    /*
-     __142-[PFCloudKitExportContext modifyRecordsOperationFinishedForStore:withSavedRecords:deletedRecordIDs:operationError:managedObjectContext:error:]_block_invoke
-     savedRecords = sp + 0x28
-     store = sp + 0x30
-     managedObjectContext = sp + 0x38
-     self = sp + 0x40
-     deletedRecordIDs = sp + 0x48
-     _succeed = sp + 0x50
-     _error = sp + 0x58
-     */
-    [managedObjectContext performBlockAndWait:^{
-#warning TODO 1
-        abort();
-    }];
-    
-    if (!_succeed) {
-        if (error == nil) {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-        } else {
-            if (error) *error = [[_error retain] autorelease];
-        }
-    }
-    
-    [_error release];
-    return _succeed;
 }
 
 @end
