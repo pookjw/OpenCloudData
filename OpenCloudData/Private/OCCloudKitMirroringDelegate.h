@@ -41,8 +41,8 @@ NS_ASSUME_NONNULL_BEGIN
     OCDCloudKitClient * _Nullable _coredatadClient; // 0x68
     BOOL _registeredForAccountChangeNotifications; // 0x70
     BOOL _registeredForIdentityUpdateNotifications; // 0x71
-    NSSQLCore *_observedStore; // 0x78
-    NSPersistentStoreCoordinator *_observedCoordinator; // 0x80
+    __weak NSSQLCore *_observedStore; // 0x78
+    __weak NSPersistentStoreCoordinator *_observedCoordinator; // 0x80
     OCCloudKitThrottledNotificationObserver *_accountChangeObserver; // 0x88
     BOOL _setupFinishedMetadataInitialization; // 0x90
     BOOL _registeredForSubscription; // 0x91
@@ -90,6 +90,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)expireActivityVoucher:(OCPersistentCloudKitContainerActivityVoucher *)activityVoucher;
 
 - (void)removeNotificationRegistrations __attribute__((objc_direct));
+- (void)beginActivitiesForRequest:(__kindof OCCloudKitMirroringRequest *)request __attribute__((objc_direct));
+- (void)checkAndExecuteNextRequest __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

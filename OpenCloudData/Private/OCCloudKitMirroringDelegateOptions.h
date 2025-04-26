@@ -48,7 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
     OCCloudKitMetadataPurger *_metadataPurger; // 0x60
     NSString * _Nullable _apsConnectionMachServiceName; // 0x68
     CKOperationConfiguration * _Nullable _defaultOperationConfiguration; // 0x70
-    CKDatabaseScope _databaseScope;
+    CKDatabaseScope _databaseScope; // 0x78
 #warning TODO weak인지?
     __weak NSObject<OCCloudKitMirroringDelegateProgressProvider> *_progressProvider; // 0x80
     @package OCCloudKitArchivingUtilities *_archivingUtilities; // 0x88

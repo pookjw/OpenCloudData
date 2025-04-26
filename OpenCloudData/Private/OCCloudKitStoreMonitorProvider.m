@@ -9,4 +9,8 @@
 
 @implementation OCCloudKitStoreMonitorProvider
 
+- (OCCloudKitStoreMonitor *)createMonitorForObservedStore:(NSSQLCore *)observedStore inTransactionWithLabel:(NSString *)transactionWithLabel {
+    abort();
+}
+
 @end

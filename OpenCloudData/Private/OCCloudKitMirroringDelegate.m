@@ -9,7 +9,11 @@
 #import <OpenCloudData/OCCloudKitLogging.h>
 #import <OpenCloudData/OCCloudKitStoreComparer.h>
 #import <OpenCloudData/Log.h>
+#import <OpenCloudData/OCCloudKitMirroringDelegateResetRequest.h>
+#import <OpenCloudData/OCCloudKitMirroringDelegateWorkBlockContext.h>
 #import <objc/runtime.h>
+
+CK_EXTERN NSString * const CKIdentityUpdateNotification;
 
 @implementation OCCloudKitMirroringDelegate
 @synthesize applicationMonitor = _applicationMonitor;
@@ -221,16 +225,30 @@
          */
         _accountChangeObserver = [[OCCloudKitThrottledNotificationObserver alloc] initWithLabel:@"AccountChangeObserver" handlerBlock:^(NSString * _Nonnull label) {
             /*
-             label = x1
+             label = x20
              */
             
+            // sp + 0x8
             OCCloudKitMirroringDelegate *loaded = weakSelf;
             if (loaded == nil) {
                 return;
             }
             
-            // TODO
-            abort();
+            // x19 / sp + 0x38
+            NSError * _Nullable error;
+            // original : getCloudKitCKIdentityUpdateNotification
+            if ([label isEqualToString:CKIdentityUpdateNotification]) {
+                error = [NSError errorWithDomain:NSCocoaErrorDomain code:134416 userInfo:nil];
+            } else if ([label isEqualToString:CKAccountChangedNotification]) {
+                error = [NSError errorWithDomain:NSCocoaErrorDomain code:134415 userInfo:nil];
+            } else {
+                error = nil;
+            }
+            
+            // sp + 0x30
+            OCCloudKitMirroringDelegateResetRequest *request = [[OCCloudKitMirroringDelegateResetRequest alloc] initWithError:error completionBlock:nil];
+            [loaded _enqueueRequest:request];
+            [request release];
         }];
         if (_accountChangeObserver != nil) {
             _accountChangeObserver->_notificationStalenessInterval = 10;
@@ -296,8 +314,6 @@
     [_lastInitializationError release];
     [_exporterOptions release];
     [_requestManager release];
-    [_observedStore release];
-    [_observedCoordinator release];
     [_sharingUIObserver release];
     [_applicationMonitor release];
     [_accountChangeObserver release];
@@ -312,6 +328,151 @@
 }
 
 - (void)removeNotificationRegistrations {
+    abort();
+}
+
+- (void)_enqueueRequest:(OCCloudKitMirroringRequest *)request __attribute__((objc_direct)) {
+    // inlined from __47-[NSCloudKitMirroringDelegate initWithOptions:]_block_invoke_2
+    
+    /*
+     __47-[NSCloudKitMirroringDelegate _enqueueRequest:]_block_invoke
+     sef = sp + 0x30 = x19 + 0x20
+     request = sp + 0x38 = x19 + 0x28
+     */
+    // original : @"com.apple.coredata.cloudkit.schedule.enqueue", @"CoreData: CloudKit Scheduling"
+    [self _openTransactionWithLabel:@"com.pookjw.openclouddata.cloudkit.schedule.enqueue" assertionLabel:@"OpenCloudData: CloudKit Scheduling" andExecuteWorkBlock:^(OCCloudKitMirroringDelegateWorkBlockContext *context) {
+        /*
+         self(block) = x19
+         context = x20
+         */
+        
+        os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: enqueuing request: %@", __func__, __LINE__, self, request);
+        
+        // x21
+        OCCloudKitStoreMonitorProvider * _Nullable storeMonitorProvider;
+        {
+            if (self == nil) {
+                storeMonitorProvider = nil;
+            } else {
+                OCCloudKitMirroringDelegateOptions * _Nullable options = self->_options;
+                if (options == nil) {
+                    storeMonitorProvider = nil;
+                } else {
+                    storeMonitorProvider = options->_storeMonitorProvider;
+                }
+            }
+        }
+        
+        NSSQLCore * _Nullable observedStore = self->_observedStore;
+        
+        NSString * _Nullable transactionLabel;
+        {
+            if (context == nil) {
+                transactionLabel = nil;
+            } else {
+                transactionLabel = context->_transactionLabel;
+            }
+        }
+        
+        // x20
+        OCCloudKitStoreMonitor *monitor = [storeMonitorProvider createMonitorForObservedStore:observedStore inTransactionWithLabel:transactionLabel];
+        
+        /*
+         __47-[NSCloudKitMirroringDelegate _enqueueRequest:]_block_invoke.193
+         monitor = sp + 0x28 = x20 + 0x20
+         sef = sp + 0x30 = x20 + 0x28
+         request = sp + 0x38 = x20 + 0x30
+         */
+        [monitor performBlock:^{
+            /*
+             self(block) = x20
+             */
+            
+            // x19
+            NSSQLCore *retainedMonitoredStore = [monitor retainedMonitoredStore];
+            if (retainedMonitoredStore == nil) {
+                // x21
+                NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:134407 userInfo:@{
+                    NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Request '%@' was cancelled because the store was removed from the coordinator.", request.requestIdentifier]
+                }];
+                
+                // x21
+                OCCloudKitMirroringResult *result = [[OCCloudKitMirroringResult alloc] initWithRequest:request storeIdentifier:self->_observedStoreIdentifier success:NO madeChanges:NO error:error];
+                
+                [request invokeCompletionBlockWithResult:result];
+                [result release];
+                [retainedMonitoredStore release];
+                return;
+            }
+            
+            // sp + 0x8
+            NSError * _Nullable error = nil;
+            
+            OCCloudKitMirroringRequestManager * _Nullable requestManager;
+            {
+                if (self == nil) {
+                    requestManager = nil;
+                } else {
+                    requestManager = self->_requestManager;
+                }
+            }
+            
+            // x23/w23
+            BOOL result = [requestManager enqueueRequest:request error:&error];
+            if (!result) {
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to enqueue request: %@\n%@", __func__, __LINE__, request, error);
+                // x21
+                OCCloudKitMirroringResult *result = [[OCCloudKitMirroringResult alloc] initWithRequest:request storeIdentifier:self->_observedStoreIdentifier success:NO madeChanges:NO error:error];
+                
+                [request invokeCompletionBlockWithResult:result];
+                [result release];
+                [retainedMonitoredStore release];
+                return;
+            }
+            
+            os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Enqueued request: %@", __func__, __LINE__, request);
+            [self beginActivitiesForRequest:request];
+            [self checkAndExecuteNextRequest];
+            [retainedMonitoredStore release];
+        }];
+        
+        [monitor release];
+    }];
+}
+
+// -[NSCloudKitMirroringDelegate _openTransactionWithLabel:assertionLabel:andExecuteWorkBlock:]
+- (void)_openTransactionWithLabel:(NSString *)label assertionLabel:(NSString *)assertionLabel andExecuteWorkBlock:(void (^)(OCCloudKitMirroringDelegateWorkBlockContext *context))executeWorkBlock __attribute__((objc_direct)) {
+    /*
+     self = x20
+     label = x22
+     assertionLabel = x21
+     executeWorkBlock = x19
+     */
+    
+    // x21
+    OCCloudKitMirroringDelegateWorkBlockContext *context = [[OCCloudKitMirroringDelegateWorkBlockContext alloc] initWithTransactionLabel:label powerAssertionLabel:assertionLabel];
+    
+    /*
+     __92-[NSCloudKitMirroringDelegate _openTransactionWithLabel:assertionLabel:andExecuteWorkBlock:]_block_invoke
+     context = sp + 0x20 = x21 + 0x20
+     executeWorkBlock = sp + 0x28 = x21 + 0x28
+     */
+    dispatch_async(_cloudKitQueue, ^{
+        // self(block) = x21
+        // x20
+        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+        executeWorkBlock(context);
+        [pool drain];
+    });
+    
+    [context release];
+}
+
+- (void)beginActivitiesForRequest:(__kindof OCCloudKitMirroringRequest *)request {
+    abort();
+}
+
+- (void)checkAndExecuteNextRequest {
     abort();
 }
 

@@ -9,4 +9,8 @@
 
 @implementation OCCloudKitMirroringRequestManager
 
+- (BOOL)enqueueRequest:(__kindof OCCloudKitMirroringRequest *)request error:(NSError * _Nullable *)error {
+    abort();
+}
+
 @end
