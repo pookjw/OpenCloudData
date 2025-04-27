@@ -9,4 +9,9 @@
 
 @implementation OCCloudKitExportedRecordBytesMetric
 
+- (NSString *)name {
+#warning TODO 바꿔도 되나?
+    return @"com.apple.coredata.cloudkit.exportedRecordBytes";
+}
+
 @end

@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NSPersistentStore (Private)
 - (NSObject<NSPersistentStoreMirroringDelegate> * _Nullable)mirroringDelegate;
+- (NSPersistentStoreCoordinator * _Nullable)_persistentStoreCoordinator;
 @end
 
 NS_ASSUME_NONNULL_END

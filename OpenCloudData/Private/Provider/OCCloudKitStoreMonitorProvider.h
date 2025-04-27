@@ -10,8 +10,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-
 @interface OCCloudKitStoreMonitorProvider : NSObject
 - (OCCloudKitStoreMonitor *)createMonitorForObservedStore:(NSSQLCore *)observedStore inTransactionWithLabel:(NSString *)transactionWithLabel __attribute__((objc_direct)) NS_RETURNS_RETAINED;
 @end

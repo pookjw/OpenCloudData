@@ -9,7 +9,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CKContainerOptions : NSObject <NSSecureCoding, NSCopying>
+@interface CKContainerOptions : NSObject </*CKPropertiesDescription, CKSQLiteItem, */NSSecureCoding, NSCopying>
 
 @end
 

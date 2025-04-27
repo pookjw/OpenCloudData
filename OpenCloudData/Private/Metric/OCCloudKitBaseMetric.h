@@ -9,9 +9,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-
-@interface OCCloudKitBaseMetric : NSObject
+@interface OCCloudKitBaseMetric : NSObject {
+    NSString *_containerIdentifier; // 0x8
+    NSString *_processName; // 0x10
+}
+@property (retain, nonatomic, readonly) NSString *name;
+@property (nonatomic, readonly) NSDictionary<NSString *, id> *payload;
 - (instancetype)initWithContainerIdentifier:(NSString *)containerIdentifier;
 @end
 

@@ -10,6 +10,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSSQLEntity : NSStoreMapping
+- (NSEntityDescription *)entityDescription;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -6,7 +6,12 @@
 //
 
 #import <OpenCloudData/OCCloudKitMetricsClient.h>
+#import <OpenCloudData/Log.h>
 
 @implementation OCCloudKitMetricsClient
+
+- (void)logMetric:(OCCloudKitBaseMetric *)metric {
+    abort();
+}
 
 @end

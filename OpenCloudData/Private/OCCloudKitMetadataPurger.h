@@ -5,14 +5,15 @@
 //  Created by Jinwoo Kim on 4/22/25.
 //
 
-#import <Foundation/Foundation.h>
+#import <OpenCloudData/OCCloudKitStoreMonitor.h>
+#import <OpenCloudData/NSSQLCore.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 #warning TODO
 
 @interface OCCloudKitMetadataPurger : NSObject
-
+- (BOOL)purgeMetadataFromStore:(NSSQLCore *)store inMonitor:(OCCloudKitStoreMonitor *)monitor withOptions:(NSUInteger)options forRecordZones:(NSArray<CKRecordZoneID *> *)recordZones inDatabaseWithScope:(CKDatabaseScope)databaseScope andTransactionAuthor:(NSString *)transactionAuthor error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

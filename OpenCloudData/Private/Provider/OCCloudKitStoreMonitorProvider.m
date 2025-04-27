@@ -10,7 +10,7 @@
 @implementation OCCloudKitStoreMonitorProvider
 
 - (OCCloudKitStoreMonitor *)createMonitorForObservedStore:(NSSQLCore *)observedStore inTransactionWithLabel:(NSString *)transactionWithLabel {
-    abort();
+    return [[OCCloudKitStoreMonitor alloc] initForStore:observedStore];
 }
 
 @end

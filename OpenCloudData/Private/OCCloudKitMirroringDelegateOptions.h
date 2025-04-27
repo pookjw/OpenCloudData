@@ -21,8 +21,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO Nullable
-
 @interface OCCloudKitMirroringDelegateOptions : NSObject <NSCopying> {
     BOOL _initializeSchema; // 0x8
     BOOL _useDeviceToDeviceEncryption; // 0x9
@@ -49,7 +47,6 @@ NS_ASSUME_NONNULL_BEGIN
     NSString * _Nullable _apsConnectionMachServiceName; // 0x68
     CKOperationConfiguration * _Nullable _defaultOperationConfiguration; // 0x70
     CKDatabaseScope _databaseScope; // 0x78
-#warning TODO weak인지?
     __weak NSObject<OCCloudKitMirroringDelegateProgressProvider> *_progressProvider; // 0x80
     @package OCCloudKitArchivingUtilities *_archivingUtilities; // 0x88
     NSArray<OCPersistentCloudKitContainerActivityVoucher *> *_activityVouchers; // 0x90
