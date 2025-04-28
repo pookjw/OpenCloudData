@@ -105,4 +105,8 @@ NSString * const OCCKRecordIDAttributeName = @"ckRecordID";
     return entityIDToPrimaryKeySet;
 }
 
++ (NSManagedObjectModel *)newMetadataModelForFrameworkVersion:(NSNumber *)version {
+    abort();
+}
+
 @end

@@ -13,6 +13,7 @@
 #import <OpenCloudData/OCCKMetadataEntry.h>
 #import <OpenCloudData/OCCloudKitMetadataModel.h>
 #import <OpenCloudData/OCCKImportPendingRelationship.h>
+#import <OpenCloudData/OCCKEvent.h>
 #import <OpenCloudData/_PFRoutines.h>
 #import <OpenCloudData/Log.h>
 @import ellekit;
@@ -425,6 +426,183 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
     }
     
     return _succeed;
+}
+
+- (BOOL)purgeMetadataAfterAccountChangeFromStore:(NSSQLCore *)store inMonitor:(OCCloudKitStoreMonitor *)monitor inDatabaseWithScope:(CKDatabaseScope)databaseScope error:(NSError * _Nullable *)error {
+    /*
+     store = x22
+     databaseScope = x21
+     error = x20
+     */
+    
+    // x29, #-0x60
+    __block BOOL _succeed = NO;
+    // sp, #0x50
+    __block NSError * _Nullable _error = nil;
+    // x19
+    NSManagedObjectContext *context = [monitor newBackgroundContextForMonitoredCoordinator];
+    context.transactionAuthor = NSCloudKitMirroringDelegateResetSyncAuthor;
+    
+    /*
+     __105-[PFCloudKitMetadataPurger purgeMetadataAfterAccountChangeFromStore:inMonitor:inDatabaseWithScope:error:]_block_invoke
+     store = sp + 0x28 = x19 + 0x20
+     context = sp + 0x30 = x19 + 0x28
+     _succeed = sp + 0x38 = x19 + 0x30
+     _error = sp + 0x40 = x19 + 0x38
+     databaseScope = sp + 0x48 = x19 + 0x40
+     */
+    [context performBlockAndWait:^{
+        /*
+         self = x19
+         */
+        // sp, #0x148
+        NSError * _Nullable __error = nil;
+        // x20
+        NSManagedObjectModel *managedObjectModel = [store _persistentStoreCoordinator].managedObjectModel;
+        // sp + 0x30
+        NSArray<NSEntityDescription *> *entities = [[managedObjectModel entitiesForConfiguration:store.configurationName] retain];
+        
+        // x24
+        for (NSEntityDescription *entity in entities) {
+            os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@ - Removing rows after account change: %@", __func__, __LINE__, context.transactionAuthor, entity.name);
+            
+            // x24
+            NSBatchDeleteRequest *request = [[NSBatchDeleteRequest alloc] initWithFetchRequest:[NSFetchRequest fetchRequestWithEntityName:entity.name]];
+            request.affectedStores = @[store];
+            request.resultType = NSBatchDeleteResultTypeStatusOnly;
+            
+            NSBatchDeleteResult * _Nullable result = [context executeRequest:request error:&__error];
+            BOOL boolValue = ((NSNumber *)result.result).boolValue;
+            
+            if (!boolValue) {
+                _succeed = NO;
+                [request release];
+                _error = [__error retain];
+                [entities release];
+                return;
+            }
+            
+            [request release];
+        }
+        
+        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
+        const void *_getPFBundleVersionNumber = MSFindSymbol(image, "+[_PFRoutines _getPFBundleVersionNumber]");
+        const void *__PFModelMapPathForEntity = MSFindSymbol(image, "__PFModelMapPathForEntity");
+        NSNumber *version = ((id (*)(Class))_getPFBundleVersionNumber)(objc_lookUpClass("_PFRoutines"));
+        // x20 / sp + 0x38
+        NSManagedObjectModel *model = [OCCloudKitMetadataModel newMetadataModelForFrameworkVersion:version];
+        // x28
+        NSMutableSet<NSString *> *set = [[NSMutableSet alloc] init];
+//            [set addObject:NSStringFromClass([OCCKMetadataEntry class])];
+//            [set addObject:NSStringFromClass([OCCKRecordZoneMetadata class])];
+//            [set addObject:NSStringFromClass([OCCKDatabaseMetadata class])];
+//            [set addObject:NSStringFromClass([OCCKEvent class])];
+        // Core Data와 호환성을 갖기 위함
+        [set addObject:NSStringFromClass(objc_lookUpClass("NSCKMetadataEntry"))];
+        [set addObject:NSStringFromClass(objc_lookUpClass("NSCKRecordZoneMetadata"))];
+        [set addObject:NSStringFromClass(objc_lookUpClass("NSCKDatabaseMetadata"))];
+        [set addObject:NSStringFromClass(objc_lookUpClass("NSCKEvent"))];
+        
+        // x26
+        for (NSEntityDescription *entity in model) {
+            if ([set containsObject:entity.name]) {
+                continue;
+            }
+            
+            NSString *entityPath = ((id (*)(id))__PFModelMapPathForEntity)(entity);
+            // x24
+            NSBatchDeleteRequest *request = [[NSBatchDeleteRequest alloc] initWithFetchRequest:[NSFetchRequest fetchRequestWithEntityName:entityPath]];
+            request.resultType = NSBatchDeleteResultTypeObjectIDs;
+            request.affectedStores = @[store];
+            
+            // x27
+            NSBatchDeleteResult * _Nullable result = [context executeRequest:request error:&__error];
+            [request release];
+            
+            if (result.result == nil) {
+                _succeed = NO;
+                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to purge cloudkit metadata entity (%@): %@", __func__, __LINE__, entity.name, __error);
+                [model release];
+                [set release];
+                _error = [__error retain];
+                [entities release];
+                return;
+            }
+            
+            os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@ - Removed cloud metadata after account change %@", __func__, __LINE__, context.transactionAuthor, entity.name);
+            
+            // x24
+            NSArray<NSManagedObjectID *> * _Nullable deletedObjectIDs = result.result;
+            
+            if (deletedObjectIDs.count != 0) {
+                [NSManagedObjectContext mergeChangesFromRemoteContextSave:@{NSDeletedObjectsKey: deletedObjectIDs} intoContexts:@[context]];
+            }
+        }
+        
+        [model release];
+        [set release];
+        
+        // x21
+        OCCKDatabaseMetadata * _Nullable metadata = [OCCKDatabaseMetadata databaseMetadataForScope:databaseScope forStore:store inContext:context error:&__error];
+        if (metadata == nil) {
+            _succeed = NO;
+            _error = [__error retain];
+            [entities release];
+            return;
+        }
+        
+        metadata.currentChangeToken = nil;
+        metadata.hasSubscription = NO;
+        
+        // x21
+        NSSet<OCCKRecordZoneMetadata *> *recordZones = metadata.recordZones;
+        for (OCCKRecordZoneMetadata *metadata in recordZones) {
+            metadata.currentChangeToken = nil;
+            metadata.hasRecordZone = NO;
+            metadata.hasSubscription = NO;
+            metadata.supportsFetchChanges = NO;
+            metadata.supportsAtomicChanges = NO;
+            metadata.supportsRecordSharing = NO;
+        }
+        
+        NSDictionary<NSString *, OCCKMetadataEntry *> * _Nullable entries = [OCCKMetadataEntry entriesForKeys:@[NSCloudKitMirroringDelegateLastHistoryTokenKey, NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey, NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey] fromStore:store inManagedObjectContext:context error:&__error];
+        
+        if (entries == nil) {
+            _succeed = NO;
+            _error = [__error retain];
+            [entities release];
+            return;
+        }
+        
+        for (OCCKMetadataEntry *entry in entries.allValues) {
+            [context deleteObject:entry];
+        }
+        
+        _succeed = [context save:&__error];
+        if (!_succeed) {
+            _error = [__error retain];
+        }
+        
+        [entities release];
+    }];
+    
+    if (!_succeed) {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        } else {
+            if (error != NULL) {
+                *error = [[_error retain] autorelease];
+            }
+        }
+    }
+    
+    [_error release];
+    return _succeed;
+}
+
+- (BOOL)deleteZoneMetadataFromStore:(NSSQLCore *)store inMonitor:(OCCloudKitStoreMonitor *)monitor forRecordZones:(NSArray<CKRecordZoneID *> *)recordZones inDatabaseWithScope:(CKDatabaseScope)databaseScope error:(NSError * _Nullable *)error {
+    abort();
 }
 
 - (BOOL)_wipeSystemFieldsAndResetUploadStateForMetadataInZoneWithID:(CKRecordZoneID *)zoneID inDatabaseWithScope:(CKDatabaseScope)databaseScope inStore:(NSSQLCore *)store usingContext:(NSManagedObjectContext *)context error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) {
