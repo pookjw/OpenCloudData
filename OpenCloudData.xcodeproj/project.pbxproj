@@ -72,6 +72,7 @@
 				Private/Model/OCCKDatabaseMetadata.h,
 				Private/Model/OCCKEvent.h,
 				Private/Model/OCCKHistoryAnalyzerState.h,
+				Private/Model/OCCKImportPendingRelationship.h,
 				Private/Model/OCCKMetadataEntry.h,
 				Private/Model/OCCKMirroredRelationship.h,
 				Private/Model/OCCKRecordMetadata.h,

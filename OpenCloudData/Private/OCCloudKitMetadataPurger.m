@@ -12,6 +12,7 @@
 #import <OpenCloudData/OCCKRecordMetadata.h>
 #import <OpenCloudData/OCCKMetadataEntry.h>
 #import <OpenCloudData/OCCloudKitMetadataModel.h>
+#import <OpenCloudData/OCCKImportPendingRelationship.h>
 #import <OpenCloudData/_PFRoutines.h>
 #import <OpenCloudData/Log.h>
 @import ellekit;
@@ -340,8 +341,19 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
             // x26
             NSArray<OCCKRecordMetadata *> * _Nullable results = [context executeFetchRequest:fetchRequest error:&_error];
             if (results == nil) {
-                // <+612>
-                abort();
+                _succeed = NO;
+                [_error retain];
+                
+#warning TODO: Error Leak
+                BOOL result = [context save:&_error];
+                if (!result) {
+                    [_error retain];
+                    _succeed = NO;
+                }
+                
+                [context reset];
+                [set release];
+                break;
             }
             
             // x28
@@ -349,12 +361,53 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
                 if (metadata.ckRecordName != nil) {
                     [set addObject:metadata.ckRecordName];
                 }
-                // <+484>
-                abort();
+                
+                metadata.recordZone.currentChangeToken = nil;
+                metadata.recordZone.lastFetchDate = nil;
+                metadata.recordZone.database.currentChangeToken = nil;
+                metadata.recordZone.database.lastFetchDate = nil;
+                [context deleteObject:metadata];
             }
+            
+            NSArray<NSString *> *entityNames = @[
+                [OCCKMirroredRelationship entityPath],
+                [OCCKImportPendingRelationship enentityPath]
+            ];
+            
+            for (NSString *entityName in entityNames) {
+                NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:entityName];
+                fetchRequest.predicate = [NSPredicate predicateWithFormat:@"recordName IN %@ OR relatedRecordName IN %@", set, set];
+                
+                // x28
+                NSBatchDeleteRequest *request = [[NSBatchDeleteRequest alloc] initWithFetchRequest:fetchRequest];
+                request.resultType = NSBatchDeleteResultTypeStatusOnly;
+                request.affectedStores = @[store];
+                request.resultType = NSBatchDeleteResultTypeStatusOnly;
+                
+                NSBatchDeleteResult * _Nullable result = [context executeRequest:request error:&_error];
+                BOOL boolValue = ((NSNumber *)result.result).boolValue;
+                
+                if (boolValue) {
+                    [request release];
+                } else {
+                    _succeed = NO;
+                    [_error retain];
+                    [request release];
+                    break;
+                }
+            }
+            
+#warning TODO: Error Leak
+                BOOL result = [context save:&_error];
+                if (!result) {
+                    [_error retain];
+                    _succeed = NO;
+                }
+                
+                [context reset];
+                [set release];
+                break;
         }
-        
-        abort();
     }];
     
     if (!_succeed) {
