@@ -57,6 +57,7 @@
     __block NSError * _Nullable _error = nil;
     
     /*
+     __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke
      sp + 0x28 = store = x19 + 0x20
      sp + 0x30 = managedObjectContext = x19 + 0x28
      sp + 0x38 = self = x19 + 0x30
@@ -110,6 +111,7 @@
         __block NSUInteger count_2 = 0;
         
         /*
+         __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke.14
          sp + 0x140 = store = x20 + 0x20
          sp + 0x148 = objectIDs_2 = x20 + 0x28
          sp + 0x150 = objectIDs_0_1 = x20 + 0x30
@@ -211,6 +213,7 @@
             } else {
                 if (count_0_1 >= 500) {
                     /*
+                     __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke.15
                      x10 = entityIDToReferenceData64Set
                      x11 = store
                      x13 = managedObjectContext
@@ -259,6 +262,7 @@
                 
                 if (count_2 >= 500) {
                     /*
+                     __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke_2
                      x11 = tokenNumber
                      x10 = entityIDToReferenceData64Set
                      x12 = managedObjectContext
@@ -310,6 +314,8 @@
         
         if (_succeed) {
             /*
+             __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke_3
+             
              storeTokens = sp + 0xe0 = x19 + 0x20
              
              <q0>
@@ -350,6 +356,9 @@
             }];
             
             if (_succeed) {
+                /*
+                 __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke_4
+                 */
                 [objc_lookUpClass("_PFRoutines") wrapBlockInGuardedAutoreleasePool:^{
                     // sp + 0x20
                     NSExpression *needsUploadExpr = [NSExpression expressionForConstantValue:@(YES)];
@@ -383,6 +392,7 @@
         
         if (_succeed) {
             /*
+             __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke.28
              objectIDs_0_1 = sp + 0x28 = x19 + 0x20
              q0 = x19, #0x20
              -> store = x19 + 0x30
@@ -418,6 +428,7 @@
                         [objectIDs_0_1 removeObject:objectID];
                         
                         /*
+                         __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke_2.29
                          managedObjectContext = sp + 0x298 = x19 + 0x20
                          objectID = sp + 0x2a0 = x19 + 0x28
                          
@@ -640,6 +651,7 @@
                         }
                         
                         /*
+                         __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke.45
                          zoneID = sp + 0x1c0 = x20 + 0x20
                          tokenNumber = sp + 0x1c8 = x20 + 0x28
                          managedObjectContext = sp + 0x1d0 = x20 + 0x30
@@ -732,6 +744,9 @@
                     
                     const void *symbol = MSFindSymbol(image, "+[_PFRoutines efficientlyEnumerateManagedObjectsInFetchRequest:usingManagedObjectContext:andApplyBlock:]");
                     
+                    /*
+                     __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke_3.57
+                     */
                     ((void (*)(Class, id, id, id))symbol)(objc_lookUpClass("_PFRoutines"), fetchRequest, managedObjectContext, ^(NSArray<OCCKRecordZoneMoveReceipt *> * _Nullable receipts, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
                         /*
                          self = x20
@@ -821,6 +836,7 @@
                     if (zoneMetadata == nil) {
                         _succeed = NO;
                         [_error retain];
+                        [zoneID release];
                         return;
                     }
                     
@@ -859,6 +875,9 @@
                         // sp + 0x170
                         __block NSArray<NSArray<NSNumber *> *> *arrayOfPrimaryKeysAndEntityIDs;
                         // x20 / sp + 0x38
+                        /*
+                         __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke_2.48
+                         */
                         NSSQLBlockRequestContext *requestCpntext = [[objc_lookUpClass("NSSQLBlockRequestContext") alloc] initWithBlock:^(NSSQLStoreRequestContext * _Nonnull context) {
                             const void *symbol = MSFindSymbol(image, "-[NSSQLiteConnection createArrayOfPrimaryKeysAndEntityIDsForRowsWithoutRecordMetadataWithEntity:metadataEntity:]");
                             arrayOfPrimaryKeysAndEntityIDs = ((id (*)(Class, id, id))symbol)(objc_lookUpClass("NSSQLiteConnection"), entry, recordMetadataEntity);
@@ -959,8 +978,8 @@
                         }
                     }
                     
+                    [zoneID release];
                     [model release];
-                    
                     
                     if (_succeed) {
                         final();
@@ -1169,12 +1188,14 @@
         if (metadata == nil) {
             hasError = YES;
             [contextError retain];
+            [zoneID release];
             break;
         }
         
         metadata.needsUpload = YES;
         metadata.pendingExportTransactionNumber = transactionNumner;
         metadata.pendingExportChangeTypeNumber = @0;
+        [zoneID release];
     }
     
     if (hasError) {

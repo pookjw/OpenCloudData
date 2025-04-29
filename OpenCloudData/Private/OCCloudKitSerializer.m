@@ -25,4 +25,8 @@
     abort();
 }
 
++ (NSSet<NSManagedObjectID *> *)createSetOfObjectIDsRelatedToObject:(NSManagedObject *)object {
+    abort();
+}
+
 @end

@@ -8,6 +8,7 @@
 #import <OpenCloudData/OCCKMetadataEntry.h>
 #import <OpenCloudData/OCCloudKitMetadataModel.h>
 #import <OpenCloudData/Log.h>
+#import <objc/runtime.h>
 
 @implementation OCCKMetadataEntry
 @dynamic boolValueNum;
@@ -18,7 +19,8 @@
 @dynamic dateValue;
 
 + (NSString *)entityPath {
-    return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(self)];
+//    return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(self)];
+    return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(objc_lookUpClass("NSCKMetadataEntry"))];
 }
 
 + (OCCKMetadataEntry *)entryForKey:(NSString *)key fromStore:(__kindof NSPersistentStore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
@@ -110,19 +112,19 @@
 }
 
 + (OCCKMetadataEntry *)insertMetadataEntryWithKey:(NSString *)key stringValue:(NSString *)stringValue forStore:(__kindof NSPersistentStore *)store intoManagedObjectContext:(NSManagedObjectContext *)managedObjectContext {
-    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry _insertMetadataEntryWithKey:key forStore:store intoManagedObjectContext:managedObjectContext];
+    OCCKMetadataEntry *entry = [OCCKMetadataEntry _insertMetadataEntryWithKey:key forStore:store intoManagedObjectContext:managedObjectContext];
     entry.stringValue = stringValue;
     return entry;
 }
 
 + (OCCKMetadataEntry *)insertMetadataEntryWithKey:(NSString *)key boolValue:(BOOL)boolValue forStore:(__kindof NSPersistentStore *)store intoManagedObjectContext:(NSManagedObjectContext *)managedObjectContext {
-    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry _insertMetadataEntryWithKey:key forStore:store intoManagedObjectContext:managedObjectContext];
+    OCCKMetadataEntry *entry = [OCCKMetadataEntry _insertMetadataEntryWithKey:key forStore:store intoManagedObjectContext:managedObjectContext];
     entry.boolValue = boolValue;
     return entry;
 }
 
-+ (OCCKMetadataEntry * _Nullable)_insertMetadataEntryWithKey:(NSString *)key forStore:(__kindof NSPersistentStore *)store intoManagedObjectContext:(NSManagedObjectContext *)managedObjectContext __attribute__((objc_direct)) {
-    OCCKMetadataEntry * _Nullable entry = [NSEntityDescription insertNewObjectForEntityForName:[OCCKMetadataEntry entityPath] inManagedObjectContext:managedObjectContext];
++ (OCCKMetadataEntry *)_insertMetadataEntryWithKey:(NSString *)key forStore:(__kindof NSPersistentStore *)store intoManagedObjectContext:(NSManagedObjectContext *)managedObjectContext __attribute__((objc_direct)) {
+    OCCKMetadataEntry *entry = [NSEntityDescription insertNewObjectForEntityForName:[OCCKMetadataEntry entityPath] inManagedObjectContext:managedObjectContext];
     entry.key = key;
     [managedObjectContext assignObject:entry toPersistentStore:store];
     return entry;

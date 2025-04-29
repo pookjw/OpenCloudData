@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (retain, nonatomic, nullable) NSPredicate* predicate;
 @property (retain, nonatomic, nullable) CKQueryCursor* queryCursor;
 
-- (CKQuery *)createQueryForUpdatingRecords __attribute__((objc_direct));
+- (CKQuery *)createQueryForUpdatingRecords __attribute__((objc_direct)) NS_RETURNS_RETAINED;
 @end
 
 NS_ASSUME_NONNULL_END

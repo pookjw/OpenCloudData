@@ -6,6 +6,8 @@
 //
 
 #import <OpenCloudData/OCCKEvent.h>
+#import <OpenCloudData/OCCloudKitMetadataModel.h>
+#import <objc/runtime.h>
 
 @implementation OCCKEvent
 @dynamic entityPath;
@@ -20,7 +22,8 @@
 @dynamic countFinishedObjects;
 
 + (NSString *)entityPath {
-    return @"CloudKit/NSCKEvent";
+//    return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(self)];
+    return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(objc_lookUpClass("NSCKEvent"))];
 }
 
 @end

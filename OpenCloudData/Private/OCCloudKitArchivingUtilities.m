@@ -17,4 +17,8 @@
     abort();
 }
 
+- (NSData *)newArchivedDataForSystemFieldsOfRecord:(CKRecord *)record {
+    abort();
+}
+
 @end

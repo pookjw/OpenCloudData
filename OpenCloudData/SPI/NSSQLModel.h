@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NSSQLModel : NSStoreMapping
 - (NSSQLEntity * _Nullable)entityNamed:(NSString *)entityName;
+- (instancetype)initWithManagedObjectModel:(NSManagedObjectModel *)managedObjectModel;
 @end
 
 NS_ASSUME_NONNULL_END

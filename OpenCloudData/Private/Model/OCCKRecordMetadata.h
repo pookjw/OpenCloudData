@@ -11,9 +11,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-// direct method 있음
-
 @class OCCKRecordZoneMetadata;
 
 @interface OCCKRecordMetadata : NSManagedObject

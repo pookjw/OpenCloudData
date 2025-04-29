@@ -110,7 +110,8 @@
 }
 
 + (NSString *)entityPath {
-    return [NSString stringWithFormat:@"%@/%@", OCCloudKitMetadataModel.ancillaryModelNamespace, NSStringFromClass(self)];
+//    return [NSString stringWithFormat:@"%@/%@", OCCloudKitMetadataModel.ancillaryModelNamespace, NSStringFromClass(self)];
+    return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(objc_lookUpClass("NSCKRecordMetadata"))];
 }
 
 + (OCCKRecordMetadata *)insertMetadataForObject:(NSManagedObject *)object setRecordName:(BOOL)setRecordName inZoneWithID:(CKRecordZoneID *)zoneID recordNamePrefix:(NSString *)recordNamePrefix error:(NSError * _Nullable *)error {
@@ -1132,6 +1133,8 @@
         os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: NCKRecordMetadata: System fields record name doesn't match row: %@\n%@\n%@\n", self.ckRecordName, record, self);
         os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: NCKRecordMetadata: System fields record name doesn't match row: %@\n%@\n%@\n", self.ckRecordName, record, self);
         [record release];
+        [unarchiver finishDecoding];
+        [unarchiver release];
         return nil;
     }
     
@@ -1139,6 +1142,8 @@
         os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: NSCKRecordMetadata: System fields record type doesn't match new schema: %@\n%@\n%@", self.ckRecordName, record.recordID, self);
         os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: NSCKRecordMetadata: System fields record type doesn't match new schema: %@\n%@\n%@", self.ckRecordName, record.recordID, self);
         [record release];
+        [unarchiver finishDecoding];
+        [unarchiver release];
         return nil;
     }
     

@@ -10,7 +10,7 @@
 @implementation OCCloudKitMirroringDelegateResetRequest
 
 - (instancetype)initWithError:(NSError *)error completionBlock:(void (^)(OCCloudKitMirroringResult * _Nonnull))requestCompletionBlock {
-    if ([super initWithOptions:nil completionBlock:requestCompletionBlock]) {
+    if (self = [super initWithOptions:nil completionBlock:requestCompletionBlock]) {
         _causedByError = [error retain];
     }
     

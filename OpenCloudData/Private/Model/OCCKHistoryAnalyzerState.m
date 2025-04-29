@@ -10,6 +10,7 @@
 #import <OpenCloudData/NSSQLEntity.h>
 #import <OpenCloudData/NSSQLCore.h>
 #import <OpenCloudData/Log.h>
+#import <objc/runtime.h>
 @import ellekit;
 
 @implementation OCCKHistoryAnalyzerState
@@ -23,7 +24,8 @@
 @dynamic finalChangeAuthor;
 
 + (NSString *)entityPath {
-    return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(self)];
+//    return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(self)];
+    return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(objc_lookUpClass("NSCKHistoryAnalyzerState"))];
 }
 
 + (BOOL)purgeAnalyzedHistoryFromStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {

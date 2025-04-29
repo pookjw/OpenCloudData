@@ -8,6 +8,7 @@
 #import <OpenCloudData/OCCKRecordZoneQuery.h>
 #import <OpenCloudData/OCCloudKitMetadataModel.h>
 #import <OpenCloudData/OCCKRecordZoneMetadata.h>
+#import <objc/runtime.h>
 
 @implementation OCCKRecordZoneQuery
 @dynamic recordZone;
@@ -18,7 +19,8 @@
 @dynamic queryCursor;
 
 + (NSString *)entityPath {
-    return [NSString stringWithFormat:@"%@/%@", OCCloudKitMetadataModel.ancillaryModelNamespace, NSStringFromClass(self)];
+//    return [NSString stringWithFormat:@"%@/%@", OCCloudKitMetadataModel.ancillaryModelNamespace, NSStringFromClass(self)];
+    return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(objc_lookUpClass("NSCKRecordZoneQuery"))];
 }
 
 + (OCCKRecordZoneQuery *)zoneQueryForRecordType:(CKRecordType)recordType inZone:(OCCKRecordZoneMetadata *)zone inStore:(__kindof NSPersistentStore *)store managedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {

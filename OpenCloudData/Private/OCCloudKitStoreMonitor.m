@@ -132,6 +132,8 @@
         assert(_persistentStoreIdentifiersIvar != NULL);
         [old_persistentStoreIdentifiers release];
         ptrdiff_t offset = ivar_getOffset(_persistentStoreIdentifiersIvar);
+        // Analyzer 무시해도 됨
+        [*(id *)((uintptr_t)context + offset) release];
         *(id *)((uintptr_t)context + offset) = [@[_storeIdentifier] copy];
     } else {
         os_log_fault(_OCLogGetLogStream(0x11), "fault: Attempt to create context without a store identifier.\n");

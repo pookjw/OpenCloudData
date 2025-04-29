@@ -69,9 +69,12 @@
 				Private/Metric/OCCloudKitBaseMetric.h,
 				Private/Metric/OCCloudKitExportedRecordBytesMetric.h,
 				Private/Metric/OCCloudKitSizeMetric.h,
+				Private/Migration/OCCloudKitMetadataMigrationContext.h,
+				Private/Migration/OCCloudKitMetadataModelMigrator.h,
 				Private/Model/OCCKDatabaseMetadata.h,
 				Private/Model/OCCKEvent.h,
 				Private/Model/OCCKHistoryAnalyzerState.h,
+				Private/Model/OCCKImportOperation.h,
 				Private/Model/OCCKImportPendingRelationship.h,
 				Private/Model/OCCKMetadataEntry.h,
 				Private/Model/OCCKMirroredRelationship.h,
@@ -117,8 +120,14 @@
 				Private/Request/OCCloudKitMirroringRequest.h,
 				Private/Request/OCCloudKitMirroringRequestOptions.h,
 				Private/Request/OCCloudKitMirroringResult.h,
+				Private/ValueTransformers/OCCKRecordZoneQueryCursorTransformer.h,
+				Private/ValueTransformers/OCCKRecordZoneQueryPredicateTransformer.h,
+				Private/ValueTransformers/OCCloudKitMetadataValueTransformer.h,
 				SPI/_NSPersistentHistoryToken.h,
 				SPI/_PFAncillaryModelFactory.h,
+				SPI/_PFBackgroundRuntimeVoucher.h,
+				SPI/_PFClassicBackgroundRuntimeVoucher.h,
+				SPI/_PFModelMap.h,
 				SPI/_PFRoutines.h,
 				"SPI/CKContainer+Private.h",
 				SPI/CKContainerID.h,
@@ -140,6 +149,9 @@
 				SPI/NSPersistentStoreMirroringDelegate.h,
 				SPI/NSSQLCore.h,
 				SPI/NSSQLEntity.h,
+				SPI/NSSQLiteAdapter.h,
+				SPI/NSSQLiteConnection.h,
+				SPI/NSSQLiteStatement.h,
 				SPI/NSSQLModel.h,
 				SPI/NSSQLModelProvider.h,
 				SPI/NSSQLStoreRequestContext.h,
@@ -360,7 +372,7 @@
 				TargetAttributes = {
 					4F2422D72D99522D005BA6EA = {
 						CreatedOnToolsVersion = 16.3;
-						LastSwiftMigration = 1630;
+						LastSwiftMigration = 1640;
 					};
 					4FB2FAE72D99668A0065C5B3 = {
 						CreatedOnToolsVersion = 16.3;

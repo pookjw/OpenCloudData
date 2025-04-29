@@ -671,6 +671,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
         if (error == nil) {
             os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
             os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            [_error release];
         } else {
             if (error) *error = [_error autorelease];
         }
@@ -950,6 +951,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                 /* <3524> */
                 // inlined
                 [self executeOperation:operation];
+                [operation release];
             }];
             
             [newBackgroundContextForMonitoredCoordinator release];
@@ -1232,7 +1234,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
             OCCloudKitHistoryAnalyzerOptions *options = [[OCCloudKitHistoryAnalyzerOptions alloc] init];
             options.request = self->_request;
             
-            // x19
+            // x19 / x22
             OCCloudKitHistoryAnalyzer *analyzer = [[OCCloudKitHistoryAnalyzer alloc] initWithOptions:options managedObjectContext:managedObjectContext];
             
             os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: Exporting changes since (%d): %@", __func__, __LINE__, self, boolValue, transformedValue);
@@ -1270,6 +1272,8 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                     }
                 }
                 
+                [options release];
+                [analyzer release];
                 [pool release];
                 [_error autorelease];
                 return _succeed;
@@ -1279,6 +1283,8 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
             assert(object_getInstanceVariable(analyzerContext, "_finalHistoryToken", (void **)&finalHistoryToken) != NULL);
             if (finalHistoryToken == nil) {
                 _succeed = YES;
+                [options release];
+                [analyzer release];
                 [pool release];
                 return _succeed;
             }
@@ -1290,6 +1296,8 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                 _succeed = NO;
                 [_error retain];
                 
+                [options release];
+                [analyzer release];
                 [pool release];
                 [_error autorelease];
                 return _succeed;
@@ -1303,6 +1311,8 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                 [_error retain];
                 _succeed = NO;
                 
+                [options release];
+                [analyzer release];
                 [pool release];
                 [_error autorelease];
                 return _succeed;
@@ -1324,6 +1334,9 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                 
                 [managedObjectContext reset];
             }
+            
+            [options release];
+            [analyzer release];
         }
     } @catch (NSException *exception) {
         _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{@"NSUnderlyingException": @"Export encountered a fatal exception while analyzing history."}];
@@ -1405,6 +1418,18 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
             [self exportOperationFinished:operationID savedRecords:savedRecords deletedRecordIDs:deletedRecordIDs operationError:operationError];
         });
     };
+    
+    CKDatabase * _Nullable database;
+    {
+        OCCloudKitExporterOptions * _Nullable options = self->_options;
+        if (options == nil) {
+            database = nil;
+        } else {
+            database = options->_database;
+        }
+    }
+    
+    [database addOperation:operation];
 }
 
 - (void)exportOperationFinished:(CKOperationID)operationID savedRecords:(NSArray<CKRecord *> *)savedRecords deletedRecordIDs:(NSArray<CKRecordID *> *)deletedRecordIDs operationError:(NSError *)operationError {

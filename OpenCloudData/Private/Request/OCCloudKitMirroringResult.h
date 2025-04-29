@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (retain, readonly, nonatomic) NSString* storeIdentifier;
 
 // original : (readonly, nonatomic)
-@property (retain, readonly, nonatomic) __kindof OCCloudKitMirroringResult *request;
+@property (retain, readonly, nonatomic) __kindof OCCloudKitMirroringRequest *request;
 
 @property (readonly, nonatomic) BOOL success;
 @property (readonly, nonatomic) BOOL madeChanges;

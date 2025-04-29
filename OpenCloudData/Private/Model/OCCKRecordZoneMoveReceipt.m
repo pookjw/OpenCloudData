@@ -9,6 +9,7 @@
 #import <OpenCloudData/OCCloudKitMetadataModel.h>
 #import <OpenCloudData/Log.h>
 #import <CloudKit/CloudKit.h>
+#import <objc/runtime.h>
 @import ellekit;
 
 @implementation OCCKRecordZoneMoveReceipt
@@ -20,7 +21,8 @@
 @dynamic recordMetadata;
 
 + (NSString *)entityPath {
-    return [NSString stringWithFormat:@"%@/%@", OCCloudKitMetadataModel.ancillaryModelNamespace, NSStringFromClass(self)];
+//    return [NSString stringWithFormat:@"%@/%@", OCCloudKitMetadataModel.ancillaryModelNamespace, NSStringFromClass(self)];
+    return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(objc_lookUpClass("NSCKRecordZoneMoveReceipt"))];
 }
 
 - (CKRecordID *)createRecordIDForMovedRecord {

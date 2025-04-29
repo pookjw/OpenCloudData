@@ -254,7 +254,12 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
             [set addObject:NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey];
         }
         
-        if (set.count == 0) return;
+        if (set.count == 0) {
+            [set release];
+            [entities release];
+            [recordZonesSet release];
+            return;
+        }
         
         NSDictionary<NSString *,OCCKMetadataEntry *> * _Nullable entries = [OCCKMetadataEntry entriesForKeys:set.allObjects fromStore:store inManagedObjectContext:managedObjectContext error:&__error];
         if (entries == nil) {
@@ -273,11 +278,12 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
         _succeed = [managedObjectContext save:&_error];
         if (!_succeed) {
             _error = [__error retain];;
-            [set release];
-            [entities release];
-            [recordZonesSet release];
-            return;
         }
+        
+        [set release];
+        [entities release];
+        [recordZonesSet release];
+        return;
     }];
     
     if (!_succeed) {
@@ -409,6 +415,8 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
                 [set release];
                 break;
         }
+        
+        [map release];
     }];
     
     if (!_succeed) {
@@ -602,7 +610,91 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
 }
 
 - (BOOL)deleteZoneMetadataFromStore:(NSSQLCore *)store inMonitor:(OCCloudKitStoreMonitor *)monitor forRecordZones:(NSArray<CKRecordZoneID *> *)recordZones inDatabaseWithScope:(CKDatabaseScope)databaseScope error:(NSError * _Nullable *)error {
-    abort();
+    /*
+     store = x22
+     recordZones = x23
+     databaseScope = x21
+     error = x20
+     */
+    
+    // x29 - 0x70
+    __block BOOL _succeed = NO;
+    // sp, #0x50
+    __block NSError * _Nullable _error = nil;
+    // x19
+    NSManagedObjectContext *context = [monitor newBackgroundContextForMonitoredCoordinator];
+    
+    context.transactionAuthor = NSCloudKitMirroringDelegateResetSyncAuthor;
+    
+    /*
+     __107-[PFCloudKitMetadataPurger deleteZoneMetadataFromStore:inMonitor:forRecordZones:inDatabaseWithScope:error:]_block_invoke
+     recordZones = sp + 0x20 = x19 + 0x20
+     store = sp + 0x28 = x19 + 0x28
+     context = sp + 0x30 = x19 + 0x30
+     _succeed = sp + 0x38 = x19 + 0x38
+     _error = sp + 0x40 = x19 + 0x40
+     databaseScope = sp + 0x48 = x19 + 0x48
+     */
+    [context performBlockAndWait:^{
+        /*
+         self = x19
+         */
+        
+        // sp + 0x58
+        NSError * _Nullable __error = nil;
+        
+        // x20
+        NSMutableSet<CKRecordZoneID *> *set = [[NSMutableSet alloc] initWithArray:recordZones];
+        
+        if (set.count == 0) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Asked to purge zone metadata (trying to recreate after the purge) without any zones from which to purge.\n");
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Asked to purge zone metadata (trying to recreate after the purge) without any zones from which to purge.\n");
+        }
+        
+        // x25
+        for (CKRecordZoneID *zondID in set) {
+            // x26
+            OCCKRecordZoneMetadata * _Nullable metadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:zondID inDatabaseWithScope:databaseScope forStore:store inContext:context error:&__error];
+            
+            if (metadata == nil) {
+                if (__error == nil) {
+                    _succeed = NO;
+                    _error = [__error retain];
+                    [set release];
+                    return;
+                }
+            } else {
+                if (metadata.records.count != 0) {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Attempting to delete a zone metadata that has records (%ld): %@ - %@\n", databaseScope, store.URL, zondID);
+                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Attempting to delete a zone metadata that has records (%ld): %@ - %@\n", databaseScope, store.URL, zondID);
+                }
+                
+                [context deleteObject:metadata];
+            }
+        }
+        
+        _succeed = [context save:&__error];
+        if (!_succeed) {
+            _error = [__error retain];
+        }
+        [set release];
+    }];
+    
+    if (!_succeed) {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        } else {
+            if (error != NULL) {
+                *error = [[_error retain] autorelease];
+            }
+        }
+    }
+    
+    [_error release];
+    [context release];
+    
+    return _succeed;
 }
 
 - (BOOL)_wipeSystemFieldsAndResetUploadStateForMetadataInZoneWithID:(CKRecordZoneID *)zoneID inDatabaseWithScope:(CKDatabaseScope)databaseScope inStore:(NSSQLCore *)store usingContext:(NSManagedObjectContext *)context error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) {

@@ -7,6 +7,7 @@
 
 #import <OpenCloudData/OCCKDatabaseMetadata.h>
 #import <OpenCloudData/OCCloudKitMetadataModel.h>
+#import <objc/runtime.h>
 
 @implementation OCCKDatabaseMetadata
 @dynamic hasSubscriptionNum;
@@ -71,7 +72,8 @@
 }
 
 + (NSString *)entityPath {
-    return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(self)];
+//    return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(self)];
+    return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(objc_lookUpClass("NSCKDatabaseMetadata"))];
 }
 
 - (BOOL)hasSubscription {
