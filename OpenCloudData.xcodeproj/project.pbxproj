@@ -147,6 +147,7 @@
 				"SPI/NSPersistentStoreCoordinator+Private.h",
 				"SPI/NSPersistentStoreDescription+Private.h",
 				SPI/NSPersistentStoreMirroringDelegate.h,
+				SPI/NSSQLBlockRequestContext.h,
 				SPI/NSSQLCore.h,
 				SPI/NSSQLEntity.h,
 				SPI/NSSQLiteAdapter.h,

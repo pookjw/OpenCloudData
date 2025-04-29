@@ -312,7 +312,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
      */
     
     // x29 - #0x60
-    __block BOOL _succeed = NO;
+    __block BOOL _succeed = YES;
     // sp + 0x50
     __block NSError * _Nullable _error = nil;
     
@@ -444,7 +444,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
      */
     
     // x29, #-0x60
-    __block BOOL _succeed = NO;
+    __block BOOL _succeed = YES;
     // sp, #0x50
     __block NSError * _Nullable _error = nil;
     // x19
@@ -618,7 +618,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
      */
     
     // x29 - 0x70
-    __block BOOL _succeed = NO;
+    __block BOOL _succeed = YES;
     // sp, #0x50
     __block NSError * _Nullable _error = nil;
     // x19

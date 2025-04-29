@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
     OCCloudKitMetricsClient *_metricsClient; // 0x28
 }
 - (instancetype)initWithStore:(NSSQLCore *)store metadataContext:(NSManagedObjectContext *)metadataContext databaseScope:(CKDatabaseScope)databaseScope metricsClient:(OCCloudKitMetricsClient *)metricsClient;
-- (BOOL)checkAndPerformMigrationIfNecessary:(NSError * _Nullable * _Nullable)error  __attribute__((objc_direct));
+- (BOOL)checkAndPerformMigrationIfNecessary:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

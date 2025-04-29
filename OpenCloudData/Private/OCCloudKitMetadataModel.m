@@ -23,6 +23,7 @@
 #import <objc/runtime.h>
 @import ellekit;
 
+#warning TODO original 쓸지
 NSString * const OCCKRecordIDAttributeName = @"ckRecordID";
 NSString * const OCCKRecordZoneQueryCursorTransformerName = @"com.pookjw.openclouddata.cloudkit.query.cursor";
 NSString * const OCCKRecordZoneQueryPredicateTransformerName = @"com.pookjw.openclouddata.cloudkit.predicate";

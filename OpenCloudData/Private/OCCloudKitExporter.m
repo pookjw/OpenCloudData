@@ -529,7 +529,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
      */
     
     // sp, #0x88
-    __block BOOL _succeed = NO;
+    __block BOOL _succeed = YES;
     // sp, #0x58
     __block NSError * _Nullable _error = nil;
     // x20

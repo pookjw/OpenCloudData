@@ -11,7 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSSQLBlockRequestContext : NSSQLStoreRequestContext
-- (instancetype)initWithBlock:(void (^)(NSSQLStoreRequestContext *context))block context:(NSManagedObjectContext *)context sqlCore:(NSSQLCore *)sqlCore;
+- (instancetype)initWithBlock:(void (^)(NSSQLStoreRequestContext *context))block context:(NSManagedObjectContext * _Nullable)context sqlCore:(NSSQLCore *)sqlCore;
 @end
 
 NS_ASSUME_NONNULL_END
