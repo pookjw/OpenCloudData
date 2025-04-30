@@ -12,7 +12,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 #warning TODO
 
-@interface OCCloudKitMetadataMigrationContext : NSObject
+@interface OCCloudKitMetadataMigrationContext : NSObject {
+    @package BOOL _needsMetdataMigrationToNSCKRecordMetadata; // 0x21
+    @package BOOL _needsImportAfterClientMigration; // 0x24
+    @package BOOL _needsBatchUpdateForSystemFieldsAndLastExportedTransaction; // 0x25
+}
 @property (strong, nonatomic, nullable, direct) NSManagedObjectModel *currentModel; // 0x30
 @property (strong, nonatomic, nullable, direct) NSSQLModel *sqlModel; // 0x38
 @property (strong, nonatomic, nullable, direct) NSManagedObjectModel *storeMetadataModel; // 0x40

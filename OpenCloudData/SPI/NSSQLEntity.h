@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface NSSQLEntity : NSStoreMapping
 - (NSEntityDescription *)entityDescription;
 - (NSArray<NSRelationshipDescription *> *)manyToManyRelationships;
+- (NSString *)tableName;
 @end
 
 NS_ASSUME_NONNULL_END

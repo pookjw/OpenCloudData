@@ -139,6 +139,7 @@
 				SPI/CKScheduler.h,
 				SPI/CKSchedulerActivity.h,
 				SPI/NSCloudKitMirroringDelegate.h,
+				SPI/NSKnownKeysDictionary.h,
 				"SPI/NSManagedObjectContext+Private.h",
 				"SPI/NSManagedObjectID+Private.h",
 				"SPI/NSPersistentContainer+Private.h",

@@ -846,8 +846,9 @@
                     
                     // original : NSPersistentStoreMirroringDelegateOptionKey
                     NSSQLModel *mirroringModel = [store ancillarySQLModels][@"NSPersistentStoreMirroringDelegateOptionKey"];
-#warning OC로 해야 하나?
+                    
                     // sp + 0x20
+//                    NSSQLEntity *recordMetadataEntity = [mirroringModel entityNamed:@"OCCKRecordMetadata"];
                     NSSQLEntity *recordMetadataEntity = [mirroringModel entityNamed:@"NSCKRecordMetadata"];
                     
                     // sp + 0x28

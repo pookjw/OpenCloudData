@@ -12,6 +12,7 @@
 #import <OpenCloudData/NSSQLiteConnection.h>
 #import <OpenCloudData/OCCloudKitMetadataModel.h>
 #import <OpenCloudData/NSSQLModel.h>
+#import <OpenCloudData/NSKnownKeysDictionary.h>
 #import <objc/runtime.h>
 @import ellekit;
 
@@ -244,8 +245,9 @@ COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigr
     __block NSError * _Nullable _error = nil;
     
     const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-    const void *_getPFBundleVersionNumber = MSFindSymbol(image, "+[_PFRoutines _getPFBundleVersionNumber]");
-    NSNumber *version = ((id (*)(Class))_getPFBundleVersionNumber)(objc_lookUpClass("_PFRoutines"));
+    const void *_PFRoutines_getPFBundleVersionNumber = MSFindSymbol(image, "+[_PFRoutines _getPFBundleVersionNumber]");
+    const void *NSSQLiteConnection_hasTableWithName_isTemp_ = MSFindSymbol(image, "-[NSSQLiteConnection _hasTableWithName:isTemp:]");
+    NSNumber *version = ((id (*)(Class))_PFRoutines_getPFBundleVersionNumber)(objc_lookUpClass("_PFRoutines"));
     
     // x22
     NSManagedObjectModel *model = [OCCloudKitMetadataModel newMetadataModelForFrameworkVersion:version];
@@ -263,12 +265,77 @@ COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigr
     self->_context.storeMetadataModel = storeMetadataModel;
     self->_context.storeSQLModel = storeSQLModel;
     
-#warning TODO
-    if ([self->_store.metadata objectForKey:PFCloudKitMetadataNeedsZoneFetchAfterClientMigrationKey] == nil) {
-        // <+404>
-        abort();
+    if ([self->_store.metadata objectForKey:PFCloudKitMetadataNeedsZoneFetchAfterClientMigrationKey] != nil) {
+        OCCloudKitMetadataMigrationContext * _Nullable context = self->_context;
+        if (context != nil) {
+            context->_needsImportAfterClientMigration = _succeed;
+        }
     }
-    // <+404>
+    
+//    NSSQLEntity *sqlEntity = [sqlModel entityNamed:NSStringFromClass([OCCKMetadataEntry class])];
+    NSSQLEntity *sqlEntity = [sqlModel entityNamed:NSStringFromClass(objc_lookUpClass("NSCKMetadataEntry"))];
+    NSString *tableName = [sqlEntity tableName];
+    BOOL hasTable = ((BOOL (*)(id, id, BOOL))NSSQLiteConnection_hasTableWithName_isTemp_)(connection, tableName, NO);
+    
+    if (hasTable) {
+        NSKnownKeysDictionary<NSString *, NSSQLEntity *> *entitiesByName;
+        assert(object_getInstanceVariable(sqlModel, "_entitiesByName", (void **)&entitiesByName) != NULL);
+        
+        // sp + 0xc8
+        __block BOOL mutated = NO;
+        /*
+         __70-[PFCloudKitMetadataModelMigrator prepareContextWithConnection:error:]_block_invoke
+         */
+        [entitiesByName enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull entityName, NSSQLEntity * _Nonnull entity, BOOL * _Nonnull stop) {
+            abort();
+        }];
+        
+        if (mutated) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Migration discovered mutated entity IDs, precomputing z_ent changes.", __func__, __LINE__);
+            _succeed = [self computeAncillaryEntityPrimaryKeyTableEntriesForStore:self->_store error:&_error];
+            
+            if (!_succeed) {
+                [_error retain];
+            }
+        }
+        
+        /*
+         __70-[PFCloudKitMetadataModelMigrator prepareContextWithConnection:error:]_block_invoke.8
+         */
+        [self->_metadataContext performBlockAndWait:^{
+            abort();
+        }];
+    } else {
+        OCCloudKitMetadataMigrationContext * _Nullable context = self->_context;
+        if (context != nil) {
+            context->_needsMetdataMigrationToNSCKRecordMetadata = YES;
+            context->_needsBatchUpdateForSystemFieldsAndLastExportedTransaction = YES;
+        }
+    }
+    
+    [model release];
+    [sqlModel release];
+    [storeMetadataModel release];
+    [storeSQLModel release];
+    
+    if (!_succeed) {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+        } else {
+            if (error != NULL) {
+                *error = [[_error retain] autorelease];
+            }
+        }
+    }
+    
+    [_error release];
+    
+    // <+1036>
+    return _succeed;
+}
+
+- (BOOL)computeAncillaryEntityPrimaryKeyTableEntriesForStore:(NSSQLCore *)store error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) {
     abort();
 }
 
