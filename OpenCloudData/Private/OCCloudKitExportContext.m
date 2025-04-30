@@ -1149,8 +1149,8 @@
     
     if (fetchedObjects == nil) {
         if (contextError == nil) {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error) *error = contextError;
         }
@@ -1201,8 +1201,8 @@
     
     if (hasError) {
         if (contextError == nil) {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error) *error = [contextError autorelease];
         }
@@ -1566,8 +1566,8 @@
                                         continue;
                                     }
                                 } else {
-                                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Fetched dirty zone that didn't need a share update or delete: %@\n", metadata);
-                                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Fetched dirty zone that didn't need a share update or delete: %@\n", metadata);
+                                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Fetched dirty zone that didn't need a share update or delete: %@\n", metadata);
+                                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Fetched dirty zone that didn't need a share update or delete: %@\n", metadata);
                                     [zoneID release];
                                     [share release];
                                     continue;
@@ -1837,8 +1837,8 @@
         [_error release];
     } else {
         if (_error == nil) {
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error) *error = [_error autorelease];
         }

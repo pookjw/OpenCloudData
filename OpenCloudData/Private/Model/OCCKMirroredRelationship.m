@@ -134,8 +134,8 @@
         if (_error != nil) {
             if (error) *error = _error;
         } else {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         }
         
         return NO;
@@ -228,8 +228,8 @@
         NSError *_error = [[contextError retain] autorelease];
         
         if (_error == nil) {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else if (error) {
             *error = _error;
         }
@@ -263,8 +263,8 @@
     
     if (results == nil) {
         if (contextError == nil) {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else if (error) {
             *error = contextError;
         }
@@ -300,8 +300,8 @@
     if (results == nil) return nil;
     
     if (results.count > 2) {
-        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Found more than one mirrored relationship matching a many to many: %@\n%@\n", manyToManyRelationship, results);
-        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Found more than one mirrored relationship matching a many to many: %@\n%@\n", manyToManyRelationship, results);
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Found more than one mirrored relationship matching a many to many: %@\n%@\n", manyToManyRelationship, results);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Found more than one mirrored relationship matching a many to many: %@\n%@\n", manyToManyRelationship, results);
     }
     
     return results.lastObject;
@@ -455,8 +455,8 @@
     
     if (hasError) {
         if (contextError == nil) {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error) *error = contextError;
         }
@@ -510,8 +510,8 @@
             NSArray<OCCKMirroredRelationship *> * _Nullable relationships = [managedObjectContext executeFetchRequest:fetchRequest error:&contextError];
             if (relationships == nil) {
                 if (contextError == nil) {
-                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
                 } else {
                     if (error) {
                         *error = contextError;
@@ -559,8 +559,8 @@
     
     if (fetchedRelationships == nil) {
         if (_error == nil) {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error) *error = _error;
         }
@@ -579,8 +579,8 @@
             recodsByRecordID[record.recordID] = record;
             [recordIDs addObject:record.recordID];
         } else {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Attempted to update a mirrored relationship with a non-mirrored-relationship record: %@\n", record);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Attempted to update a mirrored relationship with a non-mirrored-relationship record: %@\n", record);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Attempted to update a mirrored relationship with a non-mirrored-relationship record: %@\n", record);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Attempted to update a mirrored relationship with a non-mirrored-relationship record: %@\n", record);
         }
     }
     
@@ -626,8 +626,8 @@
         if (_error != nil) {
             if (error) *error = _error;
         } else {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         }
         
         return NO;

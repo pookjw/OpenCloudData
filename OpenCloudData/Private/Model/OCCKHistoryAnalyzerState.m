@@ -50,8 +50,8 @@
     
     if (status) {
         if (_error == nil) {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error) *error = _error;
         }
@@ -92,7 +92,7 @@
 
 - (NSDictionary *)tombstone {
     os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Tombstones aren't supported yet for CloudKit history analysis\\n");
-    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Tombstones aren't supported yet for CloudKit history analysis\\n");
+    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Tombstones aren't supported yet for CloudKit history analysis\\n");
     return nil;
 }
 

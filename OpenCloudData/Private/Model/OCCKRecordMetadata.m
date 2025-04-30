@@ -60,8 +60,8 @@
         return result;
     } else {
         if (_error == nil) {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             [_error autorelease];
             if (error) {
@@ -96,8 +96,8 @@
     
     if (record == nil) {
         if (_error == nil) {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             [_error autorelease];
             if (error) *error = _error;
@@ -134,8 +134,8 @@
     // x25
     CKDatabaseScope databaseScope;
     if (mirroringDelegate == nil) {
-        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Attempting to query cloudkit metadata without a mirroring delegate: %@\n", persistentStore);
-        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Attempting to query cloudkit metadata without a mirroring delegate: %@\n", persistentStore);
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Attempting to query cloudkit metadata without a mirroring delegate: %@\n", persistentStore);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Attempting to query cloudkit metadata without a mirroring delegate: %@\n", persistentStore);
         databaseScope = 0;
     } else {
         OCCloudKitMirroringDelegateOptions *options = mirroringDelegate->_options;
@@ -206,8 +206,8 @@
     
     if (metadataObject == nil) {
         if (_error == nil) {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error) *error = _error;
         }
@@ -281,8 +281,8 @@
     OCCKRecordMetadata * _Nullable lastMetadata = metadataArray.lastObject;
     
     if (metadataArray.count > 1) {
-        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Found more than one instance of NSCKRecordMetadata for object: %s\n%s\n", [object.description cStringUsingEncoding:NSUTF8StringEncoding], [metadataArray.description cStringUsingEncoding:NSUTF8StringEncoding]);
-        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Found more than one instance of NSCKRecordMetadata for object: %s\n%s\n", [object.description cStringUsingEncoding:NSUTF8StringEncoding], [metadataArray.description cStringUsingEncoding:NSUTF8StringEncoding]);
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Found more than one instance of NSCKRecordMetadata for object: %s\n%s\n", [object.description cStringUsingEncoding:NSUTF8StringEncoding], [metadataArray.description cStringUsingEncoding:NSUTF8StringEncoding]);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Found more than one instance of NSCKRecordMetadata for object: %s\n%s\n", [object.description cStringUsingEncoding:NSUTF8StringEncoding], [metadataArray.description cStringUsingEncoding:NSUTF8StringEncoding]);
     }
     
     return lastMetadata;
@@ -331,8 +331,8 @@
     
     if (results == nil) {
         if (contextError == nil) {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error) {
                 *error = [[contextError retain] autorelease];
@@ -447,8 +447,8 @@
     
     if (objectIDToRecordMetadata == nil) {
         if (contextError == nil) {
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error) {
                 *error = [[contextError retain] autorelease];
@@ -508,8 +508,8 @@
         
         // result가 되어야 할 것 같은데, assembly를 보면 sp + x18의 -autorelease 값을 검사하고 있음
         if (_error == nil) {
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error) *error = _error;
         }
@@ -529,8 +529,8 @@
     // x24
     OCCloudKitMirroringDelegate * _Nullable mirroringDelegate = (OCCloudKitMirroringDelegate *)store.mirroringDelegate;
     if (mirroringDelegate == nil) {
-        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Attempting to query cloudkit metadata without a mirroring delegate: %@\n", store);
-        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Attempting to query cloudkit metadata without a mirroring delegate: %@\n", store);
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Attempting to query cloudkit metadata without a mirroring delegate: %@\n", store);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Attempting to query cloudkit metadata without a mirroring delegate: %@\n", store);
     }
     
     // sp + 0xd8
@@ -581,8 +581,8 @@
         [zoneIDToRecordNamesSet release];
         
         if (_error == nil) {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error) *error = _error;
         }
@@ -629,8 +629,8 @@
         [results release];
         
         if (_error == nil) {
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error) *error = _error;
         }
@@ -662,8 +662,8 @@
     // sp + 0x48
     CKDatabaseScope databaseScope;
     if (mirroringDelegate == nil) {
-        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Attempting to query cloudkit metadata without a mirroring delegate: %@\n", store);
-        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Attempting to query cloudkit metadata without a mirroring delegate: %@\n", store);
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Attempting to query cloudkit metadata without a mirroring delegate: %@\n", store);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Attempting to query cloudkit metadata without a mirroring delegate: %@\n", store);
         databaseScope = 0;
     } else {
         databaseScope = mirroringDelegate->_options.databaseScope;
@@ -697,8 +697,8 @@
             OCCKRecordZoneMetadata * _Nullable recordZoneMetadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:zoneID inDatabaseWithScope:databaseScope forStore:store inContext:managedObjectContext error:&_error];
             if (recordZoneMetadata == nil) {
                 if (_error == nil) {
-                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
                 } else {
                     if (error) *error = _error;
                 }
@@ -731,8 +731,8 @@
             OCCKRecordZoneMetadata * _Nullable recordZoneMetadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:zoneID inDatabaseWithScope:databaseScope forStore:store inContext:managedObjectContext error:&_error];
             if (recordZoneMetadata == nil) {
                 if (_error == nil) {
-                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
                 } else {
                     if (error) *error = _error;
                 }
@@ -788,8 +788,8 @@
         copy = [recordIDToRecordMetadata copy];
     } else {
         if (_error == nil) {
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             [_error retain];
             if (error) *error = [[_error retain] autorelease];
@@ -863,8 +863,8 @@
         [contextError autorelease];
         
         if (contextError == nil) {
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error) *error = contextError;
         }
@@ -977,8 +977,8 @@
         [results release];
         
         if (contextError == nil) {
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else if (error) {
             *error = [[contextError retain] autorelease];
         }

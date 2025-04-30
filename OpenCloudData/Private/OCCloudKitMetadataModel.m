@@ -105,8 +105,8 @@ NSArray<Class> * _oc_PFModelMap_ancillaryModelFactoryClasses_custom(Class self, 
         __kindof NSPersistentStore *persistentStore = [objectID.persistentStore retain];
         if (store != nil) {
             if (![persistentStore.identifier isEqualToString:store.identifier]) {
-                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Somehow got a temporary objectID for export: %s\n", [objectID.description cStringUsingEncoding:NSUTF8StringEncoding]);
-                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Somehow got a temporary objectID for export: %s\n", [objectID.description cStringUsingEncoding:NSUTF8StringEncoding]);
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Somehow got a temporary objectID for export: %s\n", [objectID.description cStringUsingEncoding:NSUTF8StringEncoding]);
+                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Somehow got a temporary objectID for export: %s\n", [objectID.description cStringUsingEncoding:NSUTF8StringEncoding]);
                 [persistentStore release];
                 continue;
             }
@@ -205,8 +205,8 @@ NSArray<Class> * _oc_PFModelMap_ancillaryModelFactoryClasses_custom(Class self, 
     
     if (!result) {
         if (_error == nil) {
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error != NULL) {
                 *error = _error;

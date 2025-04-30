@@ -28,8 +28,8 @@ NSString * const OCPersistentCloudKitContainerEventUserInfoKey = @"event";
         case 2:
             return @"Export";
         default:
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Unknown event type, cannot covert to string: %ld\n", type);
             os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Unknown event type, cannot covert to string: %ld\n", type);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Unknown event type, cannot covert to string: %ld\n", type);
             return nil;
     }
 }
