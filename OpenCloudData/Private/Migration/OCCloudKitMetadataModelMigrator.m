@@ -13,8 +13,8 @@
 #import <OpenCloudData/OCCloudKitMetadataModel.h>
 #import <OpenCloudData/NSSQLModel.h>
 #import <OpenCloudData/NSKnownKeysDictionary.h>
+#import <OpenCloudData/OCSPIResolver.h>
 #import <objc/runtime.h>
-@import ellekit;
 
 COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigrationKey;
 
@@ -111,10 +111,7 @@ COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigr
                                                                                                            context:nil
                                                                                                            sqlCore:_store];
     
-    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-    const void *symbol = MSFindSymbol(image, "-[NSManagedObjectContext dispatchRequest:error:]");
-    
-    ((void (*)(id, id, NSUInteger))symbol)(_store, requestContext, 0);
+    [OCSPIResolver NSSQLCore_dispatchRequest_withRetries_:_store x1:requestContext x2:0];
     [requestContext release];
     
     if (!_succeed) {
@@ -263,11 +260,7 @@ COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigr
     // sp, #0xf8
     __block NSError * _Nullable _error = nil;
     
-    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-    const void *_PFRoutines_getPFBundleVersionNumber = MSFindSymbol(image, "+[_PFRoutines _getPFBundleVersionNumber]");
-    const void *NSSQLiteConnection_hasTableWithName_isTemp_ = MSFindSymbol(image, "-[NSSQLiteConnection _hasTableWithName:isTemp:]");
-    NSNumber *version = ((id (*)(Class))_PFRoutines_getPFBundleVersionNumber)(objc_lookUpClass("_PFRoutines"));
-    
+    NSNumber *version = [OCSPIResolver _PFRoutines__getPFBundleVersionNumber:objc_lookUpClass("_PFRoutines")];
     // x22
     NSManagedObjectModel *model = [OCCloudKitMetadataModel newMetadataModelForFrameworkVersion:version];
     // x23
@@ -294,7 +287,7 @@ COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigr
 //    NSSQLEntity *sqlEntity = [sqlModel entityNamed:NSStringFromClass([OCCKMetadataEntry class])];
     NSSQLEntity *sqlEntity = [sqlModel entityNamed:NSStringFromClass(objc_lookUpClass("NSCKMetadataEntry"))];
     NSString *tableName = [sqlEntity tableName];
-    BOOL hasTable = ((BOOL (*)(id, id, BOOL))NSSQLiteConnection_hasTableWithName_isTemp_)(connection, tableName, NO);
+    BOOL hasTable = [OCSPIResolver NSSQLiteConnection__hasTableWithName_isTemp:connection x1:tableName x2:NO];
     
     if (hasTable) {
         NSKnownKeysDictionary<NSString *, NSSQLEntity *> *entitiesByName;
@@ -380,18 +373,6 @@ COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigr
         }
     }
     
-    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-    const void *NSSQLiteConnection_connect = MSFindSymbol(image, "-[NSSQLiteConnection connect]");
-    const void *NSSQLiteConnection_beginTransaction = MSFindSymbol(image, "-[NSSQLiteConnection beginTransaction]");
-    // dedup = de + duplicate = 중복 제거
-    const void *NSSQLiteConnection_dedupeRowsForUniqueConstraintsInCloudKitMetadataEntity_ = MSFindSymbol(image, "-[NSSQLiteConnection dedupeRowsForUniqueConstraintsInCloudKitMetadataEntity:]");
-    const void *NSSQLiteConnection_prepareAndExecuteSQLStatement_ = MSFindSymbol(image, "-[NSSQLiteConnection prepareAndExecuteSQLStatement:]");
-    const void *NSSQLiteConnection_createTablesForEntities_ = MSFindSymbol(image, "-[NSSQLiteConnection createTablesForEntities:]");
-    const void *NSSQLiteConnection_commitTransaction = MSFindSymbol(image, "-[NSSQLiteConnection commitTransaction]");
-    const void *NSSQLiteConnection_endFetchAndRecycleStatement_ = MSFindSymbol(image, "-[NSSQLiteConnection endFetchAndRecycleStatement]");
-    const void *NSSQLiteConnection_rollbackTransaction = MSFindSymbol(image, "-[NSSQLiteConnection rollbackTransaction]");
-    const void *NSSQLiteConnection_disconnect = MSFindSymbol(image, "-[NSSQLiteConnection disconnect]");
-    
     // w26
     BOOL shouldRollback;
     // w25
@@ -403,8 +384,8 @@ COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigr
     
     if (hasWorkToDo) {
         @try {
-            ((void (*)(id))NSSQLiteConnection_connect)(connection);
-            ((void (*)(id))NSSQLiteConnection_beginTransaction)(connection);
+            [OCSPIResolver NSSQLiteConnection_connect:connection];
+            [OCSPIResolver NSSQLiteConnection_beginTransaction:connection];
             
             // x21
             NSMutableSet<NSSQLEntity *> * _Nullable constrainedEntitiesToPreflight;
@@ -418,11 +399,11 @@ COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigr
             }
             
             for (NSSQLEntity *entity in constrainedEntitiesToPreflight) {
-                ((void (*)(id, id))NSSQLiteConnection_dedupeRowsForUniqueConstraintsInCloudKitMetadataEntity_)(connection, entity);
+                [OCSPIResolver NSSQLiteConnection_dedupeRowsForUniqueConstraintsInCloudKitMetadataEntity_:connection x1:entity];
             }
             
             for (NSSQLEntity *entity in constrainedEntitiesToPreflight) {
-                ((void (*)(id, id))NSSQLiteConnection_prepareAndExecuteSQLStatement_)(connection, entity);
+                [OCSPIResolver NSSQLiteConnection_prepareAndExecuteSQLStatement_:connection x1:entity];
             }
             
             NSMutableArray<NSSQLEntity *> * _Nullable sqlEntitiesToCreate;
@@ -435,8 +416,8 @@ COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigr
                 }
             }
             
-            ((void (*)(id, id))NSSQLiteConnection_createTablesForEntities_)(connection, sqlEntitiesToCreate);
-            ((void (*)(id))NSSQLiteConnection_commitTransaction)(connection);
+            [OCSPIResolver NSSQLiteConnection_createTablesForEntities_:connection x1:sqlEntitiesToCreate];
+            [OCSPIResolver NSSQLiteConnection_commitTransaction:connection];
             
             shouldRollback = NO;
             shouldReconnect = NO;
@@ -461,7 +442,7 @@ COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigr
     }
     
     @try {
-        ((void (*)(id, BOOL))NSSQLiteConnection_endFetchAndRecycleStatement_)(connection, NO);
+        [OCSPIResolver NSSQLiteConnection_endFetchAndRecycleStatement_:connection x1:NO];
     } @catch (NSException *exception /* x22 */) {
         shouldRollback = YES;
         _error = [NSError errorWithDomain:NSCocoaErrorDomain code:11180 userInfo:@{NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"An unhandled exception was thrown during CloudKit metadata migration: %@", exception]}];
@@ -473,11 +454,11 @@ COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigr
     }
     
     if (shouldRollback) {
-        ((void (*)(id, BOOL))NSSQLiteConnection_rollbackTransaction)(connection, NO);
+        [OCSPIResolver NSSQLiteConnection_rollbackTransaction:connection];
     }
     if (shouldReconnect) {
-        ((void (*)(id))NSSQLiteConnection_disconnect)(connection);
-        ((void (*)(id))NSSQLiteConnection_connect)(connection);
+        [OCSPIResolver NSSQLiteConnection_disconnect:connection];
+        [OCSPIResolver NSSQLiteConnection_connect:connection];
     }
     
     if (!succeed) {

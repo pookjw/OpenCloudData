@@ -22,7 +22,7 @@
 #import <OpenCloudData/OCCloudKitMetadataCache.h>
 #import <OpenCloudData/PFMirroredManyToManyRelationshipV2.h>
 #import <OpenCloudData/CKRecord+Private.h>
-@import ellekit;
+#import <OpenCloudData/OCSPIResolver.h>
 
 @implementation OCCloudKitExportContext
 
@@ -101,8 +101,6 @@
         fetchRequest.propertiesToFetch = @[@"entityPK", @"entityId", @"finalChangeTypeNum"];
         fetchRequest.fetchBatchSize = 200;
         
-        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-        const void *symbol = MSFindSymbol(image, "+[_PFRoutines efficientlyEnumerateManagedObjectsInFetchRequest:usingManagedObjectContext:andApplyBlock:]");
         
         // sp + 0x1c0
         __block NSUInteger count_0_1 = 0;
@@ -125,7 +123,7 @@
          x19 + 0x38 = _error = x20 + 0x70
          x19 + 0x40 = _succeed = x20 + 0x78
          */
-        ((void (*)(Class, id, id, id))symbol)(objc_lookUpClass("_PFRoutines"), fetchRequest, managedObjectContext, ^(NSArray<OCCKHistoryAnalyzerState *> * _Nullable states, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
+        [OCSPIResolver _PFRoutines_efficientlyEnumerateManagedObjectsInFetchRequest_usingManagedObjectContext_andApplyBlock_:objc_lookUpClass("_PFRoutines") x1:fetchRequest x2:managedObjectContext x3:^(NSArray<OCCKHistoryAnalyzerState *> * _Nullable states, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
             /*
              x21 = states
              */
@@ -147,18 +145,14 @@
                 } else {
                     // x28
                     NSSQLModel *model = store.model;
-                    
-                    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-                    const void *symbol = MSFindSymbol(image, "__sqlEntityForEntityDescription");
-                    
-                    NSSQLEntity * _Nullable entity = ((id (*)(id, id))symbol)(analyzedObjectID.entity, model);
-                    uint _entityID;
+                    NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:analyzedObjectID.entity x1:model];
+                    NSUInteger _entityID;
                     if (entity == nil) {
                         _entityID = 0;
                     } else {
                         Ivar ivar = object_getInstanceVariable(entity, "_entityID", NULL);
                         assert(ivar != NULL);
-                        _entityID = *(uint *)((uintptr_t)entity + ivar_getOffset(ivar));
+                        _entityID = *(NSUInteger *)((uintptr_t)entity + ivar_getOffset(ivar));
                     }
                     
                     // x19
@@ -310,7 +304,7 @@
                     }];
                 }
             }
-        });
+        }];
         
         if (_succeed) {
             /*
@@ -469,16 +463,14 @@
                                     _error = nil;
                                     [errorObjectIDs addObject:objectID];
                                     
-                                    const void *symbol = MSFindSymbol(image, "__sqlEntityForEntityDescription");
-                                    
-                                    NSSQLEntity * _Nullable entity = ((id (*)(id, id))symbol)(objectID.entity, store.model);
-                                    uint _entityID;
+                                    NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:objectID.entity x1:store.model];
+                                    NSUInteger _entityID;
                                     if (entity == nil) {
                                         _entityID = 0;
                                     } else {
                                         Ivar ivar = object_getInstanceVariable(entity, "_entityID", NULL);
                                         assert(ivar != NULL);
-                                        _entityID = *(uint *)((uintptr_t)entity + ivar_getOffset(ivar));
+                                        _entityID = *(NSUInteger *)((uintptr_t)entity + ivar_getOffset(ivar));
                                     }
                                     // x20
                                     NSNumber *entityIDNumber = @(_entityID);
@@ -659,7 +651,7 @@
                          _succeed = x20 + 0x40
                          
                          */
-                        ((void (*)(Class, id, id, id))symbol)(objc_lookUpClass("_PFRoutines"), fetchRequest, managedObjectContext, ^(NSArray<OCCKHistoryAnalyzerState *> * _Nullable states, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
+                        [OCSPIResolver _PFRoutines_efficientlyEnumerateManagedObjectsInFetchRequest_usingManagedObjectContext_andApplyBlock_:objc_lookUpClass("_PFRoutines") x1:fetchRequest x2:managedObjectContext x3:^(NSArray<OCCKHistoryAnalyzerState *> * _Nullable states, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
                             if (states == nil) {
                                 _succeed = NO;
                                 _error = [__error retain];
@@ -692,7 +684,7 @@
                                 _succeed = NO;
                                 [_error retain];
                             }
-                        });
+                        }];
                     }
                 }
                 
@@ -742,12 +734,10 @@
                     fetchRequest.returnsObjectsAsFaults = NO;
                     fetchRequest.affectedStores = @[store];
                     
-                    const void *symbol = MSFindSymbol(image, "+[_PFRoutines efficientlyEnumerateManagedObjectsInFetchRequest:usingManagedObjectContext:andApplyBlock:]");
-                    
                     /*
                      __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke_3.57
                      */
-                    ((void (*)(Class, id, id, id))symbol)(objc_lookUpClass("_PFRoutines"), fetchRequest, managedObjectContext, ^(NSArray<OCCKRecordZoneMoveReceipt *> * _Nullable receipts, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
+                    [OCSPIResolver _PFRoutines_efficientlyEnumerateManagedObjectsInFetchRequest_usingManagedObjectContext_andApplyBlock_:objc_lookUpClass("_PFRoutines") x1:fetchRequest x2:managedObjectContext x3:^(NSArray<OCCKRecordZoneMoveReceipt *> * _Nullable receipts, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
                         /*
                          self = x20
                          states = x22
@@ -790,7 +780,7 @@
                         }
                         
                         [recordIDs release];
-                    });
+                    }];
                 };
                 
                 if (_succeed) {
@@ -879,15 +869,22 @@
                         /*
                          __86-[PFCloudKitExportContext processAnalyzedHistoryInStore:inManagedObjectContext:error:]_block_invoke_2.48
                          */
-                        NSSQLBlockRequestContext *requestCpntext = [[objc_lookUpClass("NSSQLBlockRequestContext") alloc] initWithBlock:^(NSSQLStoreRequestContext * _Nonnull context) {
-                            const void *symbol = MSFindSymbol(image, "-[NSSQLiteConnection createArrayOfPrimaryKeysAndEntityIDsForRowsWithoutRecordMetadataWithEntity:metadataEntity:]");
-                            arrayOfPrimaryKeysAndEntityIDs = ((id (*)(Class, id, id))symbol)(objc_lookUpClass("NSSQLiteConnection"), entry, recordMetadataEntity);
+                        NSSQLBlockRequestContext *requestCpntext = [[objc_lookUpClass("NSSQLBlockRequestContext") alloc] initWithBlock:^(NSSQLStoreRequestContext * _Nullable context) {
+                            NSSQLiteConnection * _Nullable connection;
+                            {
+                                if (context == nil) {
+                                    connection = nil;
+                                } else {
+                                    assert(object_getInstanceVariable(context, "_connection", (void **)&connection) != NULL);
+                                }
+                            }
+                            
+                            arrayOfPrimaryKeysAndEntityIDs = [OCSPIResolver NSSQLiteConnection_createArrayOfPrimaryKeysAndEntityIDsForRowsWithoutRecordMetadataWithEntity_metadataEntity_:connection x1:entity x2:recordMetadataEntity];
                         }
                                                                                                            context:managedObjectContext
                                                                                                            sqlCore:store];
                         
-                        const void *symbol = MSFindSymbol(image, "-[NSSQLCore dispatchRequest:withRetries:]");
-                        ((void (*)(Class, id, NSUInteger))symbol)(objc_lookUpClass("NSSQLCore"), requestCpntext, 0);
+                        [OCSPIResolver NSSQLCore_dispatchRequest_withRetries_:store x1:requestCpntext x2:0];
                         
                         // x23 / x28
                         NSMutableArray<NSManagedObjectID *> *objectIDs = [[NSMutableArray alloc] init];
@@ -907,8 +904,7 @@
                                                              userInfo:nil];
                             }
                             
-                            const void *symbol = MSFindSymbol(image, "__sqlCoreLookupSQLEntityForEntityID");
-                            NSSQLEntity * _Nullable sqlEntity = ((id (*)(id, unsigned long))symbol)(store, primaryKeyAndEntityID[1].unsignedLongValue);
+                            NSSQLEntity * _Nullable sqlEntity = [OCSPIResolver _sqlCoreLookupSQLEntityForEntityID:store x1:primaryKeyAndEntityID[1].unsignedLongValue];
                             
                             // x21
                             NSManagedObjectID *objectID = [store newObjectIDForEntity:sqlEntity pk:primaryKeyAndEntityID[0].integerValue];
@@ -1060,9 +1056,7 @@
         if (managedObjectContext == nil) {
             recordZoneMetadataCount = 0;
         } else {
-            const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-            const void *symbol = MSFindSymbol(image, "-[NSManagedObjectContext _countForFetchRequest_:error:]");
-            recordZoneMetadataCount = ((NSInteger (*)(id, id, id *))symbol)(managedObjectContext, fetchRequest, &_error);
+            recordZoneMetadataCount = [OCSPIResolver NSManagedObjectContext__countForFetchRequest__error_:managedObjectContext x1:fetchRequest x2:&_error];
             
             if (recordZoneMetadataCount == NSNotFound) {
                 if (_error == nil) {
@@ -1087,9 +1081,7 @@
         if (managedObjectContext == nil) {
             recordZoneMoveReceiptsCount = 0;
         } else {
-            const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-            const void *symbol = MSFindSymbol(image, "-[NSManagedObjectContext _countForFetchRequest_:error:]");
-            recordZoneMoveReceiptsCount = ((NSInteger (*)(id, id, id *))symbol)(managedObjectContext, fetchRequest, &_error);
+            recordZoneMoveReceiptsCount = [OCSPIResolver NSManagedObjectContext__countForFetchRequest__error_:managedObjectContext x1:fetchRequest x2:&_error];
             
             if (recordZoneMoveReceiptsCount == NSNotFound) {
                 if (_error == nil) {

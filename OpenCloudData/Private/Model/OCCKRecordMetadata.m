@@ -14,8 +14,8 @@
 #import <OpenCloudData/NSSQLEntity.h>
 #import <OpenCloudData/NSManagedObjectID+Private.h>
 #import <OpenCloudData/Log.h>
+#import <OpenCloudData/OCSPIResolver.h>
 #import <objc/runtime.h>
-@import ellekit;
 
 @implementation OCCKRecordMetadata
 @dynamic ckRecordName;
@@ -177,11 +177,7 @@
     
     // x19
     NSSQLModel *model = [persistentStore model];
-    
-    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-    const void *symbol = MSFindSymbol(image, "__sqlEntityForEntityDescription");
-    
-    NSSQLEntity * _Nullable entity = ((id (*)(id, id))symbol)(object.objectID.entity, model);
+    NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:object.objectID.entity x1:model];
     uint _entityID;
     if (entity == nil) {
         _entityID = 0;
@@ -226,7 +222,7 @@
      */
     
     // x22
-    unsigned long entityID = entityIDNumber.unsignedIntegerValue;
+    NSUInteger entityID = entityIDNumber.unsignedIntegerValue;
     // x21
     NSInteger primaryKey = primaryKeyNumber.integerValue;
     
@@ -236,10 +232,7 @@
         return nil;
     }
     
-    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-    const void *symbol = MSFindSymbol(image, "__sqlCoreLookupSQLEntityForEntityID");
-    
-    NSSQLEntity * _Nullable sqlEntity = ((id (*)(id, unsigned long))symbol)(sqlCore, entityID);
+    NSSQLEntity * _Nullable sqlEntity = [OCSPIResolver _sqlCoreLookupSQLEntityForEntityID:sqlCore x1:entityID];
     if (sqlEntity == nil) {
         os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Cannot create objectID. Unable to find entity with id '%@' in store '%@'", entityIDNumber, sqlCore);
         os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Cannot create objectID. Unable to find entity with id '%@' in store '%@'", entityIDNumber, sqlCore);
@@ -379,10 +372,7 @@
         
         // x23
         NSSQLModel *model = store.model;
-        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-        const void *symbol = MSFindSymbol(image, "__sqlEntityForEntityDescription");
-        
-        NSSQLEntity * _Nullable entity = ((id (*)(id, id))symbol)(objectID.entity, model);
+        NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:objectID.entity x1:model];
         
         uint _entityID;
         if (entity == nil) {
@@ -894,9 +884,7 @@
     if (managedObjectContext == nil) {
         count = 0;
     } else {
-        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-        const void *symbol = MSFindSymbol(image, "-[NSManagedObjectContext _countForFetchRequest_:error:]");
-        count = ((NSInteger (*)(id, id, id *))symbol)(managedObjectContext, fetchRequest, error);
+        count = [OCSPIResolver NSManagedObjectContext__countForFetchRequest__error_:managedObjectContext x1:fetchRequest x2:error];
         
         if (count == NSNotFound) {
             return nil;
@@ -1006,11 +994,7 @@
     for (NSManagedObjectID *objectID in objectIDs) {
         // x28
         NSSQLModel *model = store.model;
-        
-        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-        const void *symbol = MSFindSymbol(image, "__sqlEntityForEntityDescription");
-        
-        NSSQLEntity * _Nullable entity = ((id (*)(id, id))symbol)(objectID.entity, model);
+        NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:objectID.entity x1:model];
         uint _entityID;
         if (entity == nil) {
             _entityID = 0;

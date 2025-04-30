@@ -158,6 +158,7 @@
 				SPI/NSSQLModelProvider.h,
 				SPI/NSSQLStoreRequestContext.h,
 				SPI/NSStoreMapping.h,
+				SPI/OCSPIResolver.h,
 				SPI/PFApplicationStateMonitor.h,
 				SPI/PFApplicationStateMonitorDelegate.h,
 				SPI/PFHistoryAnalyzer.h,

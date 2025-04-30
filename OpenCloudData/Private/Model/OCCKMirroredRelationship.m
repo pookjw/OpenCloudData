@@ -9,8 +9,8 @@
 #import <OpenCloudData/OCCloudKitMetadataModel.h>
 #import <OpenCloudData/OCCKRecordZoneMetadata.h>
 #import <OpenCloudData/Log.h>
+#import <OpenCloudData/OCSPIResolver.h>
 #import <objc/runtime.h>
-@import ellekit;
 
 @implementation OCCKMirroredRelationship
 @dynamic ckRecordID;
@@ -655,9 +655,7 @@
     if (managedObjectContext == nil) {
         count = 0;
     } else {
-        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-        const void *symbol = MSFindSymbol(image, "-[NSManagedObjectContext _countForFetchRequest_:error:]");
-        count = ((NSInteger (*)(id, id, id *))symbol)(managedObjectContext, fetchRequest, error);
+        count = [OCSPIResolver NSManagedObjectContext__countForFetchRequest__error_:managedObjectContext x1:fetchRequest x2:error];
         
         if (count == NSNotFound) {
             return nil;

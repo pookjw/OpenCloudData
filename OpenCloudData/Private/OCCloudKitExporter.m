@@ -16,8 +16,8 @@
 #import <OpenCloudData/OCCloudKitHistoryAnalyzerContext.h>
 #import <OpenCloudData/OCCKHistoryAnalyzerState.h>
 #import <OpenCloudData/OCCKRecordZoneMoveReceipt.h>
+#import <OpenCloudData/OCSPIResolver.h>
 #import <objc/runtime.h>
-@import ellekit;
 
 COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
 
@@ -172,9 +172,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
              */
             [backgroundContextForMonitoredCoordinator performBlockAndWait:^{
                 @try {
-                    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-                    const void *symbol = MSFindSymbol(image, "+[_PFRoutines _isInMemoryStore:]");
-                    BOOL isInMemoryStore = ((BOOL (*)(Class, id))symbol)(objc_lookUpClass("_PFRoutines"), monitoredStore);
+                    BOOL isInMemoryStore = [OCSPIResolver _PFRoutines__isInMemoryStore_:objc_lookUpClass("_PFRoutines") x1:monitoredStore];
                     
                     // self = sp + 0x10
                     
@@ -880,9 +878,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                 }
                 
                 /* <+2948> */
-                const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-                const void *symbol = MSFindSymbol(image, "+[_PFRoutines _isInMemoryStore:]");
-                BOOL isInMemoryStore = ((BOOL (*)(Class, id))symbol)(objc_lookUpClass("_PFRoutines"), retainedMonitoredStore);
+                BOOL isInMemoryStore = [OCSPIResolver _PFRoutines__isInMemoryStore_:objc_lookUpClass("_PFRoutines") x1:retainedMonitoredStore];
                 
                 if (!isInMemoryStore) {
                     NSError * _Nullable __error = nil;
@@ -1144,9 +1140,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
     BOOL _succeed;
     
     @try {
-        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-        const void *symbol = MSFindSymbol(image, "+[_PFRoutines _isInMemoryStore:]");
-        BOOL isInMemoryStore = ((BOOL (*)(Class, id))symbol)(objc_lookUpClass("_PFRoutines"), store);
+        BOOL isInMemoryStore = [OCSPIResolver _PFRoutines__isInMemoryStore_:objc_lookUpClass("_PFRoutines") x1:store];
         
         if (!isInMemoryStore) {
             // sp + 0x58
@@ -1239,9 +1233,8 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
             
             os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: Exporting changes since (%d): %@", __func__, __LINE__, self, boolValue, transformedValue);
             
-            const void *symbol = MSFindSymbol(image, "-[PFHistoryAnalyzer newAnalyzerContextForStore:sinceLastHistoryToken:inManagedObjectContext:error:]");
-            // x26
-            OCCloudKitHistoryAnalyzerContext * _Nullable analyzerContext = ((id (*)(id, id, id, id, id *))symbol)(analyzer, store, transformedValue, managedObjectContext, &_error);
+            // x26 / x20
+            OCCloudKitHistoryAnalyzerContext * _Nullable analyzerContext = [OCSPIResolver PFHistoryAnalyzer_newAnalyzerContextForStore_sinceLastHistoryToken_inManagedObjectContext_error_:analyzer x1:store x2:transformedValue x3:managedObjectContext x4:&_error];
             
             if (analyzerContext == nil) {
                 if (_error == nil) {
@@ -1274,6 +1267,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                 
                 [options release];
                 [analyzer release];
+                [analyzerContext release];
                 [pool release];
                 [_error autorelease];
                 return _succeed;
@@ -1285,6 +1279,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                 _succeed = YES;
                 [options release];
                 [analyzer release];
+                [analyzerContext release];
                 [pool release];
                 return _succeed;
             }
@@ -1298,6 +1293,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                 
                 [options release];
                 [analyzer release];
+                [analyzerContext release];
                 [pool release];
                 [_error autorelease];
                 return _succeed;
@@ -1313,6 +1309,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                 
                 [options release];
                 [analyzer release];
+                [analyzerContext release];
                 [pool release];
                 [_error autorelease];
                 return _succeed;
@@ -1337,6 +1334,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
             
             [options release];
             [analyzer release];
+            [analyzerContext release];
         }
     } @catch (NSException *exception) {
         _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{@"NSUnderlyingException": @"Export encountered a fatal exception while analyzing history."}];

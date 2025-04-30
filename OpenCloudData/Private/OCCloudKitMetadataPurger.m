@@ -16,7 +16,8 @@
 #import <OpenCloudData/OCCKEvent.h>
 #import <OpenCloudData/_PFRoutines.h>
 #import <OpenCloudData/Log.h>
-@import ellekit;
+#import <OpenCloudData/OCSPIResolver.h>
+#import <objc/runtime.h>
 
 CK_EXTERN NSString * const NSCloudKitMirroringDelegateResetSyncAuthor;
 COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateBypassHistoryOnExportKey;
@@ -493,10 +494,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
             [request release];
         }
         
-        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-        const void *_getPFBundleVersionNumber = MSFindSymbol(image, "+[_PFRoutines _getPFBundleVersionNumber]");
-        const void *__PFModelMapPathForEntity = MSFindSymbol(image, "__PFModelMapPathForEntity");
-        NSNumber *version = ((id (*)(Class))_getPFBundleVersionNumber)(objc_lookUpClass("_PFRoutines"));
+        NSNumber *version = [OCSPIResolver _PFRoutines__getPFBundleVersionNumber:objc_lookUpClass("_PFRoutines")];
         // x20 / sp + 0x38
         NSManagedObjectModel *model = [OCCloudKitMetadataModel newMetadataModelForFrameworkVersion:version];
         // x28
@@ -517,7 +515,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
                 continue;
             }
             
-            NSString *entityPath = ((id (*)(id))__PFModelMapPathForEntity)(entity);
+            NSString *entityPath = [OCSPIResolver _PFModelMapPathForEntity:entity];
             // x24
             NSBatchDeleteRequest *request = [[NSBatchDeleteRequest alloc] initWithFetchRequest:[NSFetchRequest fetchRequestWithEntityName:entityPath]];
             request.resultType = NSBatchDeleteResultTypeObjectIDs;
@@ -710,9 +708,6 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
     // sp + 0x280 / x25
     __block NSError * _Nullable _error = nil;
     
-    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-    const void *symbol = MSFindSymbol(image, "+[_PFRoutines efficientlyEnumerateManagedObjectsInFetchRequest:usingManagedObjectContext:andApplyBlock:]");
-    
     {
         // x26
         NSFetchRequest<OCCKRecordMetadata *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordMetadata entityPath]];
@@ -727,7 +722,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
          _error = x29 - 0xf8 = x20 + 0x28
          _succeed = x29 - 0xf0 = x20 + 0x30
          */
-        ((void (*)(Class, id, id, id))symbol)(objc_lookUpClass("_PFRoutines"), fetchRequest, context, ^(NSArray<OCCKRecordMetadata *> * _Nullable metadataArray, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
+        [OCSPIResolver _PFRoutines_efficientlyEnumerateManagedObjectsInFetchRequest_usingManagedObjectContext_andApplyBlock_:objc_lookUpClass("_PFRoutines") x1:fetchRequest x2:context x3:^(NSArray<OCCKRecordMetadata *> * _Nullable metadataArray, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
             /*
              self(block) = x20
              checkChanges = x19
@@ -755,7 +750,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
                     [_error retain];
                 }
             }
-        });
+        }];
         
         if (!_succeed) {
             if (_error == nil) {
@@ -786,7 +781,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
          _error = sp + 0x270 = x20 + 0x28
          _succeed = sp + 0x278 = x20 + 0x30
          */
-        ((void (*)(Class, id, id, id))symbol)(objc_lookUpClass("_PFRoutines"), fetchRequest, context, ^(NSArray<OCCKMirroredRelationship *> * _Nullable relationships, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
+        [OCSPIResolver _PFRoutines_efficientlyEnumerateManagedObjectsInFetchRequest_usingManagedObjectContext_andApplyBlock_:objc_lookUpClass("_PFRoutines") x1:fetchRequest x2:context x3:^(NSArray<OCCKMirroredRelationship *> * _Nullable relationships, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
             /*
              self(block) = x20
              checkChanges = x19
@@ -813,7 +808,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
                     [_error retain];
                 }
             }
-        });
+        }];
         
         if (!_succeed) {
             if (_error == nil) {
@@ -856,16 +851,13 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
     fetchRequest.affectedStores = @[store];
     fetchRequest.fetchBatchSize = 1000;
     
-    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-    const void *symbol = MSFindSymbol(image, "+[_PFRoutines efficientlyEnumerateManagedObjectsInFetchRequest:usingManagedObjectContext:andApplyBlock:]");
-    
     /*
      __113-[PFCloudKitMetadataPurger _wipeUserRowsAndMetadataForZoneWithID:inDatabaseWithScope:inStore:usingContext:error:]_block_invoke
      dictionary = sp + 0x268 = x19 + 0x20
      _succeed = sp + 0x270 = x19 + 0x28
      _error = sp + 0x278 = x19 + 0x30
      */
-    ((void (*)(Class, id, id, id))symbol)(objc_lookUpClass("_PFRoutines"), fetchRequest, context, ^(NSArray<OCCKRecordMetadata *> * _Nullable metadataArray, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
+    [OCSPIResolver _PFRoutines_efficientlyEnumerateManagedObjectsInFetchRequest_usingManagedObjectContext_andApplyBlock_:objc_lookUpClass("_PFRoutines") x1:fetchRequest x2:context x3:^(NSArray<OCCKRecordMetadata *> * _Nullable metadataArray, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
         /*
          self(block) = x19
          */
@@ -911,7 +903,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
         
         [lastEntityId release];
         [set release];
-    });
+    }];
     
     if (!_succeed) {
         if (_error == nil) {
@@ -944,9 +936,8 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
          stop = x19
          */
         
-        const void *symbol = MSFindSymbol(image, "__sqlCoreLookupSQLEntityForEntityID");
         // x23
-        NSSQLEntity * _Nullable sqlEntity = ((id (*)(id, unsigned long))symbol)(store, entityId.unsignedIntegerValue);
+        NSSQLEntity * _Nullable sqlEntity = [OCSPIResolver _sqlCoreLookupSQLEntityForEntityID:store x1:entityId.unsignedIntegerValue];
         
         if (sqlEntity == nil) {
             os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Cannot create objectID. Unable to find entity with id '%@' in store '%@'\n%@\n", entityId, store, self);
@@ -1144,16 +1135,13 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
     // sp, #0x40
     __block NSError * _Nullable _error = nil;
     
-    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-    const void *symbol = MSFindSymbol(image, "+[_PFRoutines efficientlyEnumerateManagedObjectsInFetchRequest:usingManagedObjectContext:andApplyBlock:]");
-    
     /*
      __91-[PFCloudKitMetadataPurger _purgeObjectsMatchingFetchRequest:fromStore:usingContext:error:]_block_invoke
      context = sp + 0x28 = x21 + 0x20
      _error = sp + 0x30 = x21 + 0x28
      _succeed = sp + 0x38 = x21 + 0x30
      */
-    ((void (*)(Class, id, id, id))symbol)(objc_lookUpClass("_PFRoutines"), fetchRequest, context, ^(NSArray<__kindof NSManagedObject *> * _Nullable objects, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
+    [OCSPIResolver _PFRoutines_efficientlyEnumerateManagedObjectsInFetchRequest_usingManagedObjectContext_andApplyBlock_:objc_lookUpClass("_PFRoutines") x1:fetchRequest x2:context x3:^(NSArray<__kindof NSManagedObject *> * _Nullable objects, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved) {
         /*
          self(block) = x21
          checkChanges = x19
@@ -1183,7 +1171,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
                 *reserved = YES; // ???
             }
         }
-    });
+    }];
     
     if (!_succeed) {
         if (_error == nil) {

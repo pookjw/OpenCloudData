@@ -20,8 +20,8 @@
 #import <OpenCloudData/OCCloudKitMetadataModelMigrator.h>
 #import <OpenCloudData/NSSQLModel.h>
 #import <OpenCloudData/NSSQLiteStatement.h>
+#import <OpenCloudData/OCSPIResolver.h>
 #import <objc/runtime.h>
-@import ellekit;
 
 #warning TODO original 쓸지
 NSString * const OCCKRecordIDAttributeName = @"ckRecordID";
@@ -123,11 +123,7 @@ NSArray<Class> * _oc_PFModelMap_ancillaryModelFactoryClasses_custom(Class self, 
         NSSQLCore *sqlCore = (NSSQLCore *)persistentStore;
         // x24
         NSSQLModel *model = sqlCore.model;
-        
-        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-        const void *symbol = MSFindSymbol(image, "__sqlEntityForEntityDescription");
-        
-        NSSQLEntity * _Nullable entity = ((id (*)(id, id))symbol)(objectID.entity, model);
+        NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:objectID.entity x1:model];
         if (entity == nil) {
             [persistentStore release];
             continue;
@@ -312,10 +308,6 @@ NSArray<Class> * _oc_PFModelMap_ancillaryModelFactoryClasses_custom(Class self, 
         }
         [models autorelease];
         
-        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-        const void *NSSQLiteAdapter_newCreateTableStatementForEntity_ = MSFindSymbol(image, "-[NSSQLiteAdapter newCreateTableStatementForEntity:]");
-        const void *NSSQLiteAdapter_newCreateTableStatementForManyToMany_ = MSFindSymbol(image, "-[NSSQLiteAdapter newCreateTableStatementForManyToMany:]");
-        
         // sp + 0x38
         for (NSManagedObjectModel *model in models) {
             // x21 / sp, #0x58
@@ -331,7 +323,7 @@ NSArray<Class> * _oc_PFModelMap_ancillaryModelFactoryClasses_custom(Class self, 
             // x21
             for (NSSQLEntity *sqlEntity in entities) {
                 // x24
-                NSSQLiteStatement *tableStatement = ((id (*)(id, id))NSSQLiteAdapter_newCreateTableStatementForEntity_)(adapter, sqlEntity);
+                NSSQLiteStatement *tableStatement = [OCSPIResolver NSSQLiteAdapter_newCreateTableStatementForEntity_:adapter x1:sqlEntity];
                 // x23
                 NSString *sqlString = [tableStatement sqlString];
                 NSString *trimmed = [sqlString stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
@@ -343,7 +335,7 @@ NSArray<Class> * _oc_PFModelMap_ancillaryModelFactoryClasses_custom(Class self, 
                 
                 for (NSRelationshipDescription *relationship in manyToManyRelationships) {
                     // x23
-                    NSSQLiteStatement *tableStatement = ((id (*)(id, id))NSSQLiteAdapter_newCreateTableStatementForManyToMany_)(adapter, relationship);
+                    NSSQLiteStatement *tableStatement = [OCSPIResolver NSSQLiteAdapter_newCreateTableStatementForManyToMany_:adapter x1:relationship];
                     NSString *sqlString = [tableStatement sqlString];
                     NSString *trimmed = [sqlString stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
                     [trimmedSQLStrings addObject:trimmed];

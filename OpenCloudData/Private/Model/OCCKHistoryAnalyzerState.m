@@ -10,8 +10,8 @@
 #import <OpenCloudData/NSSQLEntity.h>
 #import <OpenCloudData/NSSQLCore.h>
 #import <OpenCloudData/Log.h>
+#import <OpenCloudData/OCSPIResolver.h>
 #import <objc/runtime.h>
-@import ellekit;
 
 @implementation OCCKHistoryAnalyzerState
 @dynamic entityId;
@@ -78,9 +78,7 @@
     if (managedObjectContext == nil) {
         count = 0;
     } else {
-        const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-        const void *symbol = MSFindSymbol(image, "-[NSManagedObjectContext _countForFetchRequest_:error:]");
-        count = ((NSInteger (*)(id, id, id *))symbol)(managedObjectContext, fetchRequest, error);
+        count = [OCSPIResolver NSManagedObjectContext__countForFetchRequest__error_:managedObjectContext x1:fetchRequest x2:error];
         
         if (count == NSNotFound) {
             return nil;
@@ -142,10 +140,7 @@
     
     // x22
     NSSQLCore *persistentStore = (NSSQLCore *)self.objectID.persistentStore;
-    
-    const void *image = MSGetImageByName("/System/Library/Frameworks/CoreData.framework/CoreData");
-    const void *symbol = MSFindSymbol(image, "__sqlCoreLookupSQLEntityForEntityID");
-    NSSQLEntity * _Nullable sqlEntity = ((id (*)(id, unsigned long))symbol)(persistentStore, entityId);
+    NSSQLEntity * _Nullable sqlEntity = [OCSPIResolver _sqlCoreLookupSQLEntityForEntityID:persistentStore x1:entityId];
     
     if (sqlEntity == nil) {
         return nil;
