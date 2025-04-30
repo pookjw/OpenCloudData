@@ -17,6 +17,8 @@
 #import <objc/runtime.h>
 
 COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigrationKey;
+COREDATA_EXTERN NSString * const NSPersistentStoreMirroringDelegateOptionKey;
+COREDATA_EXTERN NSString * const NSSQLPKTableName;
 
 @implementation OCCloudKitMetadataModelMigrator
 
@@ -348,7 +350,99 @@ COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigr
 }
 
 - (BOOL)computeAncillaryEntityPrimaryKeyTableEntriesForStore:(NSSQLCore *)store error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) {
-    abort();
+    /*
+     store = x20
+     error = x19
+     */
+    // sp, #0x30
+    __block BOOL _succeed = YES;
+    // 안 쓰이지만 정의는 존재함
+    __block NSError * _Nullable _error = nil;
+    
+    /*
+     __94-[PFCloudKitMetadataModelMigrator computeAncillaryEntityPrimaryKeyTableEntriesForStore:error:]_block_invoke
+     store = sp + 0x20 = x21 + 0x20
+     _succeed = sp + 0x28 = x21 + 0x28
+     */
+    // x21
+    NSSQLBlockRequestContext *requestContext = [[NSSQLBlockRequestContext alloc] initWithBlock:^(NSSQLStoreRequestContext * _Nullable context) {
+        /*
+         self(block) = x21 / sp + 0x18
+         */
+        
+        // x19 / sp + 0x28
+        NSSQLiteConnection * _Nullable connection;
+        {
+            if (context == nil) {
+                connection = nil;
+            } else {
+                assert(object_getInstanceVariable(context, "_connection", (void **)&connection) != NULL);
+            }
+        }
+        
+        // x20
+        NSMutableArray<NSSQLiteStatement *> *statements = [[NSMutableArray alloc] init];
+        // x22
+        NSSQLiteAdapter * _Nullable adapter = connection.adapter;
+        NSSQLModel * _Nullable mirroringModel = [[store ancillarySQLModels] objectForKey:NSPersistentStoreMirroringDelegateOptionKey];
+        
+        // x19 / sp + 0x20
+        NSMutableArray<NSSQLEntity *> * _Nullable entities;
+        {
+            if (mirroringModel == nil) {
+                entities = nil;
+            } else {
+                assert(object_getInstanceVariable(mirroringModel, "_entities", (void **)&entities) != NULL);
+            }
+        }
+        
+        // x27
+        for (NSSQLEntity *entity in entities) {
+            /*
+             NSSQLPKTableName = x25
+             */
+            
+            uint _entityID;
+            if (entity == nil) {
+                _entityID = 0;
+            } else {
+                Ivar ivar = object_getInstanceVariable(entity, "_entityID", NULL);
+                assert(ivar != NULL);
+                _entityID = *(uint *)((uintptr_t)entity + ivar_getOffset(ivar));
+            }
+            NSString *sqlString = [NSString stringWithFormat:@"DELETE FROM %@ WHERE Z_ENT = %@", NSSQLPKTableName, @(_entityID)];
+            // x21
+            NSSQLiteStatement *statement = [[objc_lookUpClass("NSSQLiteStatement") alloc] initWithEntity:nil sqlString:sqlString];
+            [statements addObject:statement];
+            [statement release];
+            
+#warning TODO
+            // <+352>
+            abort();
+        }
+        
+        abort();
+    }
+                                                                                                           context:nil
+                                                                                                           sqlCore:store];
+    
+    [OCSPIResolver NSSQLCore_dispatchRequest_withRetries_:store x1:requestContext x2:0];
+    [requestContext release];
+    
+    if (!_succeed) {
+        // _succeed 및 _error 할당하는 곳이 없음 - 안 불릴 것
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            [_error autorelease];
+            if (error != NULL) {
+                *error = _error;
+            }
+        }
+    }
+    
+    return _succeed;
 }
 
 - (BOOL)calculateMigrationStepsWithConnection:(NSSQLiteConnection *)connection error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) {

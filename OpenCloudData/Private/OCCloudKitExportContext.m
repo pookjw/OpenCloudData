@@ -24,6 +24,8 @@
 #import <OpenCloudData/CKRecord+Private.h>
 #import <OpenCloudData/OCSPIResolver.h>
 
+COREDATA_EXTERN NSString * const NSPersistentStoreMirroringDelegateOptionKey;
+
 @implementation OCCloudKitExportContext
 
 - (instancetype)initWithOptions:(OCCloudKitExporterOptions *)options {
@@ -146,7 +148,7 @@
                     // x28
                     NSSQLModel *model = store.model;
                     NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:analyzedObjectID.entity x1:model];
-                    NSUInteger _entityID;
+                    uint _entityID;
                     if (entity == nil) {
                         _entityID = 0;
                     } else {
@@ -464,13 +466,13 @@
                                     [errorObjectIDs addObject:objectID];
                                     
                                     NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:objectID.entity x1:store.model];
-                                    NSUInteger _entityID;
+                                    uint _entityID;
                                     if (entity == nil) {
                                         _entityID = 0;
                                     } else {
                                         Ivar ivar = object_getInstanceVariable(entity, "_entityID", NULL);
                                         assert(ivar != NULL);
-                                        _entityID = *(NSUInteger *)((uintptr_t)entity + ivar_getOffset(ivar));
+                                        _entityID = *(uint *)((uintptr_t)entity + ivar_getOffset(ivar));
                                     }
                                     // x20
                                     NSNumber *entityIDNumber = @(_entityID);
@@ -834,8 +836,7 @@
                     // sp + 0x50
                     NSSQLModel *model = [store.model retain];
                     
-                    // original : NSPersistentStoreMirroringDelegateOptionKey
-                    NSSQLModel *mirroringModel = [store ancillarySQLModels][@"NSPersistentStoreMirroringDelegateOptionKey"];
+                    NSSQLModel *mirroringModel = [[store ancillarySQLModels] objectForKey:NSPersistentStoreMirroringDelegateOptionKey];
                     
                     // sp + 0x20
 //                    NSSQLEntity *recordMetadataEntity = [mirroringModel entityNamed:@"OCCKRecordMetadata"];
