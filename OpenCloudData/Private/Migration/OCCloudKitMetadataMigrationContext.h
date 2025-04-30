@@ -13,6 +13,9 @@ NS_ASSUME_NONNULL_BEGIN
 #warning TODO
 
 @interface OCCloudKitMetadataMigrationContext : NSObject {
+    @package NSMutableArray<NSSQLEntity *> *_sqlEntitiesToCreate; // 0x10
+    @package NSMutableSet<NSSQLEntity *> *_constrainedEntitiesToPreflight; // 0x18
+    @package BOOL _hasWorkToDo; // 0x20
     @package BOOL _needsMetdataMigrationToNSCKRecordMetadata; // 0x21
     @package BOOL _needsImportAfterClientMigration; // 0x24
     @package BOOL _needsBatchUpdateForSystemFieldsAndLastExportedTransaction; // 0x25
