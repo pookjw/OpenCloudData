@@ -86,8 +86,17 @@ COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigr
         }
         
         // <+84>
-        _succeed = [self prepareContextWithConnection:connection error:&_error];
-        abort();
+        // w19
+        BOOL result = [self prepareContextWithConnection:connection error:&_error];
+        // <+1068>
+        
+        if (!result) {
+            _succeed = NO;
+            [_error retain];
+            return;
+        }
+        
+        // 무언가 inline이 있는듯
     }
                                                                                                            context:nil
                                                                                                            sqlCore:_store];
