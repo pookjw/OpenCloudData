@@ -403,12 +403,14 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
              */
             
             uint _entityID;
-            if (entity == nil) {
-                _entityID = 0;
-            } else {
-                Ivar ivar = object_getInstanceVariable(entity, "_entityID", NULL);
-                assert(ivar != NULL);
-                _entityID = *(uint *)((uintptr_t)entity + ivar_getOffset(ivar));
+            {
+                if (entity == nil) {
+                    _entityID = 0;
+                } else {
+                    Ivar ivar = object_getInstanceVariable(entity, "_entityID", NULL);
+                    assert(ivar != NULL);
+                    _entityID = *(uint *)((uintptr_t)entity + ivar_getOffset(ivar));
+                }
             }
             NSString *sqlString = [NSString stringWithFormat:@"DELETE FROM %@ WHERE Z_ENT = %@", NSSQLPKTableName, @(_entityID)];
             // x21
@@ -416,12 +418,67 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
             [statements addObject:statement];
             [statement release];
             
-#warning TODO
-            // <+352>
-            abort();
+            // x21
+            statement = [OCSPIResolver NSSQLiteAdapter_newPrimaryKeyInitializeStatementForEntity_withInitialMaxPK_:adapter x1:entity x2:0];
+            [statements addObject:statement];
+            [statement release];
+            
+            if (connection != nil) {
+                BOOL result = [OCSPIResolver NSSQLiteConnection__hasTableWithName_isTemp:connection x1:[entity tableName] x2:NO];
+                if (!result) {
+                    // x21
+                    statement = [OCSPIResolver NSSQLiteAdapter_newSimplePrimaryKeyUpdateStatementForEntity_:adapter x1:entity];
+                    [statements addObject:statement];
+                    [statement release];
+                    
+                    uint _entityID;
+                    {
+                        if (entity == nil) {
+                            _entityID = 0;
+                        } else {
+                            Ivar ivar = object_getInstanceVariable(entity, "_entityID", NULL);
+                            assert(ivar != NULL);
+                            _entityID = *(uint *)((uintptr_t)entity + ivar_getOffset(ivar));
+                        }
+                    }
+                    NSString *sqlString = [NSString stringWithFormat:@"UPDATE %@ SET Z_ENT = %@", [entity tableName], @(_entityID)];
+                    // x21
+                    NSSQLiteStatement *statement = [[objc_lookUpClass("NSSQLiteStatement") alloc] initWithEntity:nil sqlString:sqlString];
+                    [statements addObject:statement];
+                    [statement release];
+                }
+            }
         }
         
-        abort();
+        BOOL hasException;
+        @try {
+            [OCSPIResolver NSSQLiteConnection_connect:connection];
+            [OCSPIResolver NSSQLiteConnection_beginTransaction:connection];
+            hasException = NO;
+        } @catch (NSException *exception) {
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Exception caught during cleanup of cloudkit metadata primary keys %@ with userInfo %@", exception, exception.userInfo);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Exception caught during cleanup of cloudkit metadata primary keys %@ with userInfo %@", exception, exception.userInfo);
+            [OCSPIResolver NSSQLiteConnection_disconnect:connection];
+            [OCSPIResolver NSSQLiteConnection_connect:connection];
+            hasException = YES;
+        }
+        
+        if (!hasException) {
+            for (NSSQLiteStatement *statement in statements) {
+                [OCSPIResolver NSSQLiteConnection_prepareAndExecuteSQLStatement_:connection x1:statement];
+            }
+            
+            @try {
+                [OCSPIResolver NSSQLiteConnection_commitTransaction:connection];
+            } @catch (NSException *exception) {
+                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Exception caught during cleanup of cloudkit metadata primary keys %@", exception);
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Exception caught during cleanup of cloudkit metadata primary keys %@", exception);
+                [OCSPIResolver NSSQLiteConnection_rollbackTransaction:connection];
+            }
+            
+            [OCSPIResolver NSSQLiteConnection_endFetchAndRecycleStatement_:connection x1:NO];
+            [statements release];
+        }
     }
                                                                                                            context:nil
                                                                                                            sqlCore:store];
@@ -431,11 +488,11 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
     
     if (!_succeed) {
         // _succeed 및 _error 할당하는 곳이 없음 - 안 불릴 것
+        [_error autorelease];
         if (_error == nil) {
             os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
             os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
-            [_error autorelease];
             if (error != NULL) {
                 *error = _error;
             }
@@ -496,8 +553,17 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
                 [OCSPIResolver NSSQLiteConnection_dedupeRowsForUniqueConstraintsInCloudKitMetadataEntity_:connection x1:entity];
             }
             
-            for (NSSQLEntity *entity in constrainedEntitiesToPreflight) {
-                [OCSPIResolver NSSQLiteConnection_prepareAndExecuteSQLStatement_:connection x1:entity];
+            NSMutableArray<NSSQLiteStatement *> *migrationStatements;
+            {
+                OCCloudKitMetadataMigrationContext * _Nullable context = self->_context;
+                if (context == nil) {
+                    migrationStatements = nil;
+                } else {
+                    assert(object_getInstanceVariable(context, "_migrationStatements", (void **)&migrationStatements) != NULL);
+                }
+            }
+            for (NSSQLiteStatement *statement in migrationStatements) {
+                [OCSPIResolver NSSQLiteConnection_prepareAndExecuteSQLStatement_:connection x1:statement];
             }
             
             NSMutableArray<NSSQLEntity *> * _Nullable sqlEntitiesToCreate;

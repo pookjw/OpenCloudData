@@ -53,7 +53,7 @@ __attribute__((objc_direct_members))
     ((void (*)(id, id))addr)(x0, x1);
 }
 
-+ (void)NSSQLiteConnection_prepareAndExecuteSQLStatement_:(NSSQLiteConnection *)x0 x1:(NSSQLEntity *)x1 {
++ (void)NSSQLiteConnection_prepareAndExecuteSQLStatement_:(NSSQLiteConnection *)x0 x1:(NSSQLiteStatement *)x1 {
     const void *addr = [OCSPIResolver _addressForSymbol:"-[NSSQLiteConnection prepareAndExecuteSQLStatement:]"];
     ((void (*)(id, id))addr)(x0, x1);
 }
@@ -98,6 +98,16 @@ __attribute__((objc_direct_members))
     return ((id (*)(id, id))addr)(x0, x1);
 }
 
++ (NSSQLiteStatement *)NSSQLiteAdapter_newPrimaryKeyInitializeStatementForEntity_withInitialMaxPK_:(NSSQLiteAdapter *)x0 x1:(NSSQLEntity *)x1 x2:(uint)x2 {
+    const void *addr = [OCSPIResolver _addressForSymbol:"-[NSSQLiteAdapter newPrimaryKeyInitializeStatementForEntity:withInitialMaxPK:]"];
+    return ((id (*)(id, id, uint))addr)(x0, x1, x2);
+}
+
++ (NSSQLiteStatement *)NSSQLiteAdapter_newSimplePrimaryKeyUpdateStatementForEntity_:(NSSQLiteAdapter *)x0 x1:(NSSQLEntity *)x1 {
+    const void *addr = [OCSPIResolver _addressForSymbol:"-[NSSQLiteAdapter newSimplePrimaryKeyUpdateStatementForEntity:]"];
+    return ((id (*)(id, id))addr)(x0, x1);
+}
+
 + (NSInteger)NSManagedObjectContext__countForFetchRequest__error_:(NSManagedObjectContext *)x0 x1:(NSFetchRequest *)x1 x2:(NSError * _Nullable *)x2 {
     const void *addr = [OCSPIResolver _addressForSymbol:"-[NSManagedObjectContext _countForFetchRequest_:error:]"];
     return ((NSInteger (*)(id, id, id *))addr)(x0, x1, x2);
@@ -117,7 +127,6 @@ __attribute__((objc_direct_members))
     const void *addr = [OCSPIResolver _addressForSymbol:"+[_PFRoutines _getPFBundleVersionNumber]"];
     return ((id (*)(Class))addr)(x0);
 }
-
 
 + (void)_PFRoutines_efficientlyEnumerateManagedObjectsInFetchRequest_usingManagedObjectContext_andApplyBlock_:(Class)x0 x1:(NSFetchRequest *)x1 x2:(NSManagedObjectContext *)x2 x3:(void (^ NS_NOESCAPE)(NSArray<__kindof NSManagedObject *> * _Nullable, NSError * _Nullable, BOOL * _Nonnull, BOOL * _Nonnull))x3 {
     const void *addr = [OCSPIResolver _addressForSymbol:"+[_PFRoutines efficientlyEnumerateManagedObjectsInFetchRequest:usingManagedObjectContext:andApplyBlock:]"];
