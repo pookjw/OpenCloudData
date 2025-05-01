@@ -502,7 +502,127 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
     return _succeed;
 }
 
-- (BOOL)calculateMigrationStepsWithConnection:(NSSQLiteConnection *)connection error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) {
+- (BOOL)calculateMigrationStepsWithConnection:(NSSQLiteConnection * _Nullable)connection error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) {
+    /*
+     self = x21
+     connection = sp + 0x90
+     error = sp + 0x58
+     */
+    // sp, #0x430
+    __block BOOL _succeed = YES;
+    // sp, #0x400
+    __block NSError * _Nullable _error = nil;
+    // x24
+    OCCloudKitMetadataMigrationContext *context = self->_context;
+    BOOL _needsOldTableDrop;
+    {
+        if (context == nil) {
+            _needsOldTableDrop = NO;
+        } else {
+            _needsOldTableDrop = context->_needsOldTableDrop;
+        }
+    }
+    
+    if (_needsOldTableDrop) {
+        // x19
+        NSSQLiteAdapter *adapter = connection.adapter;
+        
+        NSArray<NSString *> *tableNames = @[
+            @"ZNSCKEXPORTEDOBJECT",
+            @"ZNSCKEXPORTMETADATA",
+            @"ZNSCKEXPORTOPERATION",
+            @"ZNSCKIMPORTOPERATION",
+            @"ZNSCKIMPORTPENDINGRELATIONSHIP"
+        ];
+        
+        for (NSString *tableName in tableNames) {
+            NSSQLiteStatement *statement = [OCSPIResolver NSSQLiteAdapter_newDropTableStatementForTableNamed_:adapter x1:tableName];
+            [context->_migrationStatements addObject:statement];
+            [statement release];
+        }
+    }
+    
+    NSMutableArray<NSSQLEntity *> * _Nullable entities;
+    {
+        OCCloudKitMetadataMigrationContext * _Nullable context = self->_context;
+        if (context == nil) {
+            entities = nil;
+        } else {
+            NSSQLModel * _Nullable sqlModel = context->_sqlModel;
+            if (sqlModel == nil) {
+                entities = nil;
+            } else {
+                assert(object_getInstanceVariable(sqlModel, "_entities", (void **)&entities) != NULL);
+            }
+        }
+    }
+    
+    // x23
+    for (NSSQLEntity *entity in entities) {
+        if ((connection == nil) || (![OCSPIResolver NSSQLiteConnection__hasTableWithName_isTemp:connection x1:[entity tableName] x2:NO])) {
+            NSMutableArray<NSSQLEntity *> * _Nullable sqlEntitiesToCreate;
+            {
+                OCCloudKitMetadataMigrationContext * _Nullable context = nil;
+                if (context == nil) {
+                    sqlEntitiesToCreate = nil;
+                } else {
+                    sqlEntitiesToCreate = context->_sqlEntitiesToCreate;
+                }
+            }
+            [sqlEntitiesToCreate addObject:entity];
+        } else if (![OCSPIResolver NSSQLiteConnection__tableHasRows_:connection x1:[entity tableName]]) {
+            // x19
+            NSSQLiteAdapter *adapter = [connection adapter];
+            // x19
+            NSSQLiteStatement *statement = [OCSPIResolver NSSQLiteAdapter_newDropTableStatementForTableNamed_:adapter x1:[entity tableName]];
+            NSMutableArray<NSSQLiteStatement *> * _Nullable migrationStatements;
+            {
+                OCCloudKitMetadataMigrationContext * _Nullable context = nil;
+                if (context == nil) {
+                    migrationStatements = nil;
+                } else {
+                    migrationStatements = context->_migrationStatements;
+                }
+            }
+            [migrationStatements addObject:statement];
+            [statement release];
+        } else {
+            // x20
+            NSArray<NSArray<NSString *> *> *table = [OCSPIResolver NSSQLiteConnection_fetchTableCreationSQLContaining_:connection x1:[entity tableName]];
+            
+            NSString * _Nullable value = nil;
+            // x19
+            for (NSArray<NSString *> *element in table) {
+                // x24
+                NSString *value = [element objectAtIndex:0];
+                
+                if ([value isEqualToString:[entity tableName]]) {
+                    value = [element objectAtIndex:1];
+                    break;
+                }
+            }
+            
+            if (value == nil) {
+                os_log_error(_OCLogGetLogStream(0x11), "CoreData: fault: Couldn't find sql for table '%@', did you check if it exists first?\n", [entity tableName]);
+                os_log_fault(_OCLogGetLogStream(0x11), "CoreData: Couldn't find sql for table '%@', did you check if it exists first?\n", [entity tableName]);
+            }
+            
+            // x19
+            if ([[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKMirroredRelationship"))]) {
+                // <+1096> ~ <+2496>
+                abort();
+            } else if ([[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKImportPendingRelationship"))]) {
+                // <+2500> ~ ??
+                abort();
+            }
+            // ~ <+3472>
+        }
+        
+        // <+3476>
+        abort();
+    }
+    
+    // <+8616>
     abort();
 }
 
@@ -524,20 +644,27 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
         }
     }
     
-    // w26
-    BOOL shouldRollback;
-    // w25
-    BOOL shouldReconnect;
     // w23
-    BOOL succeed;
+    BOOL _succeed = YES;
     // x21
-    NSError * _Nullable _error;
+    NSError * _Nullable _error = nil;
     
     if (hasWorkToDo) {
         @try {
             [OCSPIResolver NSSQLiteConnection_connect:connection];
             [OCSPIResolver NSSQLiteConnection_beginTransaction:connection];
+        } @catch (NSException *exception) {
+            _succeed = NO;
+            _error = [NSError errorWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{@"NSUnderlyingException": exception}];
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Exception caught during execution of migration statement for cloudkit metadata tables %@ with userInfo %@\n%@\n%@\n", exception, exception.userInfo, self->_store, self->_metadataContext);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Exception caught during execution of migration statement for cloudkit metadata tables %@ with userInfo %@\n%@\n%@\n", exception, exception.userInfo, self->_store, self->_metadataContext);
             
+            [OCSPIResolver NSSQLiteConnection_endFetchAndRecycleStatement_:connection x1:NO];
+            [OCSPIResolver NSSQLiteConnection_disconnect:connection];
+            [OCSPIResolver NSSQLiteConnection_connect:connection];
+        }
+        
+        if (_succeed) {
             // x21
             NSMutableSet<NSSQLEntity *> * _Nullable constrainedEntitiesToPreflight;
             {
@@ -576,52 +703,21 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
                 }
             }
             
-            [OCSPIResolver NSSQLiteConnection_createTablesForEntities_:connection x1:sqlEntitiesToCreate];
-            [OCSPIResolver NSSQLiteConnection_commitTransaction:connection];
-            
-            shouldRollback = NO;
-            shouldReconnect = NO;
-            _error = nil;
-            succeed = YES;
-        } @catch (NSException *exception /* x22 */) {
-            shouldRollback = YES;
-            
-            // TODO: Domain/Code 검증
-            _error = [NSError errorWithDomain:NSCocoaErrorDomain code:11180 userInfo:@{@"NSUnderlyingException": exception}];
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Exception caught during execution of migration statement for cloudkit metadata tables %@ with userInfo %@\n%@\n%@\n", exception, exception.userInfo, self->_store, self->_metadataContext);
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Exception caught during execution of migration statement for cloudkit metadata tables %@ with userInfo %@\n%@\n%@\n", exception, exception.userInfo, self->_store, self->_metadataContext);
-            
-            succeed = NO;
-            shouldReconnect = YES;
+            @try {
+                [OCSPIResolver NSSQLiteConnection_createTablesForEntities_:connection x1:sqlEntitiesToCreate];
+                [OCSPIResolver NSSQLiteConnection_commitTransaction:connection];
+            } @catch (NSException *exception /* x22 */) {
+                _succeed = NO;
+                _error = [NSError errorWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"An unhandled exception was thrown during CloudKit metadata migration: %@", exception]}];
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Exception caught during execution of migration statement for cloudkit metadata tables %@\n%@\n%@\n", exception, self->_store, self->_metadataContext);
+                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Exception caught during execution of migration statement for cloudkit metadata tables %@\n%@\n%@\n", exception, self->_store, self->_metadataContext);
+                [OCSPIResolver NSSQLiteConnection_endFetchAndRecycleStatement_:connection x1:NO];
+                [OCSPIResolver NSSQLiteConnection_rollbackTransaction:connection];
+            }
         }
-    } else {
-        shouldRollback = NO;
-        shouldReconnect = NO;
-        _error = nil;
-        succeed = YES;
     }
     
-    @try {
-        [OCSPIResolver NSSQLiteConnection_endFetchAndRecycleStatement_:connection x1:NO];
-    } @catch (NSException *exception /* x22 */) {
-        shouldRollback = YES;
-        _error = [NSError errorWithDomain:NSCocoaErrorDomain code:11180 userInfo:@{NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"An unhandled exception was thrown during CloudKit metadata migration: %@", exception]}];
-        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Exception caught during execution of migration statement for cloudkit metadata tables %@\n%@\n%@\n", exception, self->_store, self->_metadataContext);
-        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Exception caught during execution of migration statement for cloudkit metadata tables %@\n%@\n%@\n", exception, self->_store, self->_metadataContext);
-        
-        succeed = NO;
-        shouldReconnect = YES;
-    }
-    
-    if (shouldRollback) {
-        [OCSPIResolver NSSQLiteConnection_rollbackTransaction:connection];
-    }
-    if (shouldReconnect) {
-        [OCSPIResolver NSSQLiteConnection_disconnect:connection];
-        [OCSPIResolver NSSQLiteConnection_connect:connection];
-    }
-    
-    if (!succeed) {
+    if (!_succeed) {
         if (_error == nil) {
             os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
             os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
@@ -631,7 +727,7 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
         }
     }
     
-    return succeed;
+    return _succeed;
 }
 
 @end

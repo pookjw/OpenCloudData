@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSEntityDescription *)entityDescription;
 - (NSArray<NSRelationshipDescription *> *)manyToManyRelationships;
 - (NSString *)tableName;
+- (NSString *)name;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -83,6 +83,16 @@ __attribute__((objc_direct_members))
     ((void (*)(id))addr)(x0);
 }
 
++ (BOOL)NSSQLiteConnection__tableHasRows_:(NSSQLiteConnection *)x0 x1:(NSString *)x1 {
+    const void *addr = [OCSPIResolver _addressForSymbol:"-[NSSQLiteConnection _tableHasRows:]"];
+    return ((BOOL (*)(id, id))addr)(x0, x1);
+}
+
++ (NSArray<NSArray<NSString *> *> *)NSSQLiteConnection_fetchTableCreationSQLContaining_:(NSSQLiteConnection *)x0 x1:(NSString *)x1 {
+    const void *addr = [OCSPIResolver _addressForSymbol:"-[NSSQLiteConnection fetchTableCreationSQLContaining:]"];
+    return ((id (*)(id, id))addr)(x0, x1);
+}
+
 + (NSArray<NSArray<NSNumber *> *> *)NSSQLiteConnection_createArrayOfPrimaryKeysAndEntityIDsForRowsWithoutRecordMetadataWithEntity_metadataEntity_:(NSSQLiteConnection *)x0 x1:(NSSQLEntity *)x1 x2:(NSSQLEntity *)x2 {
     const void *addr = [OCSPIResolver _addressForSymbol:"-[NSSQLiteConnection createArrayOfPrimaryKeysAndEntityIDsForRowsWithoutRecordMetadataWithEntity:metadataEntity:]"];
     return ((id (*)(id, id, id))addr)(x0, x1, x2);
@@ -105,6 +115,11 @@ __attribute__((objc_direct_members))
 
 + (NSSQLiteStatement *)NSSQLiteAdapter_newSimplePrimaryKeyUpdateStatementForEntity_:(NSSQLiteAdapter *)x0 x1:(NSSQLEntity *)x1 {
     const void *addr = [OCSPIResolver _addressForSymbol:"-[NSSQLiteAdapter newSimplePrimaryKeyUpdateStatementForEntity:]"];
+    return ((id (*)(id, id))addr)(x0, x1);
+}
+
++ (NSSQLiteStatement *)NSSQLiteAdapter_newDropTableStatementForTableNamed_:(NSSQLiteAdapter *)x0 x1:(NSString *)x1 {
+    const void *addr = [OCSPIResolver _addressForSymbol:"-[NSSQLiteAdapter newDropTableStatementForTableNamed:]"];
     return ((id (*)(id, id))addr)(x0, x1);
 }
 
