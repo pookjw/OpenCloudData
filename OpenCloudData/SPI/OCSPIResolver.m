@@ -123,6 +123,11 @@ __attribute__((objc_direct_members))
     return ((id (*)(id, id))addr)(x0, x1);
 }
 
++ (NSArray<NSSQLiteStatement *> *)NSSQLiteAdapter_newCreateIndexStatementsForEntity_defaultIndicesOnly_:(NSSQLiteAdapter *)x0 x1:(NSSQLEntity *)x1 x2:(BOOL)x2 {
+    const void *addr = [OCSPIResolver _addressForSymbol:"-[NSSQLiteAdapter newCreateIndexStatementsForEntity:defaultIndicesOnly:]"];
+    return ((id (*)(id, id, BOOL))addr)(x0, x1, x2);
+}
+
 + (NSInteger)NSManagedObjectContext__countForFetchRequest__error_:(NSManagedObjectContext *)x0 x1:(NSFetchRequest *)x1 x2:(NSError * _Nullable *)x2 {
     const void *addr = [OCSPIResolver _addressForSymbol:"-[NSManagedObjectContext _countForFetchRequest_:error:]"];
     return ((NSInteger (*)(id, id, id *))addr)(x0, x1, x2);

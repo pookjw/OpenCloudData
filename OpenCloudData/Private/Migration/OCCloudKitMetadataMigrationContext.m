@@ -9,4 +9,8 @@
 
 @implementation OCCloudKitMetadataMigrationContext
 
+- (void)addConstrainedEntityToPreflight:(NSSQLEntity *)entity {
+    abort();
+}
+
 @end

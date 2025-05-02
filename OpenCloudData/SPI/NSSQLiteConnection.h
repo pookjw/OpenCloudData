@@ -11,7 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSSQLiteConnection : NSObject
-- (NSSQLiteAdapter *)adapter;
+- (NSSQLiteAdapter * _Nullable)adapter;
 - (NSArray<NSArray<NSString *> *> *)fetchTableCreationSQL;
 @end
 

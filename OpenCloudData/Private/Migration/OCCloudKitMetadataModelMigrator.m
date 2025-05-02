@@ -610,7 +610,7 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
                 os_log_fault(_OCLogGetLogStream(0x11), "CoreData: Couldn't find sql for table '%@', did you check if it exists first?\n", [entity tableName]);
             }
             
-            if ([[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKMirroredRelationship"))]) {
+            if ([[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKMirroredRelationship"))] || [[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKImportPendingRelationship"))]) {
                 NSSQLModel * _Nullable storeSQLModel;
                 {
                     OCCloudKitMetadataMigrationContext * _Nullable context = self->_context;
@@ -660,35 +660,8 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
                     [sqlString release];
                     [statement release];
                     
-                    // x29, #-0xb0
-                    __block BOOL __succeed = YES;
-                    // sp, #0x450
-                    __block NSError * _Nullable __error = nil;
-                    NSManagedObjectContext *metadataContext = self->_metadataContext;
-                    OCCloudKitMetadataMigrationContext *context = self->_context;
-                    /*
-                     __149-[PFCloudKitMetadataModelMigrator addMigrationStatementsToDeleteDuplicateMirroredRelationshipsToContext:withManagedObjectContext:andSQLEntity:error:]_block_invoke
-                     metadataContext = sp + 0xab0
-                     entity = sp + 0xab8
-                     context = sp + 0xac0
-                     __error = sp + 0xac8
-                     __succeed = sp + 0xad0
-                     */
-                    [metadataContext performBlockAndWait:^{
-                        // TODO
-                        abort();
-                    }];
-                    
-                    if (!__succeed) {
-                        if (__error == nil) {
-                            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
-                            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
-                        } else {
-                            _error = [[__error retain] autorelease];
-                        }
-                    }
-                    
-                    [_error release];
+                    // inlined
+                    [self addMigrationStatementsToDeleteDuplicateMirroredRelationshipsToContext:self->_context withManagedObjectContext:self->_metadataContext andSQLEntity:entity error:&_error];
                     // <+3004>
                     abort();
                 } else if ([[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKImportPendingRelationship"))]) {
@@ -730,18 +703,63 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
                                 [statement release];
                             } else if ([name isEqualToString:@"recordZoneOwnerName"] || [name isEqualToString:@"relatedRecordZoneOwnerName"]) {
                                 // <+2312>
-                                abort();
+                                // original : getCloudKitCKCurrentUserDefaultName
+                                NSString *sqlString = [NSString stringWithFormat:@"UPDATE %@ SET %@ = '%@'", [entity tableName], [property columnName], CKCurrentUserDefaultName];
+                                // x19
+                                NSSQLiteStatement *statement = [[objc_lookUpClass("NSSQLiteStatement") alloc] initWithEntity:entity sqlString:sqlString];
+                                NSMutableArray<NSSQLiteStatement *> *migrationStatements;
+                                {
+                                    OCCloudKitMetadataMigrationContext * _Nullable context = self->_context;
+                                    if (context == nil) {
+                                        migrationStatements = nil;
+                                    } else {
+                                        migrationStatements = context->_migrationStatements;
+                                    }
+                                }
+                                [migrationStatements addObject:statement];
+                                [statement release];
                             }
+                            // <+3256>
                         }
+                        // fin
                     }
+                    // <+3256>
                 }
                 
                 // <+3256>
                 abort();
-            } else if ([[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKImportPendingRelationship"))]) {
+            } else if ([[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKRecordZoneMetadata"))]) {
                 // <+2500> ~ ??
+                
+                /*
+                 __79-[PFCloudKitMetadataModelMigrator calculateMigrationStepsWithConnection:error:]_block_invoke
+                 self = sp + 0x320
+                 entity = sp + 0x328
+                 */
+                [self->_metadataContext performBlockAndWait:^{
+                    abort();
+                }];
+                
+                [self->_context addConstrainedEntityToPreflight:entity];
+                
+                // x22
+                NSArray<NSSQLiteStatement *> * _Nullable statements_2;
+                {
+                    NSSQLiteAdapter * _Nullable adapter = [connection adapter];
+                    if (adapter != nil) {
+                        statements_2 = [OCSPIResolver NSSQLiteAdapter_newCreateIndexStatementsForEntity_defaultIndicesOnly_:adapter x1:entity x2:NO];
+                    } else {
+                        statements_2 = nil;
+                    }
+                }
+                
+                // <+2688>
+                abort();
+            } else {
+                // <+3256>
                 abort();
             }
+            
             // ~ <+3472>
         }
         
@@ -863,6 +881,41 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
 
 - (void)addMigrationStatementForAddingAttribute:(NSSQLAttribute *)attribute toContext:(OCCloudKitMetadataMigrationContext *)context inStore:(NSSQLCore *)store __attribute__((objc_direct)) {
     abort();
+}
+
+- (BOOL)addMigrationStatementsToDeleteDuplicateMirroredRelationshipsToContext:(OCCloudKitMetadataMigrationContext *)context withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext andSQLEntity:(NSSQLEntity *)sqlEntity error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) {
+    // inlined from -[PFCloudKitMetadataModelMigrator calculateMigrationStepsWithConnection:error:] <+1492>~<+1668>
+    // x29, #-0xb0
+    __block BOOL _succeed = YES;
+    // sp, #0x450
+    __block NSError * _Nullable _error = nil;
+    
+    /*
+     __149-[PFCloudKitMetadataModelMigrator addMigrationStatementsToDeleteDuplicateMirroredRelationshipsToContext:withManagedObjectContext:andSQLEntity:error:]_block_invoke
+     managedObjectContext = sp + 0xab0
+     entity = sp + 0xab8
+     context = sp + 0xac0
+     __error = sp + 0xac8
+     __succeed = sp + 0xad0
+     */
+    [managedObjectContext performBlockAndWait:^{
+        // TODO
+        abort();
+    }];
+    
+    if (!_succeed) {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) {
+                *error = [[_error retain] autorelease];
+            }
+        }
+    }
+    
+    [_error release];
+    return _succeed;
 }
 
 @end

@@ -29,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (strong, nonatomic, nullable, direct) NSSQLModel *sqlModel; // 0x38
 @property (strong, nonatomic, nullable, direct) NSManagedObjectModel *storeMetadataModel; // 0x40
 @property (strong, nonatomic, nullable, direct) NSSQLModel *storeSQLModel; // 0x48
+- (void)addConstrainedEntityToPreflight:(NSSQLEntity *)entity;
 @end
 
 NS_ASSUME_NONNULL_END
