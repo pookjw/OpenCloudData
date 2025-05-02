@@ -719,14 +719,9 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
                                 [migrationStatements addObject:statement];
                                 [statement release];
                             }
-                            // <+3256>
                         }
-                        // fin
                     }
-                    // <+3256>
                 }
-                
-                // <+3256>
                 abort();
             } else if ([[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKRecordZoneMetadata"))]) {
                 // <+2500> ~ ??
@@ -753,18 +748,39 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
                     }
                 }
                 
-                // <+2688>
-                abort();
-            } else {
-                // <+3256>
-                abort();
+                for (NSSQLiteStatement *statement in statements_2) {
+                    OCCloudKitMetadataMigrationContext *context = self->_context;
+                    if (context == nil) continue;
+                    [context->_migrationStatements addObject:statement];
+                }
+                [statements_2 release];
             }
             
-            // ~ <+3472>
+            // <+3256>
+            if ([[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKExportMetadata"))] || [[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKExportOperation"))] || [[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKExportedObject"))]) {
+                // <+3388>
+                // x19
+                NSSQLiteAdapter *adapter = [connection adapter];
+                // x19
+                NSSQLiteStatement *statement = [OCSPIResolver NSSQLiteAdapter_newDropTableStatementForTableNamed_:adapter x1:[entity tableName]];
+                OCCloudKitMetadataMigrationContext *context = self->_context;
+                if (context != nil) {
+                    [context->_migrationStatements addObject:statement];
+                }
+                [statement release];
+                if (context != nil) {
+                    [context->_sqlEntitiesToCreate addObject:entity];
+                }
+            } else {
+                // <+3508>
+                if ([[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKRecordMetadata"))]) {
+                    // <+3552>
+                } else {
+                    // <+4168>
+                }
+                //fin
+            }
         }
-        
-        // <+3476>
-        abort();
     }
     
     // <+8616>
