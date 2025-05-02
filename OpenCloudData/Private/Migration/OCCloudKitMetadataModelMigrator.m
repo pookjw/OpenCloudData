@@ -14,6 +14,8 @@
 #import <OpenCloudData/NSSQLModel.h>
 #import <OpenCloudData/NSKnownKeysDictionary.h>
 #import <OpenCloudData/OCSPIResolver.h>
+#import <OpenCloudData/NSSQLProperty.h>
+#import <OpenCloudData/NSSQLAttribute.h>
 #import <objc/runtime.h>
 
 COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigrationKey;
@@ -590,6 +592,7 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
             // x20
             NSArray<NSArray<NSString *> *> *table = [OCSPIResolver NSSQLiteConnection_fetchTableCreationSQLContaining_:connection x1:[entity tableName]];
             
+            // sp + 0xb8
             NSString * _Nullable value = nil;
             // x19
             for (NSArray<NSString *> *element in table) {
@@ -607,9 +610,133 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
                 os_log_fault(_OCLogGetLogStream(0x11), "CoreData: Couldn't find sql for table '%@', did you check if it exists first?\n", [entity tableName]);
             }
             
-            // x19
             if ([[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKMirroredRelationship"))]) {
-                // <+1096> ~ <+2496>
+                NSSQLModel * _Nullable storeSQLModel;
+                {
+                    OCCloudKitMetadataMigrationContext * _Nullable context = self->_context;
+                    if (context == nil) {
+                        storeSQLModel = nil;
+                    } else {
+                        storeSQLModel = context->_storeSQLModel;
+                    }
+                }
+                
+                // x19
+                NSSQLEntity *oldEntity = [storeSQLModel entityNamed:[entity name]];
+                
+                if ([value containsString:@"ZENTITYNAME"]) {
+                    [self addMigrationStatementToContext:self->_context forRenamingAttributeNamed:@"entityName" withOldColumnName:@"ZENTITYNAME" toAttributeName:@"cdEntityName" onOldSQLEntity:oldEntity andCurrentSQLEntity:entity];
+                }
+                
+                if ([value containsString:@"ZISDELETED"]) {
+                    [self addMigrationStatementToContext:self->_context forRenamingAttributeNamed:@"isDeleted" withOldColumnName:@"ZISDELETED" toAttributeName:@"needsDelete" onOldSQLEntity:oldEntity andCurrentSQLEntity:entity];
+                }
+                
+                if ([[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKMirroredRelationship"))]) {
+                    NSMutableDictionary<NSString *, __kindof NSSQLProperty *> * _Nullable properties;
+                    assert(object_getInstanceVariable(entity, "_properties", (void **)&properties) != NULL);
+                    // x19
+                    __kindof NSSQLProperty * _Nullable property = [properties objectForKey:@"recordZone"];
+                    if ([value containsString:[property columnName]]) {
+                        // <+3256>
+                        abort();
+                    }
+                    
+                    // x19
+                    NSString *sqlString = [[NSString alloc] initWithFormat:@"ALTER TABLE %@ ADD COLUMN %@ INTEGER", [entity tableName], [property columnName]];
+                    // x22
+                    NSSQLiteStatement *statement = [[objc_lookUpClass("NSSQLiteStatement") alloc] initWithEntity:entity sqlString:sqlString];
+                    
+                    NSMutableArray<NSSQLiteStatement *> *migrationStatements;
+                    {
+                        OCCloudKitMetadataMigrationContext * _Nullable context = self->_context;
+                        if (context == nil) {
+                            migrationStatements = nil;
+                        } else {
+                            migrationStatements = context->_migrationStatements;
+                        }
+                    }
+                    [migrationStatements addObject:statement];
+                    [sqlString release];
+                    [statement release];
+                    
+                    // x29, #-0xb0
+                    __block BOOL __succeed = YES;
+                    // sp, #0x450
+                    __block NSError * _Nullable __error = nil;
+                    NSManagedObjectContext *metadataContext = self->_metadataContext;
+                    OCCloudKitMetadataMigrationContext *context = self->_context;
+                    /*
+                     __149-[PFCloudKitMetadataModelMigrator addMigrationStatementsToDeleteDuplicateMirroredRelationshipsToContext:withManagedObjectContext:andSQLEntity:error:]_block_invoke
+                     metadataContext = sp + 0xab0
+                     entity = sp + 0xab8
+                     context = sp + 0xac0
+                     __error = sp + 0xac8
+                     __succeed = sp + 0xad0
+                     */
+                    [metadataContext performBlockAndWait:^{
+                        // TODO
+                        abort();
+                    }];
+                    
+                    if (!__succeed) {
+                        if (__error == nil) {
+                            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+                            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+                        } else {
+                            _error = [[__error retain] autorelease];
+                        }
+                    }
+                    
+                    [_error release];
+                    // <+3004>
+                    abort();
+                } else if ([[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKImportPendingRelationship"))]) {
+                    // <+1672>
+                    NSArray<NSString *> *names = @[
+                        @"recordZoneName",
+                        @"recordZoneOwnerName",
+                        @"relatedRecordZoneName",
+                        @"relatedRecordZoneOwnerName"
+                    ];
+                    // x26
+                    for (NSString *name in names) {
+                        NSMutableDictionary<NSString *, __kindof NSSQLProperty *> * _Nullable properties;
+                        assert(object_getInstanceVariable(entity, "_properties", (void **)&properties) != NULL);
+                        // x22
+                        __kindof NSSQLProperty * _Nullable property = properties[name];
+                        
+                        if ([value containsString:[property columnName]]) {
+#warning TODO __ckLoggingOverride에 따라 type이 바뀌는 것 같음
+                            os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "CoreDataOpenCloudDataCloudKit: %s(%d): Skipping migration for '%@' because it already has a column named '%@'", __func__, __LINE__, [entity tableName], [property columnName]);
+                        } else {
+                            // <+2072>
+                            [self addMigrationStatementForAddingAttribute:property toContext:self->_context inStore:self->_store];
+                            
+                            if ([name isEqualToString:@"recordZoneName"] || [name isEqualToString: @"relatedRecordZoneName"]) {
+                                NSString *sqlString = [NSString stringWithFormat:@"UPDATE %@ SET %@ = '%@'", [entity tableName], [property columnName], @"com.apple.coredata.cloudkit.zone"];
+                                // x19
+                                NSSQLiteStatement *statement = [[objc_lookUpClass("NSSQLiteStatement") alloc] initWithEntity:entity sqlString:sqlString];
+                                NSMutableArray<NSSQLiteStatement *> *migrationStatements;
+                                {
+                                    OCCloudKitMetadataMigrationContext * _Nullable context = self->_context;
+                                    if (context == nil) {
+                                        migrationStatements = nil;
+                                    } else {
+                                        migrationStatements = context->_migrationStatements;
+                                    }
+                                }
+                                [migrationStatements addObject:statement];
+                                [statement release];
+                            } else if ([name isEqualToString:@"recordZoneOwnerName"] || [name isEqualToString:@"relatedRecordZoneOwnerName"]) {
+                                // <+2312>
+                                abort();
+                            }
+                        }
+                    }
+                }
+                
+                // <+3256>
                 abort();
             } else if ([[entity name] isEqualToString:NSStringFromClass(objc_lookUpClass("NSCKImportPendingRelationship"))]) {
                 // <+2500> ~ ??
@@ -686,7 +813,7 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
                 if (context == nil) {
                     migrationStatements = nil;
                 } else {
-                    assert(object_getInstanceVariable(context, "_migrationStatements", (void **)&migrationStatements) != NULL);
+                    migrationStatements = context->_migrationStatements;
                 }
             }
             for (NSSQLiteStatement *statement in migrationStatements) {
@@ -728,6 +855,14 @@ COREDATA_EXTERN NSString * const NSSQLPKTableName;
     }
     
     return _succeed;
+}
+
+- (void)addMigrationStatementToContext:(OCCloudKitMetadataMigrationContext *)context forRenamingAttributeNamed:(NSString *)renamingAttributeName withOldColumnName:(NSString *)oldColumnName toAttributeName:(NSString *)attributeName onOldSQLEntity:(NSSQLEntity *)oldSQLEntity andCurrentSQLEntity:(NSSQLEntity *)currentSQLEntity __attribute__((objc_direct)) {
+    abort();
+}
+
+- (void)addMigrationStatementForAddingAttribute:(NSSQLAttribute *)attribute toContext:(OCCloudKitMetadataMigrationContext *)context inStore:(NSSQLCore *)store __attribute__((objc_direct)) {
+    abort();
 }
 
 @end

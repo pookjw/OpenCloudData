@@ -23,6 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
     @package BOOL _needsImportAfterClientMigration; // 0x24
     @package BOOL _needsBatchUpdateForSystemFieldsAndLastExportedTransaction; // 0x25
     @package NSSQLModel *_sqlModel; // 0x38
+    @package NSSQLModel *_storeSQLModel; // 0x48
 }
 @property (strong, nonatomic, nullable, direct) NSManagedObjectModel *currentModel; // 0x30
 @property (strong, nonatomic, nullable, direct) NSSQLModel *sqlModel; // 0x38

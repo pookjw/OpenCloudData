@@ -170,6 +170,8 @@
 				SPI/PFMirroredManyToManyRelationshipV2.h,
 				SPI/PFMirroredOneToManyRelationship.h,
 				SPI/PFMirroredRelationship.h,
+				SPI/SQLProperty/NSSQLAttribute.h,
+				SPI/SQLProperty/NSSQLProperty.h,
 			);
 			publicHeaders = (
 				"NSPersistentStoreDescription+OpenCloudData.h",
