@@ -22,6 +22,9 @@
 #import <OpenCloudData/OCCKRecordZoneMetadata.h>
 #import <OpenCloudData/NSPersistentHistoryToken+Private.h>
 #import <OpenCloudData/OCCKMetadataEntry.h>
+#import <OpenCloudData/OCCloudKitMirroringDelegatePreJazzkonMetadata.h>
+#import <OpenCloudData/OCCloudKitSerializer.h>
+#import <OpenCloudData/OCCKHistoryAnalyzerState.h>
 #import <objc/runtime.h>
 
 COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigrationKey;
@@ -29,6 +32,11 @@ COREDATA_EXTERN NSString * const NSPersistentStoreMirroringDelegateOptionKey;
 COREDATA_EXTERN NSString * const NSSQLPKTableName;
 COREDATA_EXTERN NSString * const PFCloudKitMetadataFrameworkVersionKey;
 COREDATA_EXTERN NSString * const PFCloudKitMetadataModelVersionHashesKey;
+COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsMetadataMigrationKey;
+COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateLastHistoryTokenKey;
+COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey;
+COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey;
+COREDATA_EXTERN NSString * const PFCloudKitMetadataClientVersionHashesKey;
 
 @implementation OCCloudKitMetadataModelMigrator
 
@@ -165,11 +173,505 @@ COREDATA_EXTERN NSString * const PFCloudKitMetadataModelVersionHashesKey;
     
     /*
      __69-[PFCloudKitMetadataModelMigrator commitMigrationMetadataAndCleanup:]_block_invoke
-     self = sp + 0xa8
-     _succeed = sp + 0xb0
-     _error = sp + 0xb8
+     self = sp + 0xa8 = *(sp + 0x38) + 0x20
+     _succeed = sp + 0xb0 = *(sp + 0x38) + 0x28
+     _error = sp + 0xb8 = *(sp + 0x38) + 0x30
      */
     [_metadataContext performBlockAndWait:^{
+#warning TODO: try-catch 있음
+        
+        /*
+         self(block) = sp + 0x38
+         */
+        if (![OCSPIResolver _PFRoutines__isInMemoryStore_:objc_lookUpClass("_PFRoutines") x1:self->_store]) {
+            // sp + 0x188
+            NSError * _Nullable __error = nil;
+            BOOL result = [self->_metadataContext setQueryGenerationFromToken:nil error:&__error];
+            
+            if (!result) {
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Unable to set query generation on moc: %@", __func__, __LINE__, self, __error);
+            }
+        }
+        
+        // sp, #0x180
+        NSError * _Nullable __error = nil;
+        // <+288>
+        OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:@"PFCloudKitMetadataModelMigratorMigrationBeganCommitKey" boolValue:YES forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
+        BOOL hasError;
+        if (entry != nil) {
+            hasError = ![self->_metadataContext save:&__error];
+        } else {
+            hasError = YES;
+        }
+        if (hasError) {
+            _succeed = NO;
+            _error = [__error retain];
+            return;
+        }
+        
+        if (![OCSPIResolver _PFRoutines__isInMemoryStore_:objc_lookUpClass("_PFRoutines") x1:self->_store]) {
+            // sp + 0x188
+            NSError * _Nullable __error = nil;
+            BOOL result = [self->_metadataContext setQueryGenerationFromToken:NSQueryGenerationToken.currentQueryGenerationToken error:&__error];
+            
+            if (!result) {
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Unable to set query generation on moc: %@", __func__, __LINE__, self, __error);
+            }
+        }
+        
+        // x21
+        OCCKMetadataEntry *entry_1 = [OCCKMetadataEntry entryForKey:PFCloudKitMetadataFrameworkVersionKey fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&__error];
+        if (__error != nil) {
+            _succeed = NO;
+            _error = [__error retain];
+            return;
+        }
+        
+        OCCKMetadataEntry *entry_2 = [OCCKMetadataEntry entryForKey:PFCloudKitMetadataModelVersionHashesKey fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&__error];
+        if (__error != nil) {
+            _succeed = NO;
+            _error = [__error retain];
+            return;
+        }
+        
+#warning TODO: <+848> - 마지막에 불리는 것 같음 작업해야함
+        
+        // <+1560>
+        // x20
+        NSObject<NSSecureCoding> *transformedValue = [entry_2 transformedValue];
+        
+        BOOL flag;
+        if (transformedValue != nil) {
+            NSManagedObjectModel * _Nullable currentModel;
+            {
+                OCCloudKitMetadataMigrationContext * _Nullable context = self->_context;
+                if (context == nil) {
+                    currentModel = nil;
+                } else {
+                    currentModel = context->_currentModel;
+                }
+            }
+            
+            if ([currentModel.entityVersionHashesByName isEqual:transformedValue]) {
+                flag = NO;
+            } else {
+                flag = YES;
+            }
+        } else {
+            flag = YES;
+        }
+        
+        // <+1608>
+        if (flag) {
+            BOOL result = [self computeAncillaryEntityPrimaryKeyTableEntriesForStore:self->_store error:&__error];
+            if (!result) {
+                _succeed = NO;
+                _error = [__error retain];
+            }
+        }
+        // <+1672>
+        if (!_succeed) return;
+        
+        NSManagedObjectModel * _Nullable currentModel;
+        {
+            OCCloudKitMetadataMigrationContext * _Nullable context = self->_context;
+            if (context == nil) {
+                currentModel = nil;
+            } else {
+                currentModel = context->_currentModel;
+            }
+        }
+        
+        [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:PFCloudKitMetadataModelVersionHashesKey transformedValue:(NSObject<NSSecureCoding> *)currentModel forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
+        if (entry == nil) {
+            _succeed = NO;
+            _error = [__error retain];
+            return;
+        }
+        
+        BOOL flag_0;
+        // w23
+        BOOL flag_1;
+        // w8 // sp + 0x14
+        BOOL flag_2;
+        if (entry_1 == nil) {
+            flag_0 = YES;
+            flag_1 = YES;
+            flag_2 = NO;
+        } else {
+            flag_0 = (entry_1.integerValue.unsignedIntegerValue <= 0x399);
+            // w23
+            flag_1 = (entry_1.integerValue.unsignedIntegerValue < 0x3b1);
+            // w8 // sp + 0x14
+            flag_2 = (entry_1.integerValue.unsignedIntegerValue < 0x3b3);
+        }
+        
+        if (flag_0) {
+            // <+1908>
+            // x21
+            OCCloudKitMirroringDelegatePreJazzkonMetadata *preJazzkonMetadata = [[OCCloudKitMirroringDelegatePreJazzkonMetadata alloc] initWithStore:self->_store];
+            BOOL result = [preJazzkonMetadata load:&__error];
+            if (!result) {
+                _succeed = NO;
+                [__error retain];
+                [preJazzkonMetadata release];
+                return;
+            }
+            
+            // x20
+            OCCKDatabaseMetadata * _Nullable databaseMetadata = [OCCKDatabaseMetadata databaseMetadataForScope:self->_databaseScope forStore:self->_store inContext:self->_metadataContext error:&__error];
+            if (__error != nil) {
+                _succeed = NO;
+                [__error retain];
+                [preJazzkonMetadata release];
+                return;
+            }
+            
+            // <+3296>
+            databaseMetadata.currentChangeToken = [preJazzkonMetadata changeTokenForDatabaseScope:self->_databaseScope];
+            databaseMetadata.hasSubscription = [preJazzkonMetadata hasInitializedDatabaseSubscription];
+            
+            if (self->_databaseScope == CKDatabaseScopePrivate) {
+                // x22
+                CKRecordZoneID *zoneID = [OCCloudKitSerializer defaultRecordZoneIDForDatabaseScope:self->_databaseScope];
+                // x20
+                OCCKRecordZoneMetadata * _Nullable metadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:zoneID inDatabaseWithScope:self->_databaseScope forStore:self->_store inContext:self->_metadataContext error:&__error];
+                
+                if (__error != nil) {
+                    _succeed = NO;
+                    _error = [__error retain];
+                    [preJazzkonMetadata release];
+                    return;
+                }
+                
+                // <+6440>
+                metadata.hasSubscription = [preJazzkonMetadata hasInitializedDatabaseSubscription];
+                metadata.currentChangeToken = [preJazzkonMetadata changeTokenForZoneWithID:zoneID inDatabaseWithScope:self->_databaseScope];
+                metadata.hasSubscription = NO;
+                [zoneID release];
+            }
+            
+            // <+6540>
+            if ([preJazzkonMetadata lastHistoryToken] == nil) return;
+            
+            OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:NSCloudKitMirroringDelegateLastHistoryTokenKey transformedValue:[preJazzkonMetadata lastHistoryToken] forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
+            if (entry == nil) {
+                _succeed = NO;
+                _error = [__error retain];
+                [preJazzkonMetadata release];
+                return;
+            }
+            
+            if ([preJazzkonMetadata ckIdentityRecordName] == nil) return;
+            
+            entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey transformedValue:[preJazzkonMetadata ckIdentityRecordName] forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
+            if (entry == nil) {
+                _succeed = NO;
+                _error = [__error retain];
+                [preJazzkonMetadata release];
+                return;
+            }
+            
+            entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey boolValue:[preJazzkonMetadata hasCheckedCKIdentity] forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
+            if (entry == nil) {
+                _succeed = NO;
+                _error = [__error retain];
+                [preJazzkonMetadata release];
+                return;
+            }
+            
+            // <+2056>
+            [preJazzkonMetadata release];
+        }
+        
+        if (flag_1) {
+            // <+2060>
+            @autoreleasepool {
+                // sp + 0x30
+                NSMutableDictionary<CKRecordZoneID *, OCCKRecordZoneMetadata *> *dictionary = [[NSMutableDictionary alloc] init];
+                // x21
+                NSFetchRequest<OCCKRecordZoneMetadata *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordZoneMetadata entityPath]];
+                fetchRequest.relationshipKeyPathsForPrefetching = @[@"records", @"mirroredRelationships", @"database"];
+                fetchRequest.returnsObjectsAsFaults = NO;
+                fetchRequest.affectedStores = @[self->_store];
+                // <+2240>
+                // x24
+                NSArray<OCCKRecordZoneMetadata *> * _Nullable results = [self->_metadataContext executeFetchRequest:fetchRequest error:&__error];
+                if (results == nil) {
+                    _succeed = NO;
+                    _error = [__error retain];
+                    [dictionary release];
+                    return;
+                }
+                // sp + 0x18
+                OCCKDatabaseMetadata * _Nullable databaseMetadata = [OCCKDatabaseMetadata databaseMetadataForScope:self->_databaseScope forStore:self->_store inContext:self->_metadataContext error:&__error];
+                if (databaseMetadata == nil) {
+                    _succeed = NO;
+                    _error = [__error retain];
+                    [dictionary release];
+                    return;
+                }
+                
+                // x26
+                for (OCCKRecordZoneMetadata *recordZoneMetadata in results) {
+                    if ((recordZoneMetadata.ckOwnerName.length == 0) || (recordZoneMetadata.ckRecordZoneName.length == 0)) {
+                        // <+2772>
+                        [self->_metadataContext deleteObject:recordZoneMetadata];
+                        continue;
+                    }
+                    
+                    // x27
+                    CKRecordZoneID *zoneID = [recordZoneMetadata createRecordZoneID];
+                    // x28
+                    OCCKRecordZoneMetadata *recordZoneMetadata_2 = [dictionary objectForKey:zoneID];
+                    if (recordZoneMetadata_2 == nil) {
+                        recordZoneMetadata.database = databaseMetadata;
+                        [dictionary setObject:recordZoneMetadata forKey:zoneID];
+                        continue;
+                    }
+                    // x21
+                    NSSet<OCCKMirroredRelationship *> *mirroredRelationships = [recordZoneMetadata.mirroredRelationships copy];
+                    
+                    // <+2460>
+                    for (OCCKMirroredRelationship *mirroredRelationship in mirroredRelationships) {
+                        mirroredRelationship.recordZone = recordZoneMetadata_2;
+                    }
+                    // <+2592>
+                    [mirroredRelationships release];
+                    
+                    // x21
+                    NSSet<OCCKRecordMetadata *> *records = [recordZoneMetadata.records copy];
+                    for (OCCKRecordMetadata *record in records) {
+                        record.recordZone = recordZoneMetadata_2;
+                    }
+                    // <+2740>
+                    [records release];
+                    
+                    [self->_metadataContext deleteObject:recordZoneMetadata];
+                }
+                // <+3516>
+                [dictionary release];
+            }
+            
+            if (self->_metadataContext.hasChanges) {
+                BOOL result = [self->_metadataContext save:&__error];
+                if (!result) {
+                    _succeed = NO;
+                    _error = [__error retain];
+                    return;
+                }
+            }
+        }
+        
+        // <+3704>
+        // x21
+        CKRecordZoneID *zoneID = [OCCloudKitSerializer defaultRecordZoneIDForDatabaseScope:self->_databaseScope];
+        // x22
+        OCCKRecordZoneMetadata * _Nullable recordZoneMetadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:zoneID inDatabaseWithScope:self->_databaseScope forStore:self->_store inContext:self->_metadataContext error:&__error];
+        
+        BOOL result;
+        if (recordZoneMetadata.isInserted) {
+            result = [self->_metadataContext save:&__error];
+        } else {
+            result = NO;
+        }
+        
+        if (!result) {
+            [zoneID release];
+            _succeed = NO;
+            _error = [__error retain];
+            return;
+        }
+        
+        // <+3820>
+        // x23
+        NSFetchRequest<OCCKMirroredRelationship *> *fetchRequest = [[NSFetchRequest alloc] initWithEntityName:[OCCKMirroredRelationship entityPath]];
+        fetchRequest.affectedStores = @[self->_store];
+        fetchRequest.fetchBatchSize = 500;
+        
+        /*
+         __69-[PFCloudKitMetadataModelMigrator commitMigrationMetadataAndCleanup:]_block_invoke.182
+         recordZoneMetadata = sp + 0xa0
+         self = sp + 0xa8
+         _succeed = sp + 0xb0
+         _error = sp + 0xb8
+         */
+        [OCSPIResolver _PFRoutines_efficientlyEnumerateManagedObjectsInFetchRequest_usingManagedObjectContext_andApplyBlock_:objc_lookUpClass("_PFRoutines") x1:fetchRequest x2:self->_metadataContext x3:^(NSArray<__kindof NSManagedObject *> * _Nullable objects, NSError * _Nullable error, BOOL * _Nonnull checkChanges, BOOL * _Nonnull reserved) {
+#warning TODO
+            abort();
+        }];
+        [fetchRequest release];
+        [zoneID release];
+        
+        if (!_succeed) {
+            return;
+        }
+        
+        BOOL _needsAnalyzedHistoryCheck;
+        {
+            OCCloudKitMetadataMigrationContext * _Nullable context = self->_context;
+            if (context == nil) {
+                _needsAnalyzedHistoryCheck = NO;
+            } else {
+                _needsAnalyzedHistoryCheck = context->_needsAnalyzedHistoryCheck;
+            }
+        }
+        
+        if (_needsAnalyzedHistoryCheck) {
+            // <+4068>
+#warning TODO : inlined block -[PFCloudKitMetadataModelMigrator commitMigrationMetadataAndCleanup:]_block_invoke_2 같음 (__error를 안 쓰는 것을 보아 __error 이전인듯)
+            @autoreleasepool {
+                // x20
+                NSFetchRequest<OCCKHistoryAnalyzerState *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKHistoryAnalyzerState entityPath]];
+                fetchRequest.predicate = [NSPredicate predicateWithFormat:@"entityId = 0"];
+                
+                NSManagedObjectContext * _Nullable context = self->_metadataContext;
+                // x23
+                NSInteger count;
+                if (context == nil) {
+                    count = 0;
+                } else {
+                    count = [OCSPIResolver NSManagedObjectContext__countForFetchRequest__error_:context x1:fetchRequest x2:&_error];
+                }
+                
+                if (count == 0) {
+                    // nop
+                } else if (count == NSNotFound) {
+                    _succeed = NO;
+                    [_error retain];
+                    [self->_metadataContext reset];
+                    return;
+                } else {
+                    // <+4240>
+                    os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Found %lu corrupt analyzed history rows, purging.", __func__, __LINE__, count);
+                    
+                    // <+4404>
+                    // x20
+                    fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKHistoryAnalyzerState entityPath]];
+                    // x22
+                    NSBatchDeleteRequest *request = [[NSBatchDeleteRequest alloc] initWithFetchRequest:fetchRequest];
+                    request.resultType = NSBatchDeleteResultTypeStatusOnly;
+                    BOOL boolValue = ((NSNumber *)((NSBatchDeleteResult *)[self->_metadataContext executeRequest:request error:&_error]).result).boolValue;
+                    
+                    if (!boolValue) {
+                        _succeed = NO;
+                        [_error retain];
+                        [request release];
+                        [self->_metadataContext reset];
+                        return;
+                    }
+                    
+                    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:NSCloudKitMirroringDelegateLastHistoryTokenKey fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&_error];
+                    if (entry == nil) {
+                        _succeed = NO;
+                        [_error retain];
+                        [request release];
+                        [self->_metadataContext reset];
+                        return;
+                    }
+                    
+                    [self->_metadataContext deleteObject:entry];
+                    [request release];
+                }
+                
+                if (self->_metadataContext.hasChanges) {
+                    BOOL result = [self->_metadataContext save:&_error];
+                    if (!result) {
+                        _succeed = NO;
+                        [_error retain];
+                        [self->_metadataContext reset];
+                        return;
+                    }
+                }
+                
+                [self->_metadataContext reset];
+            }
+        }
+        
+        // <+4804>
+        _succeed = [self checkForOrphanedMirroredRelationshipsInStore:self->_store inManagedObjectContext:self->_metadataContext error:&__error];
+        if (!_succeed) {
+            _error = [__error retain];
+            return;
+        }
+        
+        // <+4896>
+        
+        // x21
+        BOOL isEqual;
+        if (flag_2) {
+            BOOL result = [self checkForCorruptedRecordMetadataInStore:self->_store inManagedObjectContext:self->_metadataContext error:&__error];
+            if (!result) {
+                _succeed = NO;
+                [__error retain];
+                return;
+            } else {
+                isEqual = NO;
+            }
+        } else {
+            // <+4956>
+            entry = [OCCKMetadataEntry entryForKey:PFCloudKitMetadataClientVersionHashesKey fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&__error];
+            if (__error != nil) {
+                _succeed = NO;
+                _error = [__error retain];
+                return;
+            }
+            
+            if (entry == nil) {
+                isEqual = NO;
+            } else {
+                // x20
+                transformedValue = entry.transformedValue;
+                // x21
+                isEqual = [self->_metadataContext.persistentStoreCoordinator.managedObjectModel.entityVersionHashesByName isEqual:transformedValue];
+            }
+        }
+        
+        // <+5112>
+        
+        if (self->_metadataContext.hasChanges) {
+            result = [self->_metadataContext save:&__error];
+        } else {
+            if (![OCSPIResolver _PFRoutines__isInMemoryStore_:objc_lookUpClass("_PFRoutines") x1:self->_store]) {
+                result = [self->_metadataContext setQueryGenerationFromToken:NSQueryGenerationToken.currentQueryGenerationToken error:&__error];
+            } else {
+                result = YES;
+            }
+        }
+        
+        if (!result) {
+            _succeed = NO;
+            _error = [__error retain];
+            return;
+        }
+        
+        if (!isEqual) {
+            BOOL result = [self cleanUpAfterClientMigrationWithStore:self->_store andContext:self->_metadataContext error:&__error];
+            if (!result) {
+                _succeed = NO;
+                _error = [__error retain];
+                return;
+            }
+            
+            OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:PFCloudKitMetadataClientVersionHashesKey transformedValue:self->_metadataContext.persistentStoreCoordinator.managedObjectModel.entityVersionHashesByName forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
+            if (entry == nil) {
+                _succeed = NO;
+                _error = [__error retain];
+                return;
+            }
+        }
+        
+        // <+5492>
+        NSNumber *versionNumber = [OCSPIResolver _PFRoutines__getPFBundleVersionNumber:objc_lookUpClass("_PFRoutines")];
+        entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:PFCloudKitMetadataClientVersionHashesKey integerValue:versionNumber forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
+        if (entry == nil) {
+            _succeed = NO;
+            _error = [__error retain];
+            return;
+        }
+        
+        // <+5676>
+#warning TODO
         abort();
     }];
     
@@ -1675,6 +2177,27 @@ COREDATA_EXTERN NSString * const PFCloudKitMetadataModelVersionHashesKey;
     
     [_error release];
     return _succeed;
+}
+
+- (BOOL)migrateMetadataForObjectsInStore:(NSSQLCore *)store toNSCKRecordMetadataUsingContext:(NSManagedObjectContext *)context error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) {
+    // inlined from __69-[PFCloudKitMetadataModelMigrator commitMigrationMetadataAndCleanup:]_block_invoke
+#warning TODO
+    abort();
+}
+
+- (BOOL)checkForOrphanedMirroredRelationshipsInStore:(NSSQLCore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) {
+#warning TODO
+    abort();
+}
+
+- (BOOL)checkForCorruptedRecordMetadataInStore:(NSSQLCore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) {
+#warning TODO
+    abort();
+}
+
+- (BOOL)cleanUpAfterClientMigrationWithStore:(NSSQLCore *)store andContext:(NSManagedObjectContext *)context error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) {
+#warning TODO
+    abort();
 }
 
 @end

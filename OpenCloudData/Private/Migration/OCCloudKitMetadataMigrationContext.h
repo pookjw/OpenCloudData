@@ -22,7 +22,9 @@ NS_ASSUME_NONNULL_BEGIN
     @package BOOL _needsOldTableDrop; // 0x22
     @package BOOL _needsImportAfterClientMigration; // 0x24
     @package BOOL _needsBatchUpdateForSystemFieldsAndLastExportedTransaction; // 0x25
+    @package BOOL _needsAnalyzedHistoryCheck; // 0x26
     @package BOOL _needsCleanupFromOrphanedMirroredRelationships; // 0x28
+    @package NSManagedObjectModel *_currentModel; // 0x30
     @package NSSQLModel *_sqlModel; // 0x38
     @package NSSQLModel *_storeSQLModel; // 0x48
     @package NSNumber *_storeMetadataVersion; // 0x50

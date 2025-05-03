@@ -96,6 +96,7 @@
 				Private/OCCloudKitMirroringActivityVoucherManager.h,
 				Private/OCCloudKitMirroringDelegate.h,
 				Private/OCCloudKitMirroringDelegateOptions.h,
+				Private/OCCloudKitMirroringDelegatePreJazzkonMetadata.h,
 				Private/OCCloudKitMirroringDelegateProgressProvider.h,
 				Private/OCCloudKitMirroringDelegateWorkBlockContext.h,
 				Private/OCCloudKitMirroringRequestManager.h,
