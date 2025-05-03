@@ -171,6 +171,8 @@
 				SPI/PFMirroredOneToManyRelationship.h,
 				SPI/PFMirroredRelationship.h,
 				SPI/SQLProperty/NSSQLAttribute.h,
+				SPI/SQLProperty/NSSQLColumn.h,
+				SPI/SQLProperty/NSSQLPrimaryKey.h,
 				SPI/SQLProperty/NSSQLProperty.h,
 			);
 			publicHeaders = (

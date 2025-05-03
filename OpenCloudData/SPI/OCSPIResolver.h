@@ -14,6 +14,7 @@
 #import <OpenCloudData/PFHistoryAnalyzer.h>
 #import <OpenCloudData/NSSQLiteStatement.h>
 #import <OpenCloudData/NSSQLiteAdapter.h>
+#import <OpenCloudData/NSSQLColumn.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -44,6 +45,7 @@ __attribute__((objc_direct_members))
 + (NSSQLiteStatement *)NSSQLiteAdapter_newSimplePrimaryKeyUpdateStatementForEntity_:(NSSQLiteAdapter *)x0 x1:(NSSQLEntity *)x1 NS_RETURNS_RETAINED;
 + (NSSQLiteStatement *)NSSQLiteAdapter_newDropTableStatementForTableNamed_:(NSSQLiteAdapter *)x0 x1:(NSString *)x1 NS_RETURNS_RETAINED;
 + (NSArray<NSSQLiteStatement *> *)NSSQLiteAdapter_newCreateIndexStatementsForEntity_defaultIndicesOnly_:(NSSQLiteAdapter *)x0 x1:(NSSQLEntity *)x1 x2:(BOOL)x2 NS_RETURNS_RETAINED;
++ (NSString *)NSSQLiteAdapter_typeStringForColumn_:(NSSQLiteAdapter *)x0 x1:(NSSQLColumn *)x1;
 
 + (NSInteger)NSManagedObjectContext__countForFetchRequest__error_:(NSManagedObjectContext *)x0 x1:(NSFetchRequest *)x1 x2:(NSError * _Nullable * _Nullable)x2;
 

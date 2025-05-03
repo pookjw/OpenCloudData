@@ -5,11 +5,11 @@
 //  Created by Jinwoo Kim on 5/2/25.
 //
 
-#import <OpenCloudData/NSSQLAttribute.h>
+#import <OpenCloudData/NSSQLColumn.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface NSSQLAttribute : NSSQLProperty
+@interface NSSQLAttribute : NSSQLColumn
 
 @end
 

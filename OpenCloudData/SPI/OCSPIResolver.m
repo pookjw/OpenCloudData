@@ -128,6 +128,11 @@ __attribute__((objc_direct_members))
     return ((id (*)(id, id, BOOL))addr)(x0, x1, x2);
 }
 
++ (NSString *)NSSQLiteAdapter_typeStringForColumn_:(NSSQLiteAdapter *)x0 x1:(NSSQLColumn *)x1 {
+    const void *addr = [OCSPIResolver _addressForSymbol:"-[NSSQLiteAdapter typeStringForColumn:]"];
+    return ((id (*)(id, id))addr)(x0, x1);
+}
+
 + (NSInteger)NSManagedObjectContext__countForFetchRequest__error_:(NSManagedObjectContext *)x0 x1:(NSFetchRequest *)x1 x2:(NSError * _Nullable *)x2 {
     const void *addr = [OCSPIResolver _addressForSymbol:"-[NSManagedObjectContext _countForFetchRequest_:error:]"];
     return ((NSInteger (*)(id, id, id *))addr)(x0, x1, x2);
