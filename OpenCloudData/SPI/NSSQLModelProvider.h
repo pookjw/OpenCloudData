@@ -11,7 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol NSSQLModelProvider <NSObject>
-- (NSSQLModel *)model;
+- (NSSQLModel * _Nullable)model;
 //- (id)ancillaryModels;
 //- (id)ancillarySQLModels;
 //- (id)configurationName;

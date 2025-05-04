@@ -9,6 +9,10 @@
 
 @implementation OCCloudKitMirroringDelegatePreJazzkonMetadata
 
++ (NSArray<NSString *> *)allDefaultsKeys {
+    abort();
+}
+
 - (BOOL)load:(NSError * _Nullable * _Nullable)error {
     abort();
 }

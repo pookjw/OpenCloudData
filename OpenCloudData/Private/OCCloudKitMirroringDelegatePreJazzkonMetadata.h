@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 #warning TODO
 
 @interface OCCloudKitMirroringDelegatePreJazzkonMetadata : NSObject
++ (NSArray<NSString *> *)allDefaultsKeys;
 - (instancetype)initWithStore:(NSPersistentStore *)store;
 - (BOOL)load:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 - (CKServerChangeToken *)changeTokenForDatabaseScope:(CKDatabaseScope)databaseScope __attribute__((objc_direct));
