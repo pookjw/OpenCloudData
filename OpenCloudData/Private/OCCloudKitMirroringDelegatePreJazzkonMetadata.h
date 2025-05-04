@@ -12,8 +12,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 #warning TODO
 
-@interface OCCloudKitMirroringDelegatePreJazzkonMetadata : NSObject
-+ (NSArray<NSString *> *)allDefaultsKeys;
+@interface OCCloudKitMirroringDelegatePreJazzkonMetadata : NSObject {
+    __weak NSPersistentStore * _Nullable _store; // 0x8
+    BOOL _loaded; // 0x10
+    BOOL _hasChanges; // 0x11
+    BOOL _hasInitializedZone; // 0x12
+    BOOL _hasInitializedZoneSubscription; // 0x13
+    BOOL _hasInitializedDatabaseSubscription; // 0x14
+    NSString *_ckIdentityRecordName; // 0x18
+    BOOL _hasCheckedCKIdentity; // 0x20
+    NSDictionary<NSString *, CKServerChangeToken *> *_keyToPreviousServerChangeToken; // 0x28
+    NSPersistentHistoryToken *_lastHistoryToken; // 0x30
+}
++ (NSArray<NSString *> *)allDefaultsKeys __attribute__((objc_direct));
 - (instancetype)initWithStore:(NSPersistentStore *)store;
 - (BOOL)load:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 - (CKServerChangeToken *)changeTokenForDatabaseScope:(CKDatabaseScope)databaseScope __attribute__((objc_direct));
