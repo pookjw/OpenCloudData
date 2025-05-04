@@ -340,6 +340,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
                     OCCKRecordZoneMetadata * _Nullable metadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:zoneID inDatabaseWithScope:self->_databaseScope forStore:self->_store inContext:self->_metadataContext error:&__error];
                     
                     if (__error != nil) {
+                        [zoneID release];
                         _succeed = NO;
                         _error = [__error retain];
                         [preJazzkonMetadata release];
@@ -354,7 +355,10 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
                 }
                 
                 // <+6540>
-                if ([preJazzkonMetadata lastHistoryToken] == nil) return;
+                if ([preJazzkonMetadata lastHistoryToken] == nil) {
+                    [preJazzkonMetadata release];
+                    return;
+                }
                 
                 OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:NSCloudKitMirroringDelegateLastHistoryTokenKey transformedValue:[preJazzkonMetadata lastHistoryToken] forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
                 if (entry == nil) {
@@ -364,7 +368,10 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
                     return;
                 }
                 
-                if ([preJazzkonMetadata ckIdentityRecordName] == nil) return;
+                if ([preJazzkonMetadata ckIdentityRecordName] == nil) {
+                    [preJazzkonMetadata release];
+                    return;
+                }
                 
                 entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey transformedValue:[preJazzkonMetadata ckIdentityRecordName] forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
                 if (entry == nil) {
@@ -429,6 +436,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
                         if (recordZoneMetadata_2 == nil) {
                             recordZoneMetadata.database = databaseMetadata;
                             [dictionary setObject:recordZoneMetadata forKey:zoneID];
+                            [zoneID release];
                             continue;
                         }
                         // x21
@@ -450,6 +458,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
                         [records release];
                         
                         [self->_metadataContext deleteObject:recordZoneMetadata];
+                        [zoneID release];
                     }
                     // <+3516>
                     [dictionary release];
@@ -916,6 +925,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
         // <+488>
         if ((self->_context != nil) && _succeed) {
             NSPersistentHistoryToken * _Nullable historyToken = [persistentStoreCoordinator currentPersistentHistoryTokenFromStores:@[store]];
+            // x21
             NSNumber *token;
             if (historyToken != nil) {
                 NSDictionary<NSString *, NSNumber *> *storeTokens = [historyToken storeTokens];
@@ -929,7 +939,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
             request.predicate = [NSPredicate predicateWithFormat:@"ckRecordSystemFields == NULL"];
             request.propertiesToUpdate = @{
                 @"needsUpload": [NSExpression expressionForConstantValue:@YES],
-                @"pendingExportTransactionNumber": [NSExpression expressionForConstantValue:@0]
+                @"pendingExportTransactionNumber": [NSExpression expressionForConstantValue:token]
             };
             request.affectedStores = @[store];
             request.resultType = NSStatusOnlyResultType;
@@ -2350,13 +2360,17 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
             if (map == nil) {
                 [zone release];
                 [zoneID release];
-                if (___error != nil) {
-                    _error = ___error;
-                    _succeed = NO;
-                    [___error retain];
-                    *checkChanges = YES;
-                    return;
+                
+                if (__error == nil) {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
                 }
+                
+                _succeed = NO;
+                _error = [__error retain];
+                *checkChanges = YES;
+                
+                return;
             }
             
             // x19
@@ -2420,11 +2434,11 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
      self = sp + 0x40
      store = x22 / sp, #0x38
      managedObjectContext = x23
-     error = x21 = sp + 0x40
+     error = x21 = sp + 0x10
      */
     // sp, #0xb8
     NSError * _Nullable _error = nil;
-    // x20 / sp + 0x48
+    // x20 / sp + 0x18
     NSPersistentStoreCoordinator *persistentStoreCoordinator = [managedObjectContext.persistentStoreCoordinator retain];
     // x19
     NSFetchRequest<OCCKMirroredRelationship *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKMirroredRelationship entityPath]];
@@ -2444,6 +2458,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
             os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         }
         
+        [persistentStoreCoordinator release];
         return NO;
     }
     // x26
@@ -2477,6 +2492,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
                 os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
                 os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
             }
+            [persistentStoreCoordinator release];
             
             return NO;
         }
@@ -2486,7 +2502,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
     }
     
     // <+952>
-    
+    [persistentStoreCoordinator release];
     return YES;
 }
 
