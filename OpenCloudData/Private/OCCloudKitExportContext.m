@@ -24,8 +24,6 @@
 #import <OpenCloudData/CKRecord+Private.h>
 #import <OpenCloudData/OCSPIResolver.h>
 
-COREDATA_EXTERN NSString * const NSPersistentStoreMirroringDelegateOptionKey;
-
 @implementation OCCloudKitExportContext
 
 - (instancetype)initWithOptions:(OCCloudKitExporterOptions *)options {
@@ -836,7 +834,7 @@ COREDATA_EXTERN NSString * const NSPersistentStoreMirroringDelegateOptionKey;
                     // sp + 0x50
                     NSSQLModel *model = [store.model retain];
                     
-                    NSSQLModel *mirroringModel = [[store ancillarySQLModels] objectForKey:NSPersistentStoreMirroringDelegateOptionKey];
+                    NSSQLModel *mirroringModel = [[store ancillarySQLModels] objectForKey:[OCSPIResolver NSPersistentStoreMirroringDelegateOptionKey]];
                     
                     // sp + 0x20
 //                    NSSQLEntity *recordMetadataEntity = [mirroringModel entityNamed:@"OCCKRecordMetadata"];

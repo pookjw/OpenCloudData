@@ -7,10 +7,7 @@
 
 #import <OpenCloudData/OCCloudKitMirroringDelegatePreJazzkonMetadata.h>
 #import <OpenCloudData/Log.h>
-
-COREDATA_EXTERN NSString * const PFCloudKitServerChangeTokenKey;
-COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateLastHistoryTokenKey;
-COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateServerChangeTokensKey;
+#import <OpenCloudData/OCSPIResolver.h>
 
 @implementation OCCloudKitMirroringDelegatePreJazzkonMetadata
 
@@ -20,9 +17,9 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateServerChangeTokensKe
         @"NSCloudKitMirroringDelegateInitializedZoneSubscriptionDefaultsKey",
         @"NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey",
         @"NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey",
-        PFCloudKitServerChangeTokenKey,
-        NSCloudKitMirroringDelegateLastHistoryTokenKey,
-        NSCloudKitMirroringDelegateServerChangeTokensKey,
+        [OCSPIResolver PFCloudKitServerChangeTokenKey],
+        [OCSPIResolver NSCloudKitMirroringDelegateLastHistoryTokenKey],
+        [OCSPIResolver NSCloudKitMirroringDelegateServerChangeTokensKey],
         @"NSCloudKitMirroringDelegateInitializedDatabaseSubscriptionKey"
     ];
 }
@@ -165,7 +162,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateServerChangeTokensKe
             _hasCheckedCKIdentity = ((NSNumber *)[metadata objectForKey:@"NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey"]).boolValue;
             
             // x19
-            NSData *serverChangeTokenData = [metadata objectForKey:PFCloudKitServerChangeTokenKey];
+            NSData *serverChangeTokenData = [metadata objectForKey:[OCSPIResolver PFCloudKitServerChangeTokenKey]];
             // x26
             CKServerChangeToken * _Nullable token;
             if (serverChangeTokenData != nil) {
@@ -180,7 +177,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateServerChangeTokensKe
                         _error = nil;
                         _succeed = YES;
                     } else {
-                        NSString *string = [NSString stringWithFormat:@"Failed to deserialize '%@' out of the metadata for store: %@", PFCloudKitServerChangeTokenKey, store];
+                        NSString *string = [NSString stringWithFormat:@"Failed to deserialize '%@' out of the metadata for store: %@", [OCSPIResolver PFCloudKitServerChangeTokenKey], store];
                         // x27
                         NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
                         [userInfo setObject:string forKey:NSLocalizedFailureReasonErrorKey];
@@ -203,7 +200,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateServerChangeTokensKe
             
             // <+584>
             // x28
-            NSData *serverChangeTokensData = [metadata objectForKey:NSCloudKitMirroringDelegateServerChangeTokensKey];
+            NSData *serverChangeTokensData = [metadata objectForKey:[OCSPIResolver NSCloudKitMirroringDelegateServerChangeTokensKey]];
             
             if (serverChangeTokensData == nil) {
                 // <+744>
@@ -227,7 +224,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateServerChangeTokensKe
                 
                 if (dictionary == nil) {
                     // <+816>
-                    NSString *string = [NSString stringWithFormat:@"Failed to deserialize '%@' out of the metadata for store: %@", NSCloudKitMirroringDelegateServerChangeTokensKey, store];
+                    NSString *string = [NSString stringWithFormat:@"Failed to deserialize '%@' out of the metadata for store: %@", [OCSPIResolver NSCloudKitMirroringDelegateServerChangeTokensKey], store];
                     // x26
                     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
                     [userInfo setObject:string forKey:NSLocalizedFailureReasonErrorKey];
@@ -246,7 +243,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateServerChangeTokensKe
             
             // <+992>
             // x19
-            NSData *lastHistoryTokenData = [metadata objectForKey:NSCloudKitMirroringDelegateLastHistoryTokenKey];
+            NSData *lastHistoryTokenData = [metadata objectForKey:[OCSPIResolver NSCloudKitMirroringDelegateLastHistoryTokenKey]];
             
             if (lastHistoryTokenData != nil) {
                 // <+1024>
@@ -255,7 +252,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateServerChangeTokensKe
                 NSPersistentHistoryToken * _Nullable token = [NSKeyedUnarchiver unarchivedObjectOfClass:[NSPersistentHistoryToken class] fromData:lastHistoryTokenData error:&__error];
                 
                 if (token == nil) {
-                    NSString *string = [NSString stringWithFormat:@"Failed to deserialize '%@' out of the metadata for store: %@", NSCloudKitMirroringDelegateLastHistoryTokenKey, store];
+                    NSString *string = [NSString stringWithFormat:@"Failed to deserialize '%@' out of the metadata for store: %@", [OCSPIResolver NSCloudKitMirroringDelegateLastHistoryTokenKey], store];
                     // x23
                     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
                     [userInfo setObject:string forKey:NSLocalizedFailureReasonErrorKey];

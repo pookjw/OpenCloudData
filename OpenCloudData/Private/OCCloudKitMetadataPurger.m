@@ -19,12 +19,6 @@
 #import <OpenCloudData/OCSPIResolver.h>
 #import <objc/runtime.h>
 
-CK_EXTERN NSString * const NSCloudKitMirroringDelegateResetSyncAuthor;
-COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateBypassHistoryOnExportKey;
-COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateLastHistoryTokenKey;
-COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey;
-COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey;
-
 @implementation OCCloudKitMetadataPurger
 
 - (BOOL)purgeMetadataFromStore:(NSSQLCore *)store inMonitor:(OCCloudKitStoreMonitor *)monitor withOptions:(NSUInteger)options forRecordZones:(NSArray<CKRecordZoneID *> *)recordZones inDatabaseWithScope:(CKDatabaseScope)databaseScope andTransactionAuthor:(NSString *)transactionAuthor error:(NSError * _Nullable *)error {
@@ -43,7 +37,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
     
     NSString *_transactionAuthor;
     if (transactionAuthor.length == 0) {
-        _transactionAuthor = NSCloudKitMirroringDelegateResetSyncAuthor;
+        _transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateResetSyncAuthor];
     } else {
         _transactionAuthor = transactionAuthor;
     }
@@ -142,7 +136,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
             }
         }
         
-        [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:NSCloudKitMirroringDelegateBypassHistoryOnExportKey boolValue:YES forStore:store intoManagedObjectContext:managedObjectContext error:&__error];
+        [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:[OCSPIResolver NSCloudKitMirroringDelegateBypassHistoryOnExportKey] boolValue:YES forStore:store intoManagedObjectContext:managedObjectContext error:&__error];
         BOOL result;
         if (__error == nil) {
             result = [managedObjectContext save:&__error];
@@ -160,7 +154,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
         }
         
         if (options & (1 << 5)) {
-            [set addObject:NSCloudKitMirroringDelegateLastHistoryTokenKey];
+            [set addObject:[OCSPIResolver NSCloudKitMirroringDelegateLastHistoryTokenKey]];
         }
         
         if (((options & 0b1100) != 0) && _succeed) {
@@ -251,8 +245,8 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
         }
         
         if (options & (1 << 4)) {
-            [set addObject:NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey];
-            [set addObject:NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey];
+            [set addObject:[OCSPIResolver NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey]];
+            [set addObject:[OCSPIResolver NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey]];
         }
         
         if (set.count == 0) {
@@ -450,7 +444,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
     __block NSError * _Nullable _error = nil;
     // x19
     NSManagedObjectContext *context = [monitor newBackgroundContextForMonitoredCoordinator];
-    context.transactionAuthor = NSCloudKitMirroringDelegateResetSyncAuthor;
+    context.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateResetSyncAuthor];
     
     /*
      __105-[PFCloudKitMetadataPurger purgeMetadataAfterAccountChangeFromStore:inMonitor:inDatabaseWithScope:error:]_block_invoke
@@ -571,7 +565,14 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
             metadata.supportsRecordSharing = NO;
         }
         
-        NSDictionary<NSString *, OCCKMetadataEntry *> * _Nullable entries = [OCCKMetadataEntry entriesForKeys:@[NSCloudKitMirroringDelegateLastHistoryTokenKey, NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey, NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey] fromStore:store inManagedObjectContext:context error:&__error];
+        NSDictionary<NSString *, OCCKMetadataEntry *> * _Nullable entries = [OCCKMetadataEntry entriesForKeys:@[
+            [OCSPIResolver NSCloudKitMirroringDelegateLastHistoryTokenKey],
+            [OCSPIResolver NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey],
+            [OCSPIResolver NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey]
+        ]
+                                                                                                    fromStore:store
+                                                                                       inManagedObjectContext:context
+                                                                                                        error:&__error];
         
         if (entries == nil) {
             _succeed = NO;
@@ -622,7 +623,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordName
     // x19
     NSManagedObjectContext *context = [monitor newBackgroundContextForMonitoredCoordinator];
     
-    context.transactionAuthor = NSCloudKitMirroringDelegateResetSyncAuthor;
+    context.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateResetSyncAuthor];
     
     /*
      __107-[PFCloudKitMetadataPurger deleteZoneMetadataFromStore:inMonitor:forRecordZones:inDatabaseWithScope:error:]_block_invoke

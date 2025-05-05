@@ -62,6 +62,24 @@ __attribute__((objc_direct_members))
 
 + (NSString *)NSCloudKitMirroringDelegateExportContextName;
 + (NSString *)NSCloudKitMirroringDelegateImportContextName;
++ (NSString *)PFCloudKitMetadataNeedsZoneFetchAfterClientMigrationKey;
++ (NSString *)NSPersistentStoreMirroringDelegateOptionKey;
++ (NSString *)NSSQLPKTableName;
++ (NSString *)PFCloudKitMetadataFrameworkVersionKey;
++ (NSString *)PFCloudKitMetadataModelVersionHashesKey;
++ (NSString *)PFCloudKitMetadataNeedsMetadataMigrationKey;
++ (NSString *)NSCloudKitMirroringDelegateLastHistoryTokenKey;
++ (NSString *)NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey;
++ (NSString *)NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey;
++ (NSString *)PFCloudKitMetadataClientVersionHashesKey;
++ (NSString *)NSCKRecordIDAttributeName;
++ (NSString *)NSCKRecordSystemFieldsAttributeName;
++ (NSString *)NSCloudKitMirroringDelegateResetSyncAuthor;
++ (NSString *)NSCloudKitMirroringDelegateBypassHistoryOnExportKey;
++ (NSString *)PFCloudKitServerChangeTokenKey;
++ (NSString *)NSCloudKitMirroringDelegateServerChangeTokensKey;
++ (NSString *)_NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification;
++ (NSString *)CKIdentityUpdateNotification;
 
 @end
 

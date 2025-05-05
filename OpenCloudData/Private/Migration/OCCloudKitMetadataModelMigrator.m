@@ -29,19 +29,6 @@
 #import <OpenCloudData/OCCloudKitMirroringDelegate.h>
 #import <objc/runtime.h>
 
-COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsZoneFetchAfterClientMigrationKey;
-COREDATA_EXTERN NSString * const NSPersistentStoreMirroringDelegateOptionKey;
-COREDATA_EXTERN NSString * const NSSQLPKTableName;
-COREDATA_EXTERN NSString * const PFCloudKitMetadataFrameworkVersionKey;
-COREDATA_EXTERN NSString * const PFCloudKitMetadataModelVersionHashesKey;
-COREDATA_EXTERN NSString * const PFCloudKitMetadataNeedsMetadataMigrationKey;
-COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateLastHistoryTokenKey;
-COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey;
-COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey;
-COREDATA_EXTERN NSString * const PFCloudKitMetadataClientVersionHashesKey;
-COREDATA_EXTERN NSString * const NSCKRecordIDAttributeName;
-COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
-
 @implementation OCCloudKitMetadataModelMigrator
 
 - (instancetype)initWithStore:(NSSQLCore *)store metadataContext:(NSManagedObjectContext *)metadataContext databaseScope:(CKDatabaseScope)databaseScope metricsClient:(OCCloudKitMetricsClient *)metricsClient {
@@ -224,14 +211,14 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
             }
             
             // x21
-            OCCKMetadataEntry *entry_1 = [OCCKMetadataEntry entryForKey:PFCloudKitMetadataFrameworkVersionKey fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&__error];
+            OCCKMetadataEntry *entry_1 = [OCCKMetadataEntry entryForKey:[OCSPIResolver PFCloudKitMetadataFrameworkVersionKey] fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&__error];
             if (__error != nil) {
                 _succeed = NO;
                 _error = [__error retain];
                 return;
             }
             
-            OCCKMetadataEntry *entry_2 = [OCCKMetadataEntry entryForKey:PFCloudKitMetadataModelVersionHashesKey fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&__error];
+            OCCKMetadataEntry *entry_2 = [OCCKMetadataEntry entryForKey:[OCSPIResolver PFCloudKitMetadataModelVersionHashesKey] fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&__error];
             if (__error != nil) {
                 _succeed = NO;
                 _error = [__error retain];
@@ -284,7 +271,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
                 }
             }
             
-            [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:PFCloudKitMetadataModelVersionHashesKey transformedValue:(NSObject<NSSecureCoding> *)currentModel forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
+            [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:[OCSPIResolver PFCloudKitMetadataModelVersionHashesKey] transformedValue:(NSObject<NSSecureCoding> *)currentModel forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
             if (entry == nil) {
                 _succeed = NO;
                 _error = [__error retain];
@@ -360,7 +347,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
                     return;
                 }
                 
-                OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:NSCloudKitMirroringDelegateLastHistoryTokenKey transformedValue:[preJazzkonMetadata lastHistoryToken] forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
+                OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:[OCSPIResolver NSCloudKitMirroringDelegateLastHistoryTokenKey] transformedValue:[preJazzkonMetadata lastHistoryToken] forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
                 if (entry == nil) {
                     _succeed = NO;
                     _error = [__error retain];
@@ -373,7 +360,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
                     return;
                 }
                 
-                entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey transformedValue:[preJazzkonMetadata ckIdentityRecordName] forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
+                entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:[OCSPIResolver NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey] transformedValue:[preJazzkonMetadata ckIdentityRecordName] forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
                 if (entry == nil) {
                     _succeed = NO;
                     _error = [__error retain];
@@ -381,7 +368,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
                     return;
                 }
                 
-                entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey boolValue:[preJazzkonMetadata hasCheckedCKIdentity] forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
+                entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:[OCSPIResolver NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey] boolValue:[preJazzkonMetadata hasCheckedCKIdentity] forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
                 if (entry == nil) {
                     _succeed = NO;
                     _error = [__error retain];
@@ -596,7 +583,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
                             return;
                         }
                         
-                        OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:NSCloudKitMirroringDelegateLastHistoryTokenKey fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&_error];
+                        OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:[OCSPIResolver NSCloudKitMirroringDelegateLastHistoryTokenKey] fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&_error];
                         if (entry == nil) {
                             _succeed = NO;
                             [_error retain];
@@ -645,7 +632,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
                 }
             } else {
                 // <+4956>
-                entry = [OCCKMetadataEntry entryForKey:PFCloudKitMetadataClientVersionHashesKey fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&__error];
+                entry = [OCCKMetadataEntry entryForKey:[OCSPIResolver PFCloudKitMetadataClientVersionHashesKey] fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&__error];
                 if (__error != nil) {
                     _succeed = NO;
                     _error = [__error retain];
@@ -688,7 +675,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
                     return;
                 }
                 
-                OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:PFCloudKitMetadataClientVersionHashesKey transformedValue:self->_metadataContext.persistentStoreCoordinator.managedObjectModel.entityVersionHashesByName forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
+                OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:[OCSPIResolver PFCloudKitMetadataClientVersionHashesKey] transformedValue:self->_metadataContext.persistentStoreCoordinator.managedObjectModel.entityVersionHashesByName forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
                 if (entry == nil) {
                     _succeed = NO;
                     _error = [__error retain];
@@ -698,7 +685,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
             
             // <+5492>
             NSNumber *versionNumber = [OCSPIResolver _PFRoutines__getPFBundleVersionNumber:objc_lookUpClass("_PFRoutines")];
-            entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:PFCloudKitMetadataClientVersionHashesKey integerValue:versionNumber forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
+            entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:[OCSPIResolver PFCloudKitMetadataClientVersionHashesKey] integerValue:versionNumber forStore:self->_store intoManagedObjectContext:self->_metadataContext error:&__error];
             if (entry == nil) {
                 _succeed = NO;
                 _error = [__error retain];
@@ -736,7 +723,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
                 [metadata removeObjectForKey:key];
             }
             [metadata removeObjectForKey:@"_NSStoreAncillaryModelVersionHashesMetadataKey"];
-            [metadata removeObjectForKey:PFCloudKitMetadataNeedsZoneFetchAfterClientMigrationKey];
+            [metadata removeObjectForKey:[OCSPIResolver PFCloudKitMetadataNeedsZoneFetchAfterClientMigrationKey]];
             self->_store.metadata = metadata;
             [metadata release];
             _succeed = [self->_metadataContext save:&__error];
@@ -1044,7 +1031,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
     self->_context.storeMetadataModel = storeMetadataModel;
     self->_context.storeSQLModel = storeSQLModel;
     
-    if ([self->_store.metadata objectForKey:PFCloudKitMetadataNeedsZoneFetchAfterClientMigrationKey] != nil) {
+    if ([self->_store.metadata objectForKey:[OCSPIResolver PFCloudKitMetadataNeedsZoneFetchAfterClientMigrationKey]] != nil) {
         OCCloudKitMetadataMigrationContext * _Nullable context = self->_context;
         if (context != nil) {
             context->_needsImportAfterClientMigration = _succeed;
@@ -1122,8 +1109,8 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
             NSError * _Nullable __error = nil;
             
             @try {
-                NSDictionary<NSString *,OCCKMetadataEntry *> * _Nullable entries = [OCCKMetadataEntry entriesForKeys:@[PFCloudKitMetadataFrameworkVersionKey] onlyFetchingProperties:@[@"integerValue", @"key"] fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&__error];
-                OCCKMetadataEntry *entry = [entries objectForKey:PFCloudKitMetadataFrameworkVersionKey];
+                NSDictionary<NSString *,OCCKMetadataEntry *> * _Nullable entries = [OCCKMetadataEntry entriesForKeys:@[[OCSPIResolver PFCloudKitMetadataFrameworkVersionKey]] onlyFetchingProperties:@[@"integerValue", @"key"] fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&__error];
+                OCCKMetadataEntry *entry = [entries objectForKey:[OCSPIResolver PFCloudKitMetadataFrameworkVersionKey]];
                 
                 if (__error != nil) {
                     _succeed = NO;
@@ -1165,8 +1152,8 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
             
             @try {
                 // <+380>
-                NSDictionary<NSString *,OCCKMetadataEntry *> * _Nullable entries = [OCCKMetadataEntry entriesForKeys:@[PFCloudKitMetadataModelVersionHashesKey] onlyFetchingProperties:@[@"transformedValue", @"key"] fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&__error];
-                OCCKMetadataEntry * _Nullable entry = [entries objectForKey:PFCloudKitMetadataModelVersionHashesKey];
+                NSDictionary<NSString *,OCCKMetadataEntry *> * _Nullable entries = [OCCKMetadataEntry entriesForKeys:@[[OCSPIResolver PFCloudKitMetadataModelVersionHashesKey]] onlyFetchingProperties:@[@"transformedValue", @"key"] fromStore:self->_store inManagedObjectContext:self->_metadataContext error:&__error];
+                OCCKMetadataEntry * _Nullable entry = [entries objectForKey:[OCSPIResolver PFCloudKitMetadataModelVersionHashesKey]];
                 
                 if (__error != nil) {
                     _succeed = NO;
@@ -1246,7 +1233,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
         NSMutableArray<NSSQLiteStatement *> *statements = [[NSMutableArray alloc] init];
         // x22
         NSSQLiteAdapter * _Nullable adapter = connection.adapter;
-        NSSQLModel * _Nullable mirroringModel = [[store ancillarySQLModels] objectForKey:NSPersistentStoreMirroringDelegateOptionKey];
+        NSSQLModel * _Nullable mirroringModel = [[store ancillarySQLModels] objectForKey:[OCSPIResolver NSPersistentStoreMirroringDelegateOptionKey]];
         
         // x19 / sp + 0x20
         NSMutableArray<NSSQLEntity *> * _Nullable entities;
@@ -1274,7 +1261,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
                     _entityID = *(uint *)((uintptr_t)entity + ivar_getOffset(ivar));
                 }
             }
-            NSString *sqlString = [NSString stringWithFormat:@"DELETE FROM %@ WHERE Z_ENT = %@", NSSQLPKTableName, @(_entityID)];
+            NSString *sqlString = [NSString stringWithFormat:@"DELETE FROM %@ WHERE Z_ENT = %@", [OCSPIResolver NSSQLPKTableName], @(_entityID)];
             // x21
             NSSQLiteStatement *statement = [[objc_lookUpClass("NSSQLiteStatement") alloc] initWithEntity:nil sqlString:sqlString];
             [statements addObject:statement];
@@ -2285,7 +2272,7 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
      context = x22
      */
     
-    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:PFCloudKitMetadataNeedsMetadataMigrationKey fromStore:store inManagedObjectContext:context error:error];
+    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:[OCSPIResolver PFCloudKitMetadataNeedsMetadataMigrationKey] fromStore:store inManagedObjectContext:context error:error];
     // nil 확인 없음
     if (*error != nil) return NO;
     if (!entry.boolValue) return YES;
@@ -2300,15 +2287,15 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
     NSArray<NSEntityDescription *> * _Nullable entitiesForConfiguration = [managedObjectModel entitiesForConfiguration:store.configurationName];
     // x28
     for (NSEntityDescription *entity in entitiesForConfiguration) {
-        NSAttributeDescription *recordIDAttribute = [entity.attributesByName objectForKey:NSCKRecordIDAttributeName];
+        NSAttributeDescription *recordIDAttribute = [entity.attributesByName objectForKey:[OCSPIResolver NSCKRecordIDAttributeName]];
         if (recordIDAttribute == nil) continue;
-        NSAttributeDescription *recordSystemFieldsAttribute = [entity.attributesByName objectForKey:NSCKRecordSystemFieldsAttributeName];
+        NSAttributeDescription *recordSystemFieldsAttribute = [entity.attributesByName objectForKey:[OCSPIResolver NSCKRecordSystemFieldsAttributeName]];
         if (recordSystemFieldsAttribute == nil) continue;
         
         // x28
         NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:entity.name];
-        fetchRequest.propertiesToFetch = @[NSCKRecordIDAttributeName, NSCKRecordSystemFieldsAttributeName];
-        fetchRequest.predicate = [NSPredicate predicateWithFormat:@"%K != nil", NSCKRecordIDAttributeName];
+        fetchRequest.propertiesToFetch = @[[OCSPIResolver NSCKRecordIDAttributeName], [OCSPIResolver NSCKRecordSystemFieldsAttributeName]];
+        fetchRequest.predicate = [NSPredicate predicateWithFormat:@"%K != nil", [OCSPIResolver NSCKRecordIDAttributeName]];
         fetchRequest.fetchBatchSize = 200;
         fetchRequest.affectedStores = @[store];
         
@@ -2377,17 +2364,17 @@ COREDATA_EXTERN NSString * const NSCKRecordSystemFieldsAttributeName;
             for (__kindof NSManagedObject *object in objects) {
                 OCCKRecordMetadata *metadata = [map objectForKey:object.objectID];
                 if (metadata != nil) {
-                    [metadata setValue:nil forKey:NSCKRecordSystemFieldsAttributeName];
+                    [metadata setValue:nil forKey:[OCSPIResolver NSCKRecordSystemFieldsAttributeName]];
                 } else {
                     if (mirroringDelegate != nil) {
                         OCCloudKitMirroringDelegateOptions *options = mirroringDelegate->_options;
                         // x21
                         OCCKRecordMetadata * _Nullable recordMetadata = [OCCKRecordMetadata insertMetadataForObject:object setRecordName:options.preserveLegacyRecordMetadataBehavior inZoneWithID:zone.zoneID recordNamePrefix:nil error:&___error];
                         // x23
-                        NSData *ckRecordSystemFields = [[object valueForKey:NSCKRecordSystemFieldsAttributeName] retain];
+                        NSData *ckRecordSystemFields = [[object valueForKey:[OCSPIResolver NSCKRecordSystemFieldsAttributeName]] retain];
                         recordMetadata.ckRecordSystemFields = ckRecordSystemFields;
                         [ckRecordSystemFields release];
-                        [object setValue:nil forKey:NSCKRecordSystemFieldsAttributeName];
+                        [object setValue:nil forKey:[OCSPIResolver NSCKRecordSystemFieldsAttributeName]];
                     }
                 }
             }

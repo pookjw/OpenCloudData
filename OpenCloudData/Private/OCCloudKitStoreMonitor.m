@@ -9,9 +9,8 @@
 #import <OpenCloudData/NSPersistentStoreCoordinator+Private.h>
 #import <OpenCloudData/NSManagedObjectContext+Private.h>
 #import <OpenCloudData/Log.h>
+#import <OpenCloudData/OCSPIResolver.h>
 #import <objc/runtime.h>
-
-//COREDATA_EXTERN NSNotificationName const _NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification;
 
 # define OS_UNFAIR_LOCK_FLAG_DATA_SYNCHRONIZATION (0x00010000)
 
@@ -36,7 +35,7 @@
             NSPersistentStoreCoordinator *persistentStoreCoordinator = [store.persistentStoreCoordinator retain];
             
             [persistentStoreCoordinator performBlockAndWait:^{
-                [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(coordinatorWillRemoveStore:) name:@"_NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification" object:nil];
+                [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(coordinatorWillRemoveStore:) name:[OCSPIResolver _NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification] object:nil];
                 storeIsAlive = ([persistentStoreCoordinator persistentStoreForIdentifier:identifier]);
             }];
             

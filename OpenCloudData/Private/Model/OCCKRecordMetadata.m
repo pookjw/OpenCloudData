@@ -145,12 +145,12 @@
     // x21
     OCCKRecordMetadata *metadataObject = [NSEntityDescription insertNewObjectForEntityForName:[OCCKRecordMetadata entityPath] inManagedObjectContext:managedObjectContext];
     // x28
-    __kindof NSAttributeDescription * _Nullable ckRecordIDDescription = metadataObject.entity.attributesByName[OCCKRecordIDAttributeName];
+    __kindof NSAttributeDescription * _Nullable ckRecordIDDescription = metadataObject.entity.attributesByName[[OCSPIResolver NSCKRecordIDAttributeName]];
     
     __block NSString * _Nullable recordID = nil;
     if (ckRecordIDDescription != nil) {
         [object.managedObjectContext performBlockAndWait:^{
-            recordID = [[object valueForKey:OCCKRecordIDAttributeName] retain];
+            recordID = [[object valueForKey:[OCSPIResolver NSCKRecordIDAttributeName]] retain];
         }];
     }
     
@@ -167,7 +167,7 @@
         
         if ((ckRecordIDDescription != nil) && (setRecordName)) {
             [managedObjectContext performBlockAndWait:^{
-                [object setValue:OCCKRecordIDAttributeName forKey:recordID];
+                [object setValue:[OCSPIResolver NSCKRecordIDAttributeName] forKey:recordID];
             }];
         }
     }

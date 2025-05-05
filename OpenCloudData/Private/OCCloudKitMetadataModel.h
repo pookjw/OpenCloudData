@@ -12,7 +12,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-OC_PRIVATE_EXTERN NSString * const OCCKRecordIDAttributeName;
 OC_PRIVATE_EXTERN NSString * const OCCKRecordZoneQueryCursorTransformerName;
 OC_PRIVATE_EXTERN NSString * const OCCKRecordZoneQueryPredicateTransformerName;
 

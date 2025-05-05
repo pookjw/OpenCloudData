@@ -19,8 +19,6 @@
 #import <OpenCloudData/OCSPIResolver.h>
 #import <objc/runtime.h>
 
-COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
-
 @implementation OCCloudKitExporter
 
 - (instancetype)initWithOptions:(OCCloudKitExporterOptions *)options request:(__kindof OCCloudKitMirroringRequest *)request monitor:(OCCloudKitStoreMonitor *)monitor workQueue:(dispatch_queue_t)workQueue {
@@ -158,7 +156,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
             
             // x22
             NSManagedObjectContext *backgroundContextForMonitoredCoordinator = [monitor newBackgroundContextForMonitoredCoordinator];
-            backgroundContextForMonitoredCoordinator.transactionAuthor = NSCloudKitMirroringDelegateExportContextName;
+            backgroundContextForMonitoredCoordinator.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateExportContextName];
             
             /*
              __48-[PFCloudKitExporter checkForZonesNeedingExport]_block_invoke_2
@@ -585,7 +583,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
                 
                 // x22
                 NSManagedObjectContext *newBackgroundContextForMonitoredCoordinator = [monitor newBackgroundContextForMonitoredCoordinator];
-                newBackgroundContextForMonitoredCoordinator.transactionAuthor = NSCloudKitMirroringDelegateExportContextName;
+                newBackgroundContextForMonitoredCoordinator.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateExportContextName];
                 
                 /*
                  __56-[PFCloudKitExporter updateMetadataForSavedZones:error:]_block_invoke_2
@@ -740,7 +738,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
             
             // x22
             NSManagedObjectContext *newBackgroundContextForMonitoredCoordinator = [monitor newBackgroundContextForMonitoredCoordinator];
-            newBackgroundContextForMonitoredCoordinator.transactionAuthor = NSCloudKitMirroringDelegateExportContextName;
+            newBackgroundContextForMonitoredCoordinator.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateExportContextName];
             [newBackgroundContextForMonitoredCoordinator _setAllowAncillaryEntities:YES];
             
             /*
@@ -1518,7 +1516,7 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateExportContextName;
             NSManagedObjectContext *newBackgroundContextForMonitoredCoordinator = [self->_monitor newBackgroundContextForMonitoredCoordinator];
             
             newBackgroundContextForMonitoredCoordinator.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy;
-            newBackgroundContextForMonitoredCoordinator.transactionAuthor = NSCloudKitMirroringDelegateExportContextName;
+            newBackgroundContextForMonitoredCoordinator.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateExportContextName];
             
             // x29, #-0x78
             __block BOOL succeed = NO;
