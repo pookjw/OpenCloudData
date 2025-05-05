@@ -143,7 +143,7 @@ __attribute__((objc_direct_members))
     return ((id (*)(id, NSUInteger))addr)(x0, x1);
 }
 
-+ (NSSQLEntity *)_sqlEntityForEntityDescription:(NSEntityDescription *)x0 x1:(NSSQLModel *)x1 {
++ (NSSQLEntity * _Nullable)_sqlEntityForEntityDescription:(NSSQLModel *)x0 x1:(NSEntityDescription *)x1 {
     const void *addr = [OCSPIResolver _addressForSymbol:"__sqlEntityForEntityDescription"];
     return ((id (*)(id, id))addr)(x0, x1);
 }
@@ -169,8 +169,18 @@ __attribute__((objc_direct_members))
 }
 
 + (NSString *)_PFModelMapPathForEntity:(NSEntityDescription *)x0 {
-    const void *addr = [OCSPIResolver _addressForSymbol:"-__PFModelMapPathForEntity"];
+    const void *addr = [OCSPIResolver _addressForSymbol:"__PFModelMapPathForEntity"];
     return ((id (*)(id))addr)(x0);
+}
+
++ (NSString *)NSCloudKitMirroringDelegateExportContextName {
+    const void *addr = [OCSPIResolver _addressForSymbol:"_NSCloudKitMirroringDelegateExportContextName"];
+    return *(id *)addr;
+}
+
++ (NSString *)NSCloudKitMirroringDelegateImportContextName {
+    const void *addr = [OCSPIResolver _addressForSymbol:"_NSCloudKitMirroringDelegateImportContextName"];
+    return *(id *)addr;
 }
 
 @end

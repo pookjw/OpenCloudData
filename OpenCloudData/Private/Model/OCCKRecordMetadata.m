@@ -177,7 +177,7 @@
     
     // x19
     NSSQLModel *model = [persistentStore model];
-    NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:object.objectID.entity x1:model];
+    NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:model x1:object.objectID.entity];
     uint _entityID;
     if (entity == nil) {
         _entityID = 0;
@@ -372,7 +372,7 @@
         
         // x23
         NSSQLModel *model = store.model;
-        NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:objectID.entity x1:model];
+        NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:model x1:objectID.entity];
         
         uint _entityID;
         if (entity == nil) {
@@ -994,7 +994,7 @@
     for (NSManagedObjectID *objectID in objectIDs) {
         // x28
         NSSQLModel *model = store.model;
-        NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:objectID.entity x1:model];
+        NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:model x1:objectID.entity];
         uint _entityID;
         if (entity == nil) {
             _entityID = 0;

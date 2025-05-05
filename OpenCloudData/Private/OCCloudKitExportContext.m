@@ -147,7 +147,7 @@ COREDATA_EXTERN NSString * const NSPersistentStoreMirroringDelegateOptionKey;
                 } else {
                     // x28
                     NSSQLModel *model = store.model;
-                    NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:analyzedObjectID.entity x1:model];
+                    NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:model x1:analyzedObjectID.entity];
                     uint _entityID;
                     if (entity == nil) {
                         _entityID = 0;
@@ -465,7 +465,7 @@ COREDATA_EXTERN NSString * const NSPersistentStoreMirroringDelegateOptionKey;
                                     _error = nil;
                                     [errorObjectIDs addObject:objectID];
                                     
-                                    NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:objectID.entity x1:store.model];
+                                    NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:store.model x1:objectID.entity];
                                     uint _entityID;
                                     if (entity == nil) {
                                         _entityID = 0;

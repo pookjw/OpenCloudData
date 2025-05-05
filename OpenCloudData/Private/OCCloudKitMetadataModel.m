@@ -123,7 +123,7 @@ NSArray<Class> * _oc_PFModelMap_ancillaryModelFactoryClasses_custom(Class self, 
         NSSQLCore *sqlCore = (NSSQLCore *)persistentStore;
         // x24
         NSSQLModel *model = sqlCore.model;
-        NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:objectID.entity x1:model];
+        NSSQLEntity * _Nullable entity = [OCSPIResolver _sqlEntityForEntityDescription:model x1:objectID.entity];
         if (entity == nil) {
             [persistentStore release];
             continue;

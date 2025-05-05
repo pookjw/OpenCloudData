@@ -50,7 +50,7 @@ __attribute__((objc_direct_members))
 + (NSInteger)NSManagedObjectContext__countForFetchRequest__error_:(NSManagedObjectContext *)x0 x1:(NSFetchRequest *)x1 x2:(NSError * _Nullable * _Nullable)x2;
 
 + (NSSQLEntity * _Nullable)_sqlCoreLookupSQLEntityForEntityID:(NSSQLCore *)x0 x1:(NSUInteger)x1;
-+ (NSSQLEntity * _Nullable)_sqlEntityForEntityDescription:(NSEntityDescription *)x0 x1:(NSSQLModel *)x1;
++ (NSSQLEntity * _Nullable)_sqlEntityForEntityDescription:(NSSQLModel *)x0 x1:(NSEntityDescription *)x1;
 
 + (NSNumber *)_PFRoutines__getPFBundleVersionNumber:(Class)x0;
 + (void)_PFRoutines_efficientlyEnumerateManagedObjectsInFetchRequest_usingManagedObjectContext_andApplyBlock_:(Class)x0 x1:(NSFetchRequest *)x1 x2:(NSManagedObjectContext *)x2 x3:(void (^ NS_NOESCAPE)(NSArray<__kindof NSManagedObject *> * _Nullable objects, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved))x3;
@@ -59,6 +59,9 @@ __attribute__((objc_direct_members))
 + (__kindof PFHistoryAnalyzerContext * _Nullable)PFHistoryAnalyzer_newAnalyzerContextForStore_sinceLastHistoryToken_inManagedObjectContext_error_:(__kindof PFHistoryAnalyzer *)x0 x1:(NSPersistentStore *)x1 x2:(NSPersistentHistoryToken *)x2 x3:(NSManagedObjectContext *)x3 x4:(NSError * _Nullable * _Nullable)x4 NS_RETURNS_RETAINED;
 
 + (NSString *)_PFModelMapPathForEntity:(NSEntityDescription *)x0;
+
++ (NSString *)NSCloudKitMirroringDelegateExportContextName;
++ (NSString *)NSCloudKitMirroringDelegateImportContextName;
 
 @end
 
