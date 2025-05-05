@@ -10,8 +10,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-
 @interface OCCloudKitMirroringDelegatePreJazzkonMetadata : NSObject {
     __weak NSPersistentStore * _Nullable _store; // 0x8
     BOOL _loaded; // 0x10
@@ -27,9 +25,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSArray<NSString *> *)allDefaultsKeys __attribute__((objc_direct));
 - (instancetype)initWithStore:(NSPersistentStore *)store;
 - (BOOL)load:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
-- (CKServerChangeToken *)changeTokenForDatabaseScope:(CKDatabaseScope)databaseScope __attribute__((objc_direct));
+- (CKServerChangeToken * _Nullable)changeTokenForDatabaseScope:(CKDatabaseScope)databaseScope __attribute__((objc_direct));
 - (BOOL)hasInitializedDatabaseSubscription __attribute__((objc_direct));
-- (CKServerChangeToken *)changeTokenForZoneWithID:(CKRecordZoneID *)zoneID inDatabaseWithScope:(CKDatabaseScope)databaseScope __attribute__((objc_direct));
+- (CKServerChangeToken * _Nullable)changeTokenForZoneWithID:(CKRecordZoneID *)zoneID inDatabaseWithScope:(CKDatabaseScope)databaseScope __attribute__((objc_direct));
 - (NSPersistentHistoryToken * _Nullable)lastHistoryToken __attribute__((objc_direct));
 - (NSString * _Nullable)ckIdentityRecordName __attribute__((objc_direct));
 - (BOOL)hasCheckedCKIdentity __attribute__((objc_direct));

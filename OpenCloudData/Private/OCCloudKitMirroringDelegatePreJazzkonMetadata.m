@@ -301,31 +301,88 @@ COREDATA_EXTERN NSString * const NSCloudKitMirroringDelegateServerChangeTokensKe
 }
 
 - (CKServerChangeToken *)changeTokenForDatabaseScope:(CKDatabaseScope)databaseScope {
-    abort();
+    if (!_loaded) {
+        // original : NSStringFromSelector(@selector(changeTokenForDatabaseScope:))
+        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"%@:%@ called before load.", [OCCloudKitMirroringDelegatePreJazzkonMetadata class], @"changeTokenForDatabaseScope:"] userInfo:nil];
+    }
+    // x19
+    NSDictionary<NSString *, CKServerChangeToken *> *keyToPreviousServerChangeToken = _keyToPreviousServerChangeToken;
+    NSString *key = [self _keyForDatabaseScope:databaseScope];
+    CKServerChangeToken *token = [keyToPreviousServerChangeToken objectForKey:key];
+    return token;
 }
 
 - (BOOL)hasInitializedDatabaseSubscription {
-    abort();
+    if (!_loaded) {
+        // original : NSStringFromSelector(@selector(hasInitializedDatabaseSubscription))
+        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"%@:%@ called before load.", [OCCloudKitMirroringDelegatePreJazzkonMetadata class], @"hasInitializedDatabaseSubscription"] userInfo:nil];
+    }
+    
+    return _hasInitializedDatabaseSubscription;
 }
 
 - (CKServerChangeToken *)changeTokenForZoneWithID:(CKRecordZoneID *)zoneID inDatabaseWithScope:(CKDatabaseScope)databaseScope {
-    abort();
+    /*
+     zoneID = x20
+     databaseScope = x19
+     */
+    if (!_loaded) {
+        // original : NSStringFromSelector(@selector(changeTokenForZoneWithID:inDatabaseWithScope:))
+        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"%@:%@ called before load.", [OCCloudKitMirroringDelegatePreJazzkonMetadata class], @"changeTokenForZoneWithID:inDatabaseWithScope:"] userInfo:nil];
+    }
+    
+    // x21
+    NSDictionary<NSString *, CKServerChangeToken *> *keyToPreviousServerChangeToken = _keyToPreviousServerChangeToken;
+    NSString *key = [self _keyForZoneName:zoneID.zoneName owner:zoneID.ownerName databaseScope:databaseScope];
+    return [keyToPreviousServerChangeToken objectForKey:key];
 }
 
 - (NSPersistentHistoryToken *)lastHistoryToken {
-    abort();
+    if (!_loaded) {
+        // original : NSStringFromSelector(@selector(lastHistoryToken))
+        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"%@:%@ called before load.", [OCCloudKitMirroringDelegatePreJazzkonMetadata class], @"lastHistoryToken"] userInfo:nil];
+    }
+    
+    return _lastHistoryToken;
 }
 
 - (NSString *)ckIdentityRecordName {
-    abort();
+    if (!_loaded) {
+        // original : NSStringFromSelector(@selector(ckIdentityRecordName))
+        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"%@:%@ called before load.", [OCCloudKitMirroringDelegatePreJazzkonMetadata class], @"ckIdentityRecordName"] userInfo:nil];
+    }
+    
+    return [[_ckIdentityRecordName retain] autorelease];
 }
 
 - (BOOL)hasCheckedCKIdentity {
-    abort();
+    if (!_loaded) {
+        // original : NSStringFromSelector(@selector(hasCheckedCKIdentity))
+        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"%@:%@ called before load.", [OCCloudKitMirroringDelegatePreJazzkonMetadata class], @"hasCheckedCKIdentity"] userInfo:nil];
+    }
+    
+    return _hasCheckedCKIdentity;
 }
 
 - (NSString *)_keyForZoneName:(NSString *)zoneName owner:(NSString *)owner databaseScope:(CKDatabaseScope)databaseScope __attribute__((objc_direct)) {
-    abort();
+    NSMutableString *string = [[NSMutableString alloc] initWithString:[self _keyForDatabaseScope:databaseScope]];
+    [string appendFormat:@".%@.%@", zoneName, owner];
+    NSString *copy = [string copy];
+    [string release];
+    return [copy autorelease];
+}
+
+- (NSString *)_keyForDatabaseScope:(CKDatabaseScope)databaseScope __attribute__((objc_direct)) {
+    switch (databaseScope) {
+        case CKDatabaseScopePublic:
+            return @"public";
+        case CKDatabaseScopePrivate:
+            return @"private";
+        case CKDatabaseScopeShared:
+            return @"shared";
+        default:
+            @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unknown database scope: %lu", databaseScope] userInfo:nil];
+    }
 }
 
 @end

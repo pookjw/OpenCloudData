@@ -7,14 +7,11 @@
 
 #import <OpenCloudData/OCCloudKitHistoryAnalyzerOptions.h>
 #import <objc/runtime.h>
+#import <objc/message.h>
 
-OBJC_EXPORT id _Nullable
-objc_getProperty(id _Nullable self, SEL _Nonnull _cmd,
-                 ptrdiff_t offset, BOOL atomic);
-
-OBJC_EXPORT void
-objc_setProperty_nonatomic(id _Nullable self, SEL _Nonnull _cmd,
-                           id _Nullable newValue, ptrdiff_t offset);
+OBJC_EXPORT id _Nullable objc_getProperty(id _Nullable self, SEL _Nonnull _cmd, ptrdiff_t offset, BOOL atomic);
+OBJC_EXPORT void objc_setProperty_nonatomic(id _Nullable self, SEL _Nonnull _cmd, id _Nullable newValue, ptrdiff_t offset);
+OBJC_EXPORT id objc_msgSendSuper2(void);
 
 @implementation OCCloudKitHistoryAnalyzerOptions
 
@@ -35,6 +32,14 @@ objc_setProperty_nonatomic(id _Nullable self, SEL _Nonnull _cmd,
         
         assert(class_addIvar(_isa, "_includePrivateTransactions", sizeof(BOOL), sizeof(BOOL), @encode(BOOL)));
         assert(class_addIvar(_isa, "_request", sizeof(OCCloudKitMirroringRequest *), sizeof(OCCloudKitMirroringRequest *), @encode(OCCloudKitMirroringRequest *)));
+        
+        IMP dealloc = class_getMethodImplementation(self, @selector(dealloc));
+        assert(dealloc != NULL);
+        assert(class_addMethod(_isa, @selector(dealloc), dealloc, NULL));
+        
+        IMP copyWithZone_ = class_getMethodImplementation(self, @selector(copyWithZone:));
+        assert(copyWithZone_ != NULL);
+        assert(class_addMethod(_isa, @selector(copyWithZone:), copyWithZone_, NULL));
         
         objc_registerClassPair(_isa);
         
@@ -68,4 +73,51 @@ objc_setProperty_nonatomic(id _Nullable self, SEL _Nonnull _cmd,
     objc_setProperty_nonatomic(self, _cmd, request, ivar_getOffset(ivar));
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
+- (void)dealloc {
+    Ivar ivar = object_getInstanceVariable(self, "_request", NULL);
+    assert(ivar != NULL);
+    ptrdiff_t offset = ivar_getOffset(ivar);
+    [*(id *)((uintptr_t)self + offset) release];
+    
+    struct objc_super superInfo = { self, [self class] };
+    ((void (*)(struct objc_super *, SEL))objc_msgSendSuper2)(&superInfo, _cmd);
+}
+#pragma clang diagnostic pop
+
+- (id)copyWithZone:(struct _NSZone *)zone {
+    struct objc_super superInfo = { self, [self class] };
+    OCCloudKitHistoryAnalyzerOptions *copy = ((id (*)(struct objc_super *, SEL, struct _NSZone *))objc_msgSendSuper2)(&superInfo, _cmd, zone);
+    
+    {
+        Ivar ivar = object_getInstanceVariable(self, "_includePrivateTransactions", NULL);
+        assert(ivar != NULL);
+        ptrdiff_t offset = ivar_getOffset(ivar);
+        *(BOOL *)((uintptr_t)copy + offset) = *(BOOL *)((uintptr_t)self + offset);
+    }
+    
+    {
+        Ivar ivar = object_getInstanceVariable(self, "_request", NULL);
+        assert(ivar != NULL);
+        ptrdiff_t offset = ivar_getOffset(ivar);
+        *(id *)((uintptr_t)copy + offset) = [*(id *)((uintptr_t)self + offset) retain];
+    }
+    
+    return copy;
+}
+
 @end
+
+void _OCCloudKitHistoryAnalyzerOptions_setIncludePrivateTransactions_(OCCloudKitHistoryAnalyzerOptions *self, BOOL value) {
+    self.includePrivateTransactions = value;
+}
+BOOL _OCCloudKitHistoryAnalyzerOptions_includePrivateTransactions_(OCCloudKitHistoryAnalyzerOptions *self) {
+    return self.includePrivateTransactions;
+}
+void _OCCloudKitHistoryAnalyzerOptions_setRequest_(OCCloudKitHistoryAnalyzerOptions *self, OCCloudKitMirroringRequest *value) {
+    self.request = value;
+}
+OCCloudKitMirroringRequest * _OCCloudKitHistoryAnalyzerOptions_request(OCCloudKitHistoryAnalyzerOptions *self) {
+    return self.request;
+}

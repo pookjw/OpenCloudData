@@ -6,14 +6,22 @@
 //
 
 #import <OpenCloudData/PFHistoryAnalyzerContext.h>
+#import <OpenCloudData/OCCloudKitHistoryAnalyzerOptions.h>
+#import <OpenCloudData/NSSQLCore.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 #warning TODO
-// -[OCCloudKitExporter analyzeHistoryInStore:withManagedObjectContext:error:]에서 -[PFHistoryAnalyzer newAnalyzerContextForStore:sinceLastHistoryToken:inManagedObjectContext:error:]를 통해 생성된다. 이를 위해서 어딘가에서 register를 해야 할 것
 
 @interface OCCloudKitHistoryAnalyzerContext : NSObject /* PFHistoryAnalyzerContext */
-
+//{
+//    NSManagedObjectContext *_managedObjectContext; // 0x40
+//    NSSet<NSString *> *_configuredEntityNames; // 0x48
+//    NSMutableSet<NSManagedObjectID *> *_resetChangedObjectIDs; // 0x50
+//    NSMutableDictionary<NSNumber *, NSMutableSet<NSNumber *> *> *_entityIDToChangedPrimaryKeySet; // 0x58
+//    NSSQLCore *_store; // 0x60
+//}
+- (instancetype)initWithOptions:(OCCloudKitHistoryAnalyzerOptions *)options managedObjectContext:(NSManagedObjectContext *)managedObjectContext store:(NSSQLCore *)store;
 @end
 
 NS_ASSUME_NONNULL_END
