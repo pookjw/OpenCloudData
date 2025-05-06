@@ -388,15 +388,17 @@ OBJC_EXPORT id objc_msgSendSuper2(void);
                     // <+220>
                     flag = NO;
                 } else {
+                    flag = YES;
                     for (NSPropertyDescription *property in change.updatedProperties) {
                         BOOL boolValue = ((NSNumber *)property.userInfo[[OCSPIResolver NSCloudKitMirroringDelegateIgnoredPropertyKey]]).boolValue;
                         if (!boolValue) {
                             // <+220>
+                            flag = NO;
+                            break;
                         }
                     }
                     
-                    // <+472>
-                    flag = YES;
+                    // break가 안 됐다면 <+472> (flag = YES)
                 }
             }
         }

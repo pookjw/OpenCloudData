@@ -6,8 +6,18 @@
 //
 
 #import <OpenCloudData/OCCloudKitSerializer.h>
+#import <OpenCloudData/OCSPIResolver.h>
 
 @implementation OCCloudKitSerializer
+
++ (BOOL)shouldTrackProperty:(NSPropertyDescription *)property {
+    if (property.isTransient) return NO;
+    
+    BOOL boolValue = ((NSNumber *)[property.userInfo objectForKey:[OCSPIResolver NSCloudKitMirroringDelegateIgnoredPropertyKey]]).boolValue;
+    if (boolValue) return NO;
+    
+    return YES;
+}
 
 + (size_t)estimateByteSizeOfRecordID:(CKRecordID *)recordID {
     abort();
