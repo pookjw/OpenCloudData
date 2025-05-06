@@ -94,7 +94,7 @@
     return nil;
 }
 
-- (void)mergeWithState:(PFHistoryAnalyzerDefaultObjectState *)state {
+- (void)mergeWithState:(id<PFHistoryAnalyzerObjectState>)state {
     /*
      x19 = self
      x20 = state

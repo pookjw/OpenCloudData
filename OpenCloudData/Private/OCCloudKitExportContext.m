@@ -151,7 +151,7 @@
                     } else {
                         Ivar ivar = object_getInstanceVariable(entity, "_entityID", NULL);
                         assert(ivar != NULL);
-                        _entityID = *(NSUInteger *)((uintptr_t)entity + ivar_getOffset(ivar));
+                        _entityID = *(uint *)((uintptr_t)entity + ivar_getOffset(ivar));
                     }
                     
                     // x19

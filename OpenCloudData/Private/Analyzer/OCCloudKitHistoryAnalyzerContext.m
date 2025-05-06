@@ -10,6 +10,7 @@
 #import <OpenCloudData/OCCKHistoryAnalyzerState.h>
 #import <OpenCloudData/OCSPIResolver.h>
 #import <OpenCloudData/NSManagedObjectID+Private.h>
+#import <OpenCloudData/OCCKMetadataEntry.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
 
@@ -423,11 +424,180 @@ OBJC_EXPORT id objc_msgSendSuper2(void);
 }
 
 - (BOOL)resetStateForObjectID:(NSManagedObjectID *)objectID error:(NSError * _Nullable * _Nullable)error {
-    abort();
+    /*
+     self = x22
+     objectID = x21
+     error = x20
+     */
+    // sp, #0x18
+    NSError * _Nullable _error = nil;
+    
+    struct objc_super superInfo = { self, [self class] };
+    BOOL result = ((BOOL (*)(struct objc_super *, SEL, id, id *))objc_msgSendSuper2)(&superInfo, _cmd, objectID, &_error);
+    
+    if (result) {
+        [*[self _resetChangedObjectIDsPtr] addObject:objectID];
+    } else {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) {
+                *error = _error;
+            }
+        }
+    }
+    
+    return result;
 }
 
 - (BOOL)_flushPendingAnalyzerStates:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) {
-    abort();
+    /*
+     self = x20
+     error = x19
+     */
+    
+    // sp + 0x90
+    __block NSError * _Nullable _error = nil;
+    // sp + 0x48
+    __block BOOL _succeed = YES;
+    
+    /*
+     __64-[PFCloudKitHistoryAnalyzerContext _flushPendingAnalyzerStates:]_block_invoke
+     self = sp + 0x28 = x19 + 0x20
+     _succeed = sp + 0x30 = x19 + 0x28
+     _error = sp + 0x38 = x19 + 0x30
+     */
+    [*[self _managedObjectContextPtr] performBlockAndWait:^{
+        if (!_succeed) return;
+        
+        NSMutableDictionary<NSManagedObjectID *, id<PFHistoryAnalyzerObjectState>> *objectIDToState;
+        {
+            if (self == nil) {
+                objectIDToState = nil;
+            } else {
+                assert(object_getInstanceVariable(self, "_objectIDToState", (void **)&objectIDToState) != NULL);
+            }
+        }
+        
+        if (objectIDToState.count != 0) {
+            // x20
+            for (NSNumber *entityIDNumber in *[self _entityIDToChangedPrimaryKeySetPtr]) {
+                NSMutableSet<NSNumber *> *changedPrimaryKeySet = [*[self _entityIDToChangedPrimaryKeySetPtr] objectForKey:entityIDNumber];
+                // x26
+                NSFetchRequest<OCCKHistoryAnalyzerState *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKHistoryAnalyzerState entityPath]];
+                fetchRequest.predicate = [NSPredicate predicateWithFormat:@"entityId = %@ AND entityPK in %@", entityIDNumber, changedPrimaryKeySet];
+                
+                NSArray<OCCKHistoryAnalyzerState *> * _Nullable results = [*[self _managedObjectContextPtr] executeFetchRequest:fetchRequest error:&_error];
+                if (results == nil) {
+                    _succeed = NO;
+                    [_error retain];
+                    return;
+                }
+                
+                // x20
+                for (OCCKHistoryAnalyzerState *state in results) {
+                    // x22
+                    NSManagedObjectID *analyzedObjectID = state.analyzedObjectID;
+                    
+                    // x28
+                    id<PFHistoryAnalyzerObjectState> state_2 = [[objectIDToState objectForKey:analyzedObjectID] retain];
+                    if (state_2 != nil) {
+                        [state mergeWithState:state_2];
+                        [objectIDToState removeObjectForKey:analyzedObjectID];
+                    }
+                    
+                    if ([*[self _resetChangedObjectIDsPtr] containsObject:analyzedObjectID]) {
+                        [*[self _managedObjectContextPtr] deleteObject:state];
+                    } else {
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: History parsing corruption detected. An existing analyzer state was fetched from the database for '%@' but it's corresponding in-memory copy is no longer present in the in-memory cache.\n", analyzedObjectID);
+                        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: History parsing corruption detected. An existing analyzer state was fetched from the database for '%@' but it's corresponding in-memory copy is no longer present in the in-memory cache.\n", analyzedObjectID);
+                    }
+                    
+                    [state_2 release];
+                }
+            }
+        }
+        
+        // <+876>
+        // x26
+        for (NSManagedObjectID *objectID in objectIDToState) {
+            // x25
+            id<PFHistoryAnalyzerObjectState> state = [[objectIDToState objectForKey:objectID] retain];
+            // x27
+            OCCKHistoryAnalyzerState *stateObject = [NSEntityDescription insertNewObjectForEntityForName:[OCCKHistoryAnalyzerState entityPath] inManagedObjectContext:*[self _managedObjectContextPtr]];
+            
+            [stateObject setValue:state.originalTransactionNumber forKey:@"originalTransactionNumber"];
+            stateObject.originalChangeTypeNum = @(state.originalChangeType);
+            [stateObject setValue:state.finalTransactionNumber forKey:@"finalTransactionNumber"];
+            [stateObject setValue:state.finalChangeAuthor forKey:@"finalChangeAuthor"];
+            stateObject.finalChangeTypeNum = @(state.finalChangeType);
+            
+            NSSQLCore *store = *[self _storePtr];
+            NSSQLEntity * _Nullable sqlEntity = [OCSPIResolver _sqlEntityForEntityDescription:store.model x1:objectID.entity];
+            
+            uint _entityID;
+            {
+                if (sqlEntity == nil) {
+                    _entityID = 0;
+                } else {
+                    Ivar ivar = object_getInstanceVariable(sqlEntity, "_entityID", NULL);
+                    assert(ivar != NULL);
+                    _entityID = *(uint *)((uintptr_t)sqlEntity + ivar_getOffset(ivar));
+                }
+            }
+            
+            stateObject.entityId = @(_entityID);
+            stateObject.entityPK = @([objectID _referenceData64]);
+            
+            [*[self _managedObjectContextPtr] assignObject:stateObject toPersistentStore:*[self _storePtr]];
+            [state release];
+        }
+        
+        NSPersistentHistoryToken *finalHistoryToken;
+        assert(object_getInstanceVariable(self, "_finalHistoryToken", (void **)&finalHistoryToken) != NULL);
+        
+        // <+1448>
+        OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:[OCSPIResolver NSCloudKitMirroringDelegateLastHistoryTokenKey] transformedValue:finalHistoryToken forStore:*[self _storePtr] intoManagedObjectContext:*[self _managedObjectContextPtr] error:&_error];
+        if (entry == nil) {
+            _succeed = NO;
+            [_error retain];
+            return;
+        }
+        
+        BOOL result = [*[self _managedObjectContextPtr] save:&_error];
+        if (!result) {
+            // 원래 코드에는 NO로 설정하지 않음
+            _succeed = NO;
+            
+            [_error retain];
+        }
+    }];
+    
+    if (_succeed) {
+        NSMutableDictionary<NSManagedObjectID *, id<PFHistoryAnalyzerObjectState>> *objectIDToState;
+        assert(object_getInstanceVariable(self, "_objectIDToState", (void **)&objectIDToState) != NULL);
+        [objectIDToState removeAllObjects];
+        
+        NSMutableSet<NSNumber *> *processedTransactionIDs;
+        assert(object_getInstanceVariable(self, "_processedTransactionIDs", (void **)&processedTransactionIDs) != NULL);
+        [processedTransactionIDs removeAllObjects];
+        
+        [*[self _resetChangedObjectIDsPtr] removeAllObjects];
+        [*[self _entityIDToChangedPrimaryKeySetPtr] removeAllObjects];
+    } else {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) {
+                *error = [[_error retain] autorelease];
+            }
+        }
+    }
+    
+    [_error release];
+    return _succeed;
 }
 
 - (NSMutableDictionary<NSNumber *, NSMutableSet<NSNumber *> *> * _Nullable *)_entityIDToChangedPrimaryKeySetPtr {

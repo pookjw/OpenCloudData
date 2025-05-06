@@ -6,7 +6,7 @@
 //
 
 #import <CoreData/CoreData.h>
-#import <OpenCloudData/PFHistoryAnalyzerDefaultObjectState.h>
+#import <OpenCloudData/PFHistoryAnalyzerObjectState.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readonly, nonatomic, nullable) NSDictionary *tombstone;
 @property (readonly, nonatomic, nullable) NSString *finalChangeAuthor;
 
-- (void)mergeWithState:(PFHistoryAnalyzerDefaultObjectState *)state;
+- (void)mergeWithState:(id<PFHistoryAnalyzerObjectState>)state;
 @end
 
 NS_ASSUME_NONNULL_END
