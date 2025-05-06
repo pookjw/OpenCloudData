@@ -333,7 +333,91 @@ OBJC_EXPORT id objc_msgSendSuper2(void);
 }
 
 - (BOOL)processChange:(NSPersistentHistoryChange *)change error:(NSError * _Nullable * _Nullable)error {
-    abort();
+    /*
+     self = x20
+     change = x21
+     error = x19
+     */
+    
+    NSSet<NSString *> *configuredEntityNames = *[self _configuredEntityNamesPtr];
+    
+    // 1 = <+472> / 0 = <+202>
+    BOOL flag;
+    
+    if (![configuredEntityNames containsObject:change.changedObjectID.entity.name]) {
+        // <+276>
+        os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: Skipping change because its entity is not in the configured set of entities for this store: %@", __func__, __LINE__, self, change.changedObjectID);
+        // <+472>
+        flag = YES;
+    } else {
+        // +104>
+        NSString *NSCloudKitMirroringDelegateImportContextName = [OCSPIResolver NSCloudKitMirroringDelegateImportContextName];
+        NSString *NSCloudKitMirroringDelegateResetSyncAuthor = [OCSPIResolver NSCloudKitMirroringDelegateResetSyncAuthor];
+        
+        if (([change.transaction.author isEqualToString:NSCloudKitMirroringDelegateImportContextName]) || ([change.transaction.contextName isEqualToString:NSCloudKitMirroringDelegateImportContextName]) || ([change.transaction.author isEqualToString:NSCloudKitMirroringDelegateResetSyncAuthor])) {
+            // <+196>
+            OCCloudKitHistoryAnalyzerOptions *options;
+            assert(object_getInstanceVariable(self, "_options", (void **)&options) != NULL);
+            if (!options.includePrivateTransactions) {
+                // <+564>
+                if (change.changeType == NSPersistentHistoryChangeTypeDelete) {
+                    // <+580>
+                    BOOL result = [self resetStateForObjectID:change.changedObjectID error:error];
+                    if (result) {
+                        // <+472>
+                        flag = YES;
+                    } else {
+                        return NO;
+                    }
+                } else {
+                    // <+472>
+                    flag = YES;
+                }
+            } else {
+                // <+220>
+                flag = NO;
+            }
+        } else {
+            // <+616>
+            if (change.changeType == NSPersistentHistoryChangeTypeDelete) {
+                // <+220>
+                flag = NO;
+            } else {
+                // <+632>
+                if (change.updatedProperties.count == 0) {
+                    // <+220>
+                    flag = NO;
+                } else {
+                    for (NSPropertyDescription *property in change.updatedProperties) {
+                        BOOL boolValue = ((NSNumber *)property.userInfo[[OCSPIResolver NSCloudKitMirroringDelegateIgnoredPropertyKey]]).boolValue;
+                        if (!boolValue) {
+                            // <+220>
+                        }
+                    }
+                    
+                    // <+472>
+                    flag = YES;
+                }
+            }
+        }
+    }
+    
+    if (!flag) {
+        // <+220>
+        struct objc_super superInfo = { self, [self class] };
+        BOOL result = ((BOOL (*)(struct objc_super *, SEL, id, id *))objc_msgSendSuper2)(&superInfo, _cmd, change, error);
+        if (!result) return NO;
+    }
+    
+    // <+472>
+    NSMutableDictionary<NSManagedObjectID *, id<PFHistoryAnalyzerObjectState>> *objectIDToState;
+    assert(object_getInstanceVariable(self, "_objectIDToState", (void **)&objectIDToState) != NULL);
+    
+    if (objectIDToState.count < 1000) {
+        return YES;
+    } else {
+        return [self _flushPendingAnalyzerStates:error];
+    }
 }
 
 - (BOOL)resetStateForObjectID:(NSManagedObjectID *)objectID error:(NSError * _Nullable * _Nullable)error {

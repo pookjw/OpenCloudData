@@ -79,7 +79,9 @@ __attribute__((objc_direct_members))
 + (NSString *)PFCloudKitServerChangeTokenKey;
 + (NSString *)NSCloudKitMirroringDelegateServerChangeTokensKey;
 + (NSString *)_NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification;
-+ (NSString *)CKIdentityUpdateNotification;
++ (NSString *)NSCloudKitMirroringDelegateMigrationAuthor;
++ (NSString *)NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey;
++ (NSString *)NSCloudKitMirroringDelegateIgnoredPropertyKey;
 
 @end
 

@@ -282,4 +282,19 @@ __attribute__((objc_direct_members))
     return *(id *)addr;
 }
 
++ (NSString *)NSCloudKitMirroringDelegateMigrationAuthor {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateMigrationAuthor"];
+    return *(id *)addr;
+}
+
++ (NSString *)NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey"];
+    return *(id *)addr;
+}
+
++ (NSString *)NSCloudKitMirroringDelegateIgnoredPropertyKey {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateIgnoredPropertyKey"];
+    return *(id *)addr;
+}
+
 @end

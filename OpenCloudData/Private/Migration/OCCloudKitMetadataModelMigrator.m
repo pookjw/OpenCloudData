@@ -41,8 +41,7 @@
     if (self = [super init]) {
         _store = [store retain];
         _metadataContext = [metadataContext retain];
-        // original : NSCloudKitMirroringDelegateMigrationAuthor
-        metadataContext.transactionAuthor = @"NSCloudKitMirroringDelegate.migration";
+        metadataContext.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateMigrationAuthor];
         _context = [[OCCloudKitMetadataMigrationContext alloc] init];
         _databaseScope = databaseScope;
         _metricsClient = [metricsClient retain];

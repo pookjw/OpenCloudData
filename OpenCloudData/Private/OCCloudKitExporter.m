@@ -816,8 +816,7 @@
                 
                 NSInteger count = countNumber.integerValue;
                 if (count < 1) {
-                    // original : NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey
-                    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:@"NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey" fromStore:retainedMonitoredStore inManagedObjectContext:newBackgroundContextForMonitoredCoordinator error:&_error];
+                    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:[OCSPIResolver NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey] fromStore:retainedMonitoredStore inManagedObjectContext:newBackgroundContextForMonitoredCoordinator error:&_error];
                     if (entry == nil) {
                         if (_error != nil) {
                             succeed = NO;
@@ -1149,8 +1148,7 @@
             }
         }
         
-        // original : NSCloudKitMirroringDelegateLastHistoryTokenKey
-        OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:@"NSCloudKitMirroringDelegateLastHistoryTokenKey" fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+        OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:[OCSPIResolver NSCloudKitMirroringDelegateLastHistoryTokenKey] fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
         
         // x26
         NSObject<NSSecureCoding> * _Nullable transformedValue;
@@ -1168,8 +1166,7 @@
             shouldAnalyze = NO;
         } else {
             transformedValue = entry.transformedValue;
-            // original : NSCloudKitMirroringDelegateBypassHistoryOnExportKey
-            OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:@"NSCloudKitMirroringDelegateBypassHistoryOnExportKey" fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+            OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:[OCSPIResolver NSCloudKitMirroringDelegateBypassHistoryOnExportKey] fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
             
             if (_error != nil) {
                 _succeed = NO;
@@ -1181,8 +1178,7 @@
             } else {
                 boolValue = entry.boolValue;
                 if ((transformedValue == nil) || boolValue) {
-                    // original : NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey
-                    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:@"NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey" boolValue:YES forStore:store intoManagedObjectContext:managedObjectContext error:&_error];
+                    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:[OCSPIResolver NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey] boolValue:YES forStore:store intoManagedObjectContext:managedObjectContext error:&_error];
                     
                     if (entry == nil) {
                         _succeed = NO;
@@ -1250,8 +1246,7 @@
                     NSPersistentHistoryToken * _Nullable lastProcessedToken;
                     assert(object_getInstanceVariable(analyzer, "_lastProcessedToken", (void **)&lastProcessedToken) != NULL);
                     
-                    // original : NSCloudKitMirroringDelegateLastHistoryTokenKey
-                    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:@"NSCloudKitMirroringDelegateLastHistoryTokenKey" transformedValue:lastProcessedToken forStore:store intoManagedObjectContext:managedObjectContext error:&__error];
+                    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:[OCSPIResolver NSCloudKitMirroringDelegateLastHistoryTokenKey] transformedValue:lastProcessedToken forStore:store intoManagedObjectContext:managedObjectContext error:&__error];
                     
                     if (entry == nil) {
                         os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Failed to update exporter history token after deferral: %@", __func__, __LINE__, self, __error);
@@ -1282,8 +1277,7 @@
                 return _succeed;
             }
             
-            // original : NSCloudKitMirroringDelegateLastHistoryTokenKey
-            [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:@"NSCloudKitMirroringDelegateLastHistoryTokenKey" transformedValue:finalHistoryToken forStore:store intoManagedObjectContext:managedObjectContext error:&_error];
+            [OCCKMetadataEntry updateOrInsertMetadataEntryWithKey:[OCSPIResolver NSCloudKitMirroringDelegateLastHistoryTokenKey] transformedValue:finalHistoryToken forStore:store intoManagedObjectContext:managedObjectContext error:&_error];
             
             if (_error != nil) {
                 _succeed = NO;
@@ -1297,8 +1291,7 @@
                 return _succeed;
             }
             
-            // original : NSCloudKitMirroringDelegateBypassHistoryOnExportKey
-            OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:@"NSCloudKitMirroringDelegateBypassHistoryOnExportKey" fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+            OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:[OCSPIResolver NSCloudKitMirroringDelegateBypassHistoryOnExportKey] fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
             
             if (_error != nil) {
                 os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Unable to read the bypass entry: %@", __func__, __LINE__, _error);

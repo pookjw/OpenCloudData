@@ -65,8 +65,7 @@
      sp + 0x48 = _succeed = x19 + 0x40
      */
     [managedObjectContext performBlockAndWait:^{
-        // original : NSCloudKitMirroringDelegateLastHistoryTokenKey
-        OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:@"NSCloudKitMirroringDelegateLastHistoryTokenKey" fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+        OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:[OCSPIResolver NSCloudKitMirroringDelegateLastHistoryTokenKey] fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
         
         if (_error == nil) {
             _succeed = NO;
@@ -635,8 +634,7 @@
                             preserveLegacyRecordMetadataBehavior = options->_options.preserveLegacyRecordMetadataBehavior;
                         }
                         if (preserveLegacyRecordMetadataBehavior) {
-                            // original : NSCKRecordIDAttributeName
-                            NSPropertyDescription *propertyDescription = managedObjectContext.persistentStoreCoordinator.managedObjectModel.entitiesByName[entityName].propertiesByName[@"ckRecordID"];
+                            NSPropertyDescription *propertyDescription = managedObjectContext.persistentStoreCoordinator.managedObjectModel.entitiesByName[entityName].propertiesByName[[OCSPIResolver NSCKRecordIDAttributeName]];
                             if (propertyDescription != nil) {
                                 fetchRequest.propertiesToFetch = @[propertyDescription];
                             }
@@ -784,8 +782,7 @@
                 };
                 
                 if (_succeed) {
-                    // original : NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey
-                    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:@"NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey" fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+                    OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entryForKey:[OCSPIResolver NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey] fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
                     if (!entry.boolValue) {
                         if (_error != nil) {
                             _succeed = NO;
@@ -957,8 +954,7 @@
                         [arrayOfPrimaryKeysAndEntityIDs release];
                     }
                     
-                    // original : NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey
-                    OCCKMetadataEntry * _Nullable entry_2 = [OCCKMetadataEntry entryForKey:@"NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey" fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+                    OCCKMetadataEntry * _Nullable entry_2 = [OCCKMetadataEntry entryForKey:[OCSPIResolver NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey] fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
                     if (entry_2 != nil) {
                         [managedObjectContext deleteObject:entry_2];
                     } else {
