@@ -21,4 +21,8 @@
     abort();
 }
 
+- (CKRecord *)recordFromEncodedData:(NSData *)encodedData error:(NSError * _Nullable *)error {
+    abort();
+}
+
 @end

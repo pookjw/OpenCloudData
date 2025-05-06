@@ -18,7 +18,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-__attribute__((objc_direct_members))
+//__attribute__((objc_direct_members))
 @interface OCSPIResolver : NSObject
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
@@ -55,6 +55,7 @@ __attribute__((objc_direct_members))
 + (NSNumber *)_PFRoutines__getPFBundleVersionNumber:(Class)x0;
 + (void)_PFRoutines_efficientlyEnumerateManagedObjectsInFetchRequest_usingManagedObjectContext_andApplyBlock_:(Class)x0 x1:(NSFetchRequest *)x1 x2:(NSManagedObjectContext *)x2 x3:(void (^ NS_NOESCAPE)(NSArray<__kindof NSManagedObject *> * _Nullable objects, NSError * _Nullable __error, BOOL *checkChanges, BOOL *reserved))x3;
 + (BOOL)_PFRoutines__isInMemoryStore_:(Class)x0 x1:(NSPersistentStore *)x1;
++ (NSData *)_PFRoutines_retainedEncodeObjectValue_forTransformableAttribute_:(Class)x0 x1:(id)x1 x2:(NSAttributeDescription *)x2 NS_RETURNS_RETAINED;
 
 + (__kindof PFHistoryAnalyzerContext * _Nullable)PFHistoryAnalyzer_newAnalyzerContextForStore_sinceLastHistoryToken_inManagedObjectContext_error_:(__kindof PFHistoryAnalyzer *)x0 x1:(NSPersistentStore *)x1 x2:(NSPersistentHistoryToken *)x2 x3:(NSManagedObjectContext *)x3 x4:(NSError * _Nullable * _Nullable)x4 NS_RETURNS_RETAINED;
 
@@ -82,6 +83,8 @@ __attribute__((objc_direct_members))
 + (NSString *)NSCloudKitMirroringDelegateMigrationAuthor;
 + (NSString *)NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey;
 + (NSString *)NSCloudKitMirroringDelegateIgnoredPropertyKey;
++ (NSString *)NSCloudKitMirroringDelegateSetupAuthor;
++ (NSString *)NSCloudKitMirroringDelegateEventAuthor;
 
 @end
 

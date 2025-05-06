@@ -1512,7 +1512,7 @@
             newBackgroundContextForMonitoredCoordinator.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateExportContextName];
             
             // x29, #-0x78
-            __block BOOL succeed = NO;
+            __block BOOL succeed = YES;
             
             // sp, #0x78
             __block NSError * _Nullable error = nil;

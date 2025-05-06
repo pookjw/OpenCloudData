@@ -177,6 +177,11 @@ __attribute__((objc_direct_members))
     return ((BOOL (*)(Class, id))addr)(x0, x1);
 }
 
++ (NSData *)_PFRoutines_retainedEncodeObjectValue_forTransformableAttribute_:(Class)x0 x1:(id)x1 x2:(NSAttributeDescription *)x2 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[_PFRoutines retainedEncodeObjectValue:forTransformableAttribute:]"];
+    return ((id (*)(Class, id, id))addr)(x0, x1, x2);
+}
+
 + (__kindof PFHistoryAnalyzerContext *)PFHistoryAnalyzer_newAnalyzerContextForStore_sinceLastHistoryToken_inManagedObjectContext_error_:(__kindof PFHistoryAnalyzer *)x0 x1:(NSPersistentStore *)x1 x2:(NSPersistentHistoryToken *)x2 x3:(NSManagedObjectContext *)x3 x4:(NSError * _Nullable *)x4 {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"-[PFHistoryAnalyzer newAnalyzerContextForStore:sinceLastHistoryToken:inManagedObjectContext:error:]"];
     return ((id (*)(id, id, id, id, id *))addr)(x0, x1, x2, x3, x4);
@@ -294,6 +299,16 @@ __attribute__((objc_direct_members))
 
 + (NSString *)NSCloudKitMirroringDelegateIgnoredPropertyKey {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateIgnoredPropertyKey"];
+    return *(id *)addr;
+}
+
++ (NSString *)NSCloudKitMirroringDelegateSetupAuthor {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateSetupAuthor"];
+    return *(id *)addr;
+}
+
++ (NSString *)NSCloudKitMirroringDelegateEventAuthor {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateEventAuthor"];
     return *(id *)addr;
 }
 

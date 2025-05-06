@@ -15,6 +15,7 @@
 #import <OpenCloudData/NSManagedObjectID+Private.h>
 #import <OpenCloudData/Log.h>
 #import <OpenCloudData/OCSPIResolver.h>
+#import <OpenCloudData/OCCKRecordMetadataReceiptArchive.h>
 #import <objc/runtime.h>
 
 @implementation OCCKRecordMetadata
@@ -1145,6 +1146,42 @@
     NSNumber *entityPK = self.entityPK;
     
     return [OCCKRecordMetadata createObjectIDForEntityID:entityId primaryKey:entityPK inSQLCore:(NSSQLCore *)self.objectID.persistentStore];
+}
+
+- (NSData *)createEncodedMoveReceiptData:(NSError * _Nullable *)error {
+    /*
+     self = x19
+     error = x20
+     */
+    // sp + 0x8
+    NSError * _Nullable _error = nil;
+    // x19
+    NSData * _Nullable data;
+    @autoreleasepool {
+        // x22
+        OCCKRecordMetadataReceiptArchive *archive = [[OCCKRecordMetadataReceiptArchive alloc] initWithReceiptsToEncode:self.moveReceipts];
+        data = [[NSKeyedArchiver archivedDataWithRootObject:archive requiringSecureCoding:YES error:&_error] retain];
+        
+        if (data == nil) {
+            [_error retain];
+        }
+        [archive release];
+    }
+    
+    if (data != nil) {
+        return [data autorelease];
+    } else {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error) {
+                *error = [[_error retain] autorelease];
+            }
+        }
+        [_error release];
+        return nil;
+    }
 }
 
 @end

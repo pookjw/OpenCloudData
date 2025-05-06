@@ -11,8 +11,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-
 @interface OCCloudKitHistoryAnalyzerContext : NSObject /* PFHistoryAnalyzerContext */
 //{
 //    NSManagedObjectContext *_managedObjectContext; // 0x40
@@ -21,7 +19,6 @@ NS_ASSUME_NONNULL_BEGIN
 //    NSMutableDictionary<NSNumber *, NSMutableSet<NSNumber *> *> *_entityIDToChangedPrimaryKeySet; // 0x58
 //    NSSQLCore *_store; // 0x60
 //}
-+ (BOOL)isPrivateContextName:(NSString *)name;
 - (instancetype)initWithOptions:(OCCloudKitHistoryAnalyzerOptions *)options managedObjectContext:(NSManagedObjectContext *)managedObjectContext store:(NSSQLCore *)store;
 @end
 

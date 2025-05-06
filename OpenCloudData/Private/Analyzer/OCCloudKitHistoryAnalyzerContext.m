@@ -39,10 +39,6 @@ OBJC_EXPORT id objc_msgSendSuper2(void);
         assert(class_addIvar(_isa, "_entityIDToChangedPrimaryKeySet", sizeof(id), sizeof(id), @encode(id)));
         assert(class_addIvar(_isa, "_store", sizeof(id), sizeof(id), @encode(id)));
         
-        IMP isPrivateContextName_ = method_getImplementation(class_getClassMethod(self, @selector(isPrivateContextName:)));
-        assert(isPrivateContextName_ != NULL);
-        assert(class_addMethod(object_getClass(_isa), @selector(isPrivateContextName:), isPrivateContextName_, NULL));
-        
         IMP initWithOptions_managedObjectContext_store_ = class_getMethodImplementation(self, @selector(initWithOptions:managedObjectContext:store:));
         assert(initWithOptions_managedObjectContext_store_ != NULL);
         assert(class_addMethod(_isa, @selector(initWithOptions:managedObjectContext:store:), initWithOptions_managedObjectContext_store_, NULL));
@@ -81,12 +77,6 @@ OBJC_EXPORT id objc_msgSendSuper2(void);
     });
     
     return isa;
-}
-
-+ (BOOL)isPrivateContextName:(NSString *)name {
-    if ([name isEqualToString:[OCSPIResolver NSCloudKitMirroringDelegateExportContextName]]) return YES;
-    if ([name isEqualToString:[OCSPIResolver NSCloudKitMirroringDelegateImportContextName]]) return YES;
-    return NO;
 }
 
 - (instancetype)initWithOptions:(OCCloudKitHistoryAnalyzerOptions *)options managedObjectContext:(NSManagedObjectContext *)managedObjectContext store:(NSSQLCore *)store {

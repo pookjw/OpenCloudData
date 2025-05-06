@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
     NSMutableArray *_containerBlocks;
     BOOL _isContainerRequest;
     @package CKSchedulerActivity *_schedulerActivity; // 0x40
-    OCPersistentCloudKitContainerEventActivity *_activity; // 0x48
+    @package OCPersistentCloudKitContainerEventActivity *_activity; // 0x48
 }
 + (NSSet<Class> *)allRequestClasses;
 
