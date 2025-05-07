@@ -461,17 +461,28 @@ static CKRecordZoneID *zoneID_2;
         
         /*
          __98-[PFCloudKitSerializer newCKRecordsFromObject:fullyMaterializeRecords:includeRelationships:error:]_block_invoke_2
-         attribute = sp + 0x120
-         representativeValues = sp + 0x128
-         self = sp + 0x130
-         record = sp + 0x138
-         object = sp + 0x140
-         _succeed = sp + 0x148
-         _error = sp + 0x150
+         attribute = sp + 0x120 = x19 + 0x20
+         representativeValues = sp + 0x128 = x19 + 0x28
+         self = sp + 0x130 = x19 + 0x30
+         record = sp + 0x138 = x19 + 0x38
+         object = sp + 0x140 = x19 + 0x40
+         _succeed = sp + 0x148 = x19 + 0x48
+         _error = sp + 0x150 = x19 + 0x50
          */
         [objc_lookUpClass("_PFRoutines") wrapBlockInGuardedAutoreleasePool:^{
-#warning TODO
-            abort();
+            /*
+             self(block) = x19
+             */
+            // x21
+            NSString *name = attribute.name;
+            // x20
+            NSString *key = [@"CD_" stringByAppendingString:attribute.name];
+            id representativeValue = [representativeValues objectForKey:name];
+            
+            if ((attribute.attributeType == NSBinaryDataAttributeType) || (attribute.attributeType == NSTransformableAttributeType)) {
+                // <+144>
+                abort();
+            }
         }];
     }
     
