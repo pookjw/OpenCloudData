@@ -15,6 +15,7 @@
 #import <OpenCloudData/NSSQLiteStatement.h>
 #import <OpenCloudData/NSSQLiteAdapter.h>
 #import <OpenCloudData/NSSQLColumn.h>
+#import <OpenCloudData/_NSDataFileBackedFuture.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -60,6 +61,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (__kindof PFHistoryAnalyzerContext * _Nullable)PFHistoryAnalyzer_newAnalyzerContextForStore_sinceLastHistoryToken_inManagedObjectContext_error_:(__kindof PFHistoryAnalyzer *)x0 x1:(NSPersistentStore *)x1 x2:(NSPersistentHistoryToken *)x2 x3:(NSManagedObjectContext *)x3 x4:(NSError * _Nullable * _Nullable)x4 NS_RETURNS_RETAINED;
 
 + (NSString *)_PFModelMapPathForEntity:(NSEntityDescription *)x0;
+
++ (NSData *)_NSDataFileBackedFuture__storeMetadata:(_NSDataFileBackedFuture *)x0 NS_RETURNS_RETAINED;
 
 + (NSString *)NSCloudKitMirroringDelegateExportContextName;
 + (NSString *)NSCloudKitMirroringDelegateImportContextName;

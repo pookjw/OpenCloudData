@@ -43,6 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSURL *)generateCKAssetFileURLForObjectInStore:(NSPersistentStore *)store __attribute__((objc_direct));
 + (BOOL)isVariableLengthAttributeType:(NSAttributeType)attributeType __attribute__((objc_direct));
 + (size_t)sizeOfVariableLengthAttribute:(NSAttributeDescription *)attribute withValue:(id)value;
++ (NSString *)mtmKeyForObjectWithRecordName:(NSString *)recordName relatedToObjectWithRecordName:(NSString *)relatedToObjectWithRecordName byRelationship:(NSRelationshipDescription *)relationship withInverse:(NSRelationshipDescription *)inverseRelationship __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

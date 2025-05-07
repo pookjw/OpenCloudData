@@ -167,6 +167,11 @@ __attribute__((objc_direct_members))
     return ((id (*)(Class))addr)(x0);
 }
 
++ (NSData *)_NSDataFileBackedFuture__storeMetadata:(_NSDataFileBackedFuture *)x0 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"-[_NSDataFileBackedFuture _storeMetadata]"];
+    return ((id (*)(id))addr)(x0);
+}
+
 + (void)_PFRoutines_efficientlyEnumerateManagedObjectsInFetchRequest_usingManagedObjectContext_andApplyBlock_:(Class)x0 x1:(NSFetchRequest *)x1 x2:(NSManagedObjectContext *)x2 x3:(void (^ NS_NOESCAPE)(NSArray<__kindof NSManagedObject *> * _Nullable, NSError * _Nullable, BOOL * _Nonnull, BOOL * _Nonnull))x3 {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[_PFRoutines efficientlyEnumerateManagedObjectsInFetchRequest:usingManagedObjectContext:andApplyBlock:]"];
     ((void (*)(Class, id, id, id))addr)(x0, x1, x2, x3);
