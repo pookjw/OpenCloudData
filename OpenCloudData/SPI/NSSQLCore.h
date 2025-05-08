@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSDictionary<NSString *, NSSQLModel *> * _Nullable)ancillarySQLModels;
 - (void)setAncillarySQLModels:(NSDictionary<NSString *, NSSQLEntity *> * _Nullable)ancillarySQLModels;
 - (NSSQLiteAdapter *)adapter;
+- (NSURL * _Nullable)fileBackedFuturesDirectory;
 @end
 
 NS_ASSUME_NONNULL_END

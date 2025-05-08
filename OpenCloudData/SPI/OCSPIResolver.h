@@ -69,6 +69,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (CKRecordType)PFCloudKitSerializer_recordTypeForEntity_:(Class)x0 x1:(NSEntityDescription *)x1;
 + (BOOL)PFCloudKitSerializer_isMirroredRelationshipRecordType_:(Class)x0 x1:(CKRecordType)x1;
 + (NSSet<NSManagedObjectID *> *)PFCloudKitSerializer_createSetOfObjectIDsRelatedToObject_:(Class)x0 x1:(NSManagedObject *)x1;
++ (NSURL *)PFCloudKitSerializer_generateCKAssetFileURLForObjectInStore_:(Class)x0 x1:(NSPersistentStore *)x1;
++ (NSURL *)PFCloudKitSerializer_assetStorageDirectoryURLForStore_:(Class)x0 x1:(NSPersistentStore *)x1;
 
 + (NSString *)NSCloudKitMirroringDelegateExportContextName;
 + (NSString *)NSCloudKitMirroringDelegateImportContextName;
@@ -95,6 +97,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)NSCloudKitMirroringDelegateSetupAuthor;
 + (NSString *)NSCloudKitMirroringDelegateEventAuthor;
 + (NSString *)PFCloudKitMirroringDelegateToManyPrefix;
++ (NSString *)NSPersistentCloudKitContainerEncryptedAttributeKey;
 
 @end
 

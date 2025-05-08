@@ -217,6 +217,16 @@ __attribute__((objc_direct_members))
     return ((id (*)(Class, id))addr)(x0, x1);
 }
 
++ (NSURL *)PFCloudKitSerializer_generateCKAssetFileURLForObjectInStore_:(Class)x0 x1:(NSPersistentStore *)x1 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[PFCloudKitSerializer generateCKAssetFileURLForObjectInStore:]"];
+    return ((id (*)(Class, id))addr)(x0, x1);
+}
+
++ (NSURL *)PFCloudKitSerializer_assetStorageDirectoryURLForStore_:(Class)x0 x1:(NSPersistentStore *)x1 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[PFCloudKitSerializer assetStorageDirectoryURLForStore:]"];
+    return ((id (*)(Class, id))addr)(x0, x1);
+}
+
 + (NSString *)_PFModelMapPathForEntity:(NSEntityDescription *)x0 {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"__PFModelMapPathForEntity"];
     return ((id (*)(id))addr)(x0);
@@ -344,6 +354,11 @@ __attribute__((objc_direct_members))
 
 + (NSString *)PFCloudKitMirroringDelegateToManyPrefix {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_PFCloudKitMirroringDelegateToManyPrefix"];
+    return *(id *)addr;
+}
+
++ (NSString *)NSPersistentCloudKitContainerEncryptedAttributeKey {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSPersistentCloudKitContainerEncryptedAttributeKey"];
     return *(id *)addr;
 }
 

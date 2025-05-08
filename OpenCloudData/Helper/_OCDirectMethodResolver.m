@@ -50,4 +50,13 @@
     return [OCCloudKitSerializer createSetOfObjectIDsRelatedToObject:x1];
 }
 
++ (NSURL *)OCCloudKitSerializer:(Class)x0 generateCKAssetFileURLForObjectInStore:(NSPersistentStore *)x1 {
+    assert(x0 == [OCCloudKitSerializer class]);
+    return [OCCloudKitSerializer generateCKAssetFileURLForObjectInStore:x1];
+}
++ (NSURL *)OCCloudKitSerializer:(Class)x0 assetStorageDirectoryURLForStore:(NSPersistentStore *)x1 {
+    assert(x0 == [OCCloudKitSerializer class]);
+    return [OCCloudKitSerializer assetStorageDirectoryURLForStore:x1];
+}
+
 @end

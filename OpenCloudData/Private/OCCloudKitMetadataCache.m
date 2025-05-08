@@ -17,4 +17,8 @@
     abort();
 }
 
+- (void)cacheZoneMetadata:(OCCKRecordZoneMetadata *)zoneMetadata {
+    abort();
+}
+
 @end

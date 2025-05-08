@@ -17,6 +17,8 @@
 #import <OpenCloudData/NSAttributeDescription+Private.h>
 #import <OpenCloudData/_NSDataFileBackedFuture.h>
 #import <OpenCloudData/PFMirroredManyToManyRelationshipV2.h>
+#import <OpenCloudData/OCCloudKitImportZoneContext.h>
+#import <OpenCloudData/NSManagedObjectID+Private.h>
 #import <objc/runtime.h>
 
 CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
@@ -203,19 +205,77 @@ static CKRecordZoneID *zoneID_2;
 }
 
 + (NSURL *)generateCKAssetFileURLForObjectInStore:(NSPersistentStore *)store {
-    abort();
+    /*
+     store = x19
+     */
+    NSURL *storageURL = [OCCloudKitSerializer assetStorageDirectoryURLForStore:store];
+    NSString *name = [NSString stringWithFormat:@"%@.fxd", [NSUUID UUID].UUIDString];
+    return [storageURL URLByAppendingPathComponent:name isDirectory:NO];
+}
+
++ (NSURL *)assetStorageDirectoryURLForStore:(NSPersistentStore *)store {
+    /*
+     store = x19
+     */
+    BOOL isInMemoryStore = [OCSPIResolver _PFRoutines__isInMemoryStore_:objc_lookUpClass("_PFRoutines") x1:store];
+    if (isInMemoryStore) {
+        // x21
+        NSString *tempDir =  NSTemporaryDirectory();
+        NSString *filePath = [[tempDir stringByAppendingPathComponent:store.identifier] stringByAppendingPathComponent:@"inMemory_store_ckAssets"];
+        return [NSURL fileURLWithPath:filePath];
+    }
+    
+    // x19
+    NSURL *url_1 = store.URL;
+    // x20
+    NSString *name_1 = url_1.lastPathComponent.stringByDeletingPathExtension;
+    // x19
+    NSURL *url_2 = [url_1 URLByDeletingLastPathComponent];
+    NSString *name_2 = [NSString stringWithFormat:@"%@_ckAssets", name_1];
+    return [url_2 URLByAppendingPathComponent:name_2];
 }
 
 + (BOOL)isVariableLengthAttributeType:(NSAttributeType)attributeType {
-    abort();
+    switch (attributeType) {
+        case NSStringAttributeType:
+        case NSBinaryDataAttributeType:
+        case NSURIAttributeType:
+        case NSTransformableAttributeType:
+        case NSCompositeAttributeType:
+            return YES;
+        default:
+            return NO;
+    }
 }
 
-+ (size_t)sizeOfVariableLengthAttribute:(NSAttributeDescription *)attribute withValue:(id)value {
-    abort();
-}
-
-- (BOOL)shouldEncryptValueForAttribute:(NSAttributeDescription *)attribute {
-    abort();
++ (size_t)sizeOfVariableLengthAttribute:(NSAttributeDescription *)attribute withValue:(id _Nullable)value {
+    /*
+     attribute = x20
+     value = x19
+     */
+    if (value == nil) {
+        return 0;
+    }
+    
+    NSAttributeType attributeType = attribute.attributeType;
+    
+    switch (attributeType) {
+        case NSStringAttributeType:
+        case NSURIAttributeType:
+            return ((NSString *)value).length;
+        case NSBinaryDataAttributeType:
+        case NSTransformableAttributeType:
+        case NSCompositeAttributeType:
+        {
+            if ([value isKindOfClass:objc_lookUpClass("_NSDataFileBackedFuture")]) {
+                return ((_NSDataFileBackedFuture *)value).fileSize;
+            } else {
+                return ((NSData *)value).length;
+            }
+        }
+        default:
+            return 0;
+    }
 }
 
 + (NSString *)mtmKeyForObjectWithRecordName:(NSString *)recordName relatedToObjectWithRecordName:(NSString *)relatedToObjectWithRecordName byRelationship:(NSRelationshipDescription *)relationship withInverse:(NSRelationshipDescription *)inverseRelationship {
@@ -342,6 +402,14 @@ static CKRecordZoneID *zoneID_2;
     NSString *string_3 = [NSString stringWithFormat:@"%@:%@", string_1, string_2];
     [array release];
     return string_3;
+}
+
++ (NSString *)applyCDPrefixToName:(NSString *)name {
+    return [@"CD_" stringByAppendingString:name];
+}
+
++ (BOOL)isPrivateAttribute:(NSAttributeDescription *)attribute {
+    abort();
 }
 
 - (instancetype)initWithMirroringOptions:(OCCloudKitMirroringDelegateOptions *)mirroringOptions metadataCache:(OCCloudKitMetadataCache *)metadataCache recordNamePrefix:(NSString *)recordNamePrefix {
@@ -541,7 +609,7 @@ static CKRecordZoneID *zoneID_2;
                 // x19
                 size_t ckAssetThresholdBytes = self->_mirroringOptions.ckAssetThresholdBytes.unsignedIntegerValue;
                 
-                BOOL flag; // 1 = <+1412>, 0 = <+1452>
+                BOOL flag; // 1 = <+1412>/<+1832>, 0 = <+1452>
                 if (ckAssetThresholdBytes == 0) {
                     flag = YES;
                 } else {
@@ -557,31 +625,49 @@ static CKRecordZoneID *zoneID_2;
                     ckAssetThresholdBytes = encodedMoveReceiptData.length;
                     
                     if ((ckAssetThresholdBytes + record.size) < 0xaae61) {
-                        // <+1832>
-                        abort();
+                        flag = YES;
+                    } else {
+                        flag = NO;
                     }
                 }
                 
-                // <+1452>
-                // x19
-                NSURL *url = [OCCloudKitSerializer generateCKAssetFileURLForObjectInStore:object.objectID.persistentStore];
-                BOOL result = [encodedMoveReceiptData writeToURL:url options:0 error:&_error];
-                
-                if (!result) {
-                    // <+1580>
-                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to write CKAsset data for '%@' on '%@' backing record '%@'.\n%@", __func__, __LINE__, @"moveReceipt", object.objectID, record, _error);
-                    _succeed = NO;
-                    [_error retain];
+                if (!flag) {
+                    // <+1452>
+                    // x19
+                    NSURL *url = [OCCloudKitSerializer generateCKAssetFileURLForObjectInStore:object.objectID.persistentStore];
+                    BOOL result = [encodedMoveReceiptData writeToURL:url options:0 error:&_error];
+                    
+                    if (!result) {
+                        // <+1580>
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to write CKAsset data for '%@' on '%@' backing record '%@'.\n%@", __func__, __LINE__, @"moveReceipt", object.objectID, record, _error);
+                        _succeed = NO;
+                        [_error retain];
+                        [encodedMoveReceiptData release];
+                        // <+2148>
+                    }
+                    
+                    [self->_writtenAssetURLs addObject:url];
+                    // original : getCloudKitCKAssetClass
+                    CKAsset *ckAsset = [[[CKAsset alloc] initWithFileURL:url] autorelease];
+                    [record setObject:ckAsset forKey: [[@"CD_" stringByAppendingString:@"moveReceipt"] stringByAppendingString:@"_ckAsset"]];
+                    [encodedMoveReceiptData release];
+                    // <+2148>
+                } else {
+                    // <+1832>
+                    // x19
+                    NSString *name = [@"CD_" stringByAppendingString:@"moveReceipt"];
+                    
+                    id<CKRecordKeyValueSetting> target;
+                    if (self->_mirroringOptions.useDeviceToDeviceEncryption) {
+                        target = record.encryptedValues;
+                    } else {
+                        target = record;
+                    }
+                    [target setObject:encodedMoveReceiptData forKey:name];
                     [encodedMoveReceiptData release];
                     // <+2148>
                 }
-                
-                [self->_writtenAssetURLs addObject:url];
-                // original : getCloudKitCKAssetClass
-                CKAsset *ckAsset = [[[CKAsset alloc] initWithFileURL:url] autorelease];
-                [record setObject:ckAsset forKey: [[@"CD_" stringByAppendingString:@"moveReceipt"] stringByAppendingString:@"_ckAsset"]];
-                [encodedMoveReceiptData release];
-                // <+2148>
+                // fin
             }
             // fin
         }
@@ -1107,15 +1193,21 @@ static CKRecordZoneID *zoneID_2;
         if (!_succeed) {
             *stop = YES;
         }
+        
         // x19
-        OCCloudKitMetadataCache * _Nullable metadataCache = self->_metadataCache;
-        if (metadataCache == nil) {
-            // <+2268>
-            abort();
+        NSMutableDictionary<NSManagedObjectID *, NSMutableDictionary<NSString *, NSMutableSet<NSString *> *> *> *objectIDToRelationshipNameToExistingMTMKeys;
+        {
+            // x19
+            OCCloudKitMetadataCache * _Nullable metadataCache = self->_metadataCache;
+            if (metadataCache == nil) {
+                objectIDToRelationshipNameToExistingMTMKeys = nil;
+            } else {
+                objectIDToRelationshipNameToExistingMTMKeys = metadataCache->_objectIDToRelationshipNameToExistingMTMKeys;
+            }
         }
         
         // x19
-        NSMutableSet<NSString *> *oldMTMKeys = [[[metadataCache->_objectIDToRelationshipNameToExistingMTMKeys objectForKey:object.objectID] objectForKey:name] mutableCopy];
+        NSMutableSet<NSString *> *oldMTMKeys = [[[objectIDToRelationshipNameToExistingMTMKeys objectForKey:object.objectID] objectForKey:name] mutableCopy];
         [oldMTMKeys minusSet:mtmKeySet];
         // x27
         for (NSString *oldKey in oldMTMKeys) {
@@ -1177,8 +1269,8 @@ static CKRecordZoneID *zoneID_2;
     // x22
     OCCKRecordMetadata * _Nullable recordMetadata;
     if (metadataCache != nil) {
-        NSMutableDictionary<NSManagedObjectID *, OCCKRecordMetadata *> *recordZoneIDToZoneMetadata = metadataCache->_recordZoneIDToZoneMetadata;
-        recordMetadata = [recordZoneIDToZoneMetadata objectForKey:managedObject.objectID];
+        NSMutableDictionary<NSManagedObjectID *, OCCKRecordMetadata *> *objectIDToRecordMetadata = metadataCache->_objectIDToRecordMetadata;
+        recordMetadata = [objectIDToRecordMetadata objectForKey:managedObject.objectID];
     } else {
         recordMetadata = nil;
     }
@@ -1222,6 +1314,320 @@ static CKRecordZoneID *zoneID_2;
         }
         return nil;
     }
+}
+
+- (BOOL)shouldEncryptValueForAttribute:(NSAttributeDescription *)attribute {
+    /*
+     attribute = x19
+     */
+    if (self->_mirroringOptions.useDeviceToDeviceEncryption) return YES;
+    
+    NSNumber * _Nullable number = (NSNumber *)[attribute.userInfo objectForKey:[OCSPIResolver NSPersistentCloudKitContainerEncryptedAttributeKey]];
+    if (number != nil) return number.boolValue;
+    
+    return attribute.allowsCloudEncryption;
+}
+
+- (BOOL)applyUpdatedRecords:(NSArray<CKRecord *> *)updatedRecords deletedRecordIDs:(NSDictionary<NSString *,NSArray<CKRecordID *> *> *)deletedRecordIDs toStore:(NSSQLCore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext onlyUpdatingAttributes:(NSDictionary<NSString *, NSArray<NSAttributeDescription *> *> *)onlyUpdatingAttributes andRelationships:(NSDictionary<NSString *, NSArray *> *)relationships madeChanges:(BOOL *)madeChanges error:(NSError * _Nullable *)error {
+    // x29, #-0x60
+    __block BOOL _succeed = YES;
+    // sp, #0x70
+    __block NSError * _Nullable _error = nil;
+    
+    /*
+     __150-[PFCloudKitSerializer applyUpdatedRecords:deletedRecordIDs:toStore:inManagedObjectContext:onlyUpdatingAttributes:andRelationships:madeChanges:error:]_block_invoke
+     managedObjectContext = sp + 0x20 = x19 + 0x20
+     self = sp + 0x28 = x19 + 0x28
+     store = sp + 0x30 = x19 + 0x30
+     updatedRecords = sp + 0x38 = x19 + 0x38
+     deletedRecordIDs = sp + 0x40 = x19 + 0x40
+     onlyUpdatingAttributes = sp + 0x48 = x19 + 0x48
+     relationships = sp + 0x50 = x19 + 0x50
+     _error = sp + 0x58 = x19 + 0x58
+     _succeed = sp + 0x60 = x19 + 0x60
+     madeChanges = sp + 0x68 = x19 + 0x68
+     */
+    [managedObjectContext performBlockAndWait:^{
+        /*
+         self(block) = x19 / sp, #0x158
+         */
+        // sp + 0x78
+        NSManagedObjectModel *managedObjectModel = [managedObjectContext.persistentStoreCoordinator.managedObjectModel retain];
+        // sp + 0xa8
+        NSMutableDictionary<NSString *, NSEntityDescription *> *entityDescriptions = [[NSMutableDictionary alloc] init];
+        // sp + 0x98
+        NSObject<OCCloudKitSerializerDelegate> * _Nullable delegate = [self->_delegate retain];
+        
+        /*
+         __150-[PFCloudKitSerializer applyUpdatedRecords:deletedRecordIDs:toStore:inManagedObjectContext:onlyUpdatingAttributes:andRelationships:madeChanges:error:]_block_invoke_2
+         entityDescriptions = sp + 0x408
+         */
+        [[managedObjectModel entitiesForConfiguration:store.configurationName] enumerateObjectsUsingBlock:^(NSEntityDescription * _Nonnull entity, NSUInteger idx, BOOL * _Nonnull stop) {
+            [entityDescriptions setObject:entity forKey:entity.name];
+        }];
+        // x19 // sp, #0x108
+        OCCloudKitImportZoneContext *importZoneContext = [[OCCloudKitImportZoneContext alloc] initWithUpdatedRecords:updatedRecords deletedRecordTypeToRecordIDs:deletedRecordIDs options:self->_mirroringOptions fileBackedFuturesDirectory:store.fileBackedFuturesDirectory];
+        
+        BOOL result = [importZoneContext initializeCachesWithManagedObjectContext:managedObjectContext andObservedStore:store error:&_error];
+        if (!result) {
+            [_error retain];
+            _succeed = NO;
+            [managedObjectModel release];
+            [entityDescriptions release];
+            [importZoneContext release];
+            [delegate release];
+            return;
+        }
+        
+        // <+320>
+        NSArray<CKRecord *> *modifiedRecords;
+        if (importZoneContext == nil) {
+            modifiedRecords = nil;
+        } else {
+            modifiedRecords = importZoneContext->_modifiedRecords;
+        }
+        // sp + 0x118
+        for (CKRecord *modifiedRecord in modifiedRecords) @autoreleasepool {
+            // x19
+            NSString *key = @"entityName";
+            if (![modifiedRecord.recordType hasPrefix:@"CD_"]) {
+                key = [@"CD_" stringByAppendingString:@"entityName"];
+            }
+            // self = x20
+            id<CKRecordKeyValueSetting> target;
+            if (self->_mirroringOptions.useDeviceToDeviceEncryption) {
+                if ([key hasSuffix:@"_ckAsset"]) {
+                    // name은 entityName 또는 CD_entityName일 것이기에 안 불릴 것. 아마 무언가 inline된 것 같음
+                    target = modifiedRecord;
+                } else {
+                    target = modifiedRecord.encryptedValues;
+                }
+            } else {
+                target = modifiedRecord;
+            }
+            
+            // <+712>
+            // x19
+            NSString *name = [target objectForKey:key];
+            
+            if (name == nil) {
+                name = modifiedRecord.recordType;
+                if ([key hasPrefix:@"CD_"]) {
+                    name = [name substringFromIndex:@"CD_".length];
+                }
+            }
+            NSEntityDescription *entityDescription = [entityDescriptions objectForKey:name];
+            if (entityDescription == nil) {
+                // <+1040>
+                os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Skipping record because its entity '%@' is no longer in the managed object model's configured entities: %@\n%@", __func__, __LINE__, name, modifiedRecord, entityDescriptions.allKeys);
+                continue;
+            }
+            // sp + 0xf8
+            OCCKRecordMetadata * _Nullable recordMetadata = [OCCKRecordMetadata metadataForRecord:modifiedRecord inManagedObjectContext:managedObjectContext fromStore:store error:&_error];
+            if (recordMetadata == nil) {
+                // <+1228>
+                _succeed = NO;
+                [_error retain];
+                break;
+            }
+            // x20
+            OCCKRecordZoneMetadata * _Nullable recordZoneMetadata = recordMetadata.recordZone;
+            if (recordZoneMetadata == nil) {
+                // <+880>
+                OCCloudKitMetadataCache * _Nullable metadataCache = self->_metadataCache;
+                if (metadataCache == nil) {
+                    recordZoneMetadata = nil;
+                } else {
+                    recordZoneMetadata = [metadataCache->_recordZoneIDToZoneMetadata objectForKey:modifiedRecord.recordID.zoneID];
+                }
+                
+                if (metadataCache == nil) {
+                    recordZoneMetadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:modifiedRecord.recordID.zoneID inDatabaseWithScope:self->_mirroringOptions.databaseScope forStore:store inContext:managedObjectContext error:&_error];
+                    if (recordMetadata == nil) {
+                        // <+1264>
+                        _succeed = NO;
+                        [_error retain];
+                        break;
+                    }
+                    
+                    // <+1016>
+                    [self->_metadataCache cacheZoneMetadata:recordZoneMetadata];
+                    // <+1300>
+                }
+                // <+1300>
+                recordMetadata.recordZone = recordZoneMetadata;
+                // <+1336>
+            }
+            
+            // <+1336>
+            CKRecordID *modifiedRecordID = modifiedRecord.recordID;
+            
+            NSMutableDictionary<CKRecordType, NSMutableDictionary<CKRecordID *, NSManagedObjectID *> *> * _Nullable recordTypeToRecordIDToObjectID;
+            {
+                if (importZoneContext == nil) {
+                    recordTypeToRecordIDToObjectID = nil;
+                } else {
+                    recordTypeToRecordIDToObjectID = importZoneContext->_recordTypeToRecordIDToObjectID;
+                }
+            }
+            
+            // sp + 0x140
+            NSManagedObject * _Nullable managedObject = nil;
+            if (recordTypeToRecordIDToObjectID != nil) {
+                // modifiedRecordID = x20
+                // x20
+                NSManagedObjectID * _Nullable objectID = [[recordTypeToRecordIDToObjectID objectForKey:name] objectForKey:modifiedRecordID];
+                if (objectID != nil) {
+                    managedObject = [managedObjectContext objectWithID:objectID];
+                    // x19
+                    NSSQLModel *model = store.model;
+                    NSSQLEntity * _Nullable sqlEntity = [OCSPIResolver _sqlEntityForEntityDescription:model x1:objectID.entity];
+                    // <+1472>
+                    uint _entityID;
+                    {
+                        if (sqlEntity == nil) {
+                            _entityID = 0;
+                        } else {
+                            Ivar ivar = object_getInstanceVariable(sqlEntity, "_entityID", NULL);
+                            assert(ivar != NULL);
+                            _entityID = *(uint *)((uintptr_t)sqlEntity + ivar_getOffset(ivar));
+                        }
+                    }
+                    
+                    if ((recordMetadata.entityId.longValue != _entityID) || ([objectID _referenceData64] != recordMetadata.entityPK.integerValue)) {
+                        // <+1536>
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Record metadata doesn't match row: %@\n%@", objectID, recordMetadata);
+                        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Record metadata doesn't match row: %@\n%@", objectID, recordMetadata);
+                    }
+                    // <1704>
+                }
+            }
+            
+            if (managedObject == nil) {
+                // <+1656>
+                managedObject = [NSEntityDescription insertNewObjectForEntityForName:name inManagedObjectContext:managedObjectContext];
+                [importZoneContext registerObject:managedObject forInsertedRecord:modifiedRecord withMetadata:recordMetadata];
+            }
+            
+            // <+1704>
+            // x20
+            NSArray<NSAttributeDescription *> * _Nullable _onlyUpdatingAttributes;
+            if (onlyUpdatingAttributes != nil) {
+                _onlyUpdatingAttributes = [onlyUpdatingAttributes objectForKey:managedObject.entity.name];
+                if (_onlyUpdatingAttributes == nil) {
+                    _onlyUpdatingAttributes = @[];
+                }
+            } else {
+                _onlyUpdatingAttributes = nil;
+            }
+            // sp + 0x120
+            NSArray * _Nullable _relationships;
+            if (relationships != nil) {
+                _relationships = [relationships objectForKey:managedObject.entity.name];
+                if (_relationships == nil) {
+                    _relationships = @[];
+                }
+            } else {
+                _relationships = nil;
+            }
+            
+            // <+1828>
+            // self = sp + 0x130
+            if (managedObject.isInserted && self->_mirroringOptions.preserveLegacyRecordMetadataBehavior && ([managedObject.entity.attributesByName objectForKey:[OCSPIResolver NSCKRecordIDAttributeName]] != nil)) {
+                [managedObject setValue:modifiedRecord.recordID.recordName forKey:[OCSPIResolver NSCKRecordIDAttributeName]];
+            }
+            
+            // sp, #0x498
+            NSError * _Nullable __error = nil;
+            
+            // <+1952>
+            OCCloudKitArchivingUtilities * _Nullable archivingUtilities;
+            {
+                OCCloudKitMirroringDelegateOptions * _Nullable mirroringOptions = self->_mirroringOptions;
+                if (mirroringOptions == nil) {
+                    archivingUtilities = nil;
+                } else {
+                    archivingUtilities = mirroringOptions->_archivingUtilities;
+                }
+            }
+            // x19
+            NSData * _Nullable encodedRecord = [archivingUtilities encodeRecord:modifiedRecord error:&__error];
+            if (encodedRecord != nil) {
+                recordMetadata.encodedRecord = encodedRecord;
+                recordMetadata.ckRecordSystemFields = nil;
+            }
+            [encodedRecord release];
+            // sp, #0x104
+            BOOL hasCDPrefix = [modifiedRecord.recordType hasPrefix:@"CD_"];
+            
+            if (encodedRecord == nil) {
+                if (__error == nil) {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+                } else {
+                    _error = __error;
+                }
+                _succeed = NO;
+                [_error retain];
+                [managedObjectModel release];
+                [entityDescriptions release];
+                [importZoneContext release];
+                [delegate release];
+                return;
+            }
+            
+            // <+2044>
+            if (_onlyUpdatingAttributes == nil) {
+                _onlyUpdatingAttributes = managedObject.entity.attributesByName.allValues;
+            }
+            // x27
+            for (NSAttributeDescription *attributeDescription in _onlyUpdatingAttributes) {
+                if (!([OCCloudKitSerializer isPrivateAttribute:attributeDescription]) && !attributeDescription.isTransient && attributeDescription.isReadOnly && !(((NSNumber *)[attributeDescription.userInfo objectForKey:[OCSPIResolver NSCloudKitMirroringDelegateIgnoredPropertyKey]]).boolValue)) {
+                    // <+2244>
+                    // x24
+                    NSString *_name_1 = attributeDescription.name;
+                    // x20
+                    NSString *_name_2 = attributeDescription.name;
+                    if (hasCDPrefix) {
+                        _name_2 = [@"CD_" stringByAppendingString:_name_1];
+                    }
+                    
+                    // <+2316>
+                    id<CKRecordKeyValueSetting> target = modifiedRecord;
+                    if ([self shouldEncryptValueForAttribute:attributeDescription]) {
+                        if (![_name_2 hasPrefix:@"_ckAsset"]) {
+                            target = modifiedRecord.encryptedValues;
+                        }
+                    }
+                    
+                    // <+2400>
+                    // x20 / x22
+                    id value = [[target objectForKey:_name_2] retain];
+                    // <+2436>
+                    abort();
+#warning TODO
+                }
+                // <+4716>
+                abort();
+            }
+            // <+6228>
+            abort();
+        }
+        abort();
+    }];
+    
+    if (!_succeed) {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) {
+                *error = [[_error retain] autorelease];
+            }
+        }
+    }
+    [_error release];
+    return _succeed;
 }
 
 @end

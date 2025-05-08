@@ -143,4 +143,58 @@
     XCTAssertTrue(impl.count > 0);
 }
 
+- (void)test_generateCKAssetFileURLForObjectInStore {
+    {
+        NSManagedObjectModel *model = [[NSManagedObjectModel alloc] init];
+        NSPersistentContainer *container = [[NSPersistentContainer alloc] initWithName:@"Test" managedObjectModel:model];
+        XCTAssertNotNil(container);
+        [model release];
+        
+        NSURL *storeURL = [[[NSFileManager.defaultManager URLsForDirectory:NSApplicationSupportDirectory inDomains:NSAllDomainsMask].firstObject URLByAppendingPathComponent:@"default"] URLByAppendingPathExtension:@"sqlite"];
+        XCTAssertNotNil(storeURL);
+        NSPersistentStoreDescription *storeDesc = [[NSPersistentStoreDescription alloc] initWithURL:storeURL];
+        storeDesc.type = NSSQLiteStoreType;
+        storeDesc.shouldAddStoreAsynchronously = NO;
+        
+        [container.persistentStoreCoordinator addPersistentStoreWithDescription:storeDesc completionHandler:^(NSPersistentStoreDescription * _Nonnull storeDesc, NSError * _Nullable error) {
+            XCTAssertNil(error);
+        }];
+        [storeDesc release];
+        
+        NSPersistentStore *store = container.persistentStoreCoordinator.persistentStores.firstObject;
+        XCTAssertNotNil(store);
+        [container release];
+        
+        NSURL *impl = [_OCDirectMethodResolver OCCloudKitSerializer:[OCCloudKitSerializer class] generateCKAssetFileURLForObjectInStore:store];
+        NSURL *platform = [OCSPIResolver PFCloudKitSerializer_generateCKAssetFileURLForObjectInStore_:objc_lookUpClass("PFCloudKitSerializer") x1:store];;
+        XCTAssertEqualObjects([impl URLByDeletingLastPathComponent], [platform URLByDeletingLastPathComponent]);
+        XCTAssertEqualObjects([impl pathExtension], [platform pathExtension]);
+    }
+    
+    {
+        NSManagedObjectModel *model = [[NSManagedObjectModel alloc] init];
+        NSPersistentContainer *container = [[NSPersistentContainer alloc] initWithName:@"Test" managedObjectModel:model];
+        XCTAssertNotNil(container);
+        [model release];
+        
+        NSPersistentStoreDescription *storeDesc = [[NSPersistentStoreDescription alloc] init];
+        storeDesc.type = NSInMemoryStoreType;
+        storeDesc.shouldAddStoreAsynchronously = NO;
+        
+        [container.persistentStoreCoordinator addPersistentStoreWithDescription:storeDesc completionHandler:^(NSPersistentStoreDescription * _Nonnull storeDesc, NSError * _Nullable error) {
+            XCTAssertNil(error);
+        }];
+        [storeDesc release];
+        
+        NSPersistentStore *store = container.persistentStoreCoordinator.persistentStores.firstObject;
+        XCTAssertNotNil(store);
+        [container release];
+        
+        NSURL *impl = [_OCDirectMethodResolver OCCloudKitSerializer:[OCCloudKitSerializer class] generateCKAssetFileURLForObjectInStore:store];
+        NSURL *platform = [OCSPIResolver PFCloudKitSerializer_generateCKAssetFileURLForObjectInStore_:objc_lookUpClass("PFCloudKitSerializer") x1:store];;
+        XCTAssertEqualObjects([impl URLByDeletingLastPathComponent], [platform URLByDeletingLastPathComponent]);
+        XCTAssertEqualObjects([impl pathExtension], [platform pathExtension]);
+    }
+}
+
 @end
