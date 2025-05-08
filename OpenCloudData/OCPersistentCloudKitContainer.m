@@ -337,9 +337,9 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
     dispatch_group_t group = dispatch_group_create();
     
     for (__kindof NSPersistentStore *persistentStore in self.persistentStoreCoordinator.persistentStores) {
-//        if (!persistentStore.oc_isCloudKitEnabled) continue;
-        BOOL isCloudKitEnabled = ((BOOL (*)(id, SEL))objc_msgSend)(persistentStore, sel_registerName("isCloudKitEnabled"));
-        if (!isCloudKitEnabled) continue;
+        if (!persistentStore.oc_isCloudKitEnabled) continue;
+//        BOOL isCloudKitEnabled = ((BOOL (*)(id, SEL))objc_msgSend)(persistentStore, sel_registerName("isCloudKitEnabled"));
+//        if (!isCloudKitEnabled) continue;
         
         @autoreleasepool {
 #warning _NSCoreDataLog

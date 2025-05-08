@@ -64,6 +64,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSData *)_NSDataFileBackedFuture__storeMetadata:(_NSDataFileBackedFuture *)x0 NS_RETURNS_RETAINED;
 
++ (NSString *)PFCloudKitSerializer_mtmKeyForObjectWithRecordName_relatedToObjectWithRecordName_byRelationship_withInverse_:(Class)x0 x1:(NSString *)x1 x2:(NSString *)x2 x3:(NSRelationshipDescription *)x3 x4:(NSRelationshipDescription *)x4;
++ (size_t)PFCloudKitSerializer_estimateByteSizeOfRecordID_:(Class)x0 x1:(CKRecordID *)x1;
++ (CKRecordType)PFCloudKitSerializer_recordTypeForEntity_:(Class)x0 x1:(NSEntityDescription *)x1;
++ (BOOL)PFCloudKitSerializer_isMirroredRelationshipRecordType_:(Class)x0 x1:(CKRecordType)x1;
++ (NSSet<NSManagedObjectID *> *)PFCloudKitSerializer_createSetOfObjectIDsRelatedToObject_:(Class)x0 x1:(NSManagedObject *)x1;
+
 + (NSString *)NSCloudKitMirroringDelegateExportContextName;
 + (NSString *)NSCloudKitMirroringDelegateImportContextName;
 + (NSString *)PFCloudKitMetadataNeedsZoneFetchAfterClientMigrationKey;
@@ -88,6 +94,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)NSCloudKitMirroringDelegateIgnoredPropertyKey;
 + (NSString *)NSCloudKitMirroringDelegateSetupAuthor;
 + (NSString *)NSCloudKitMirroringDelegateEventAuthor;
++ (NSString *)PFCloudKitMirroringDelegateToManyPrefix;
 
 @end
 

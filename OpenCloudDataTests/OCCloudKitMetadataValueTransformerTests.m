@@ -7,8 +7,8 @@
 
 #import <XCTest/XCTest.h>
 #import <OpenCloudData/OCCloudKitMetadataValueTransformer.h>
+#import <OpenCloudData/PFCloudKitMetadataValueTransformer.h>
 #import <objc/runtime.h>
-#import <objc/message.h>
 
 @interface OCCloudKitMetadataValueTransformerTests : XCTestCase
 @end
@@ -19,27 +19,27 @@
     {
         NSArray<Class> *defined = [OCCloudKitMetadataValueTransformer allowedTopLevelClasses];
         XCTAssertNotNil(defined);
-        NSArray<Class> *platform = ((id (*)(Class, SEL))objc_msgSend)(objc_lookUpClass("PFCloudKitMetadataValueTransformer"), @selector(allowedTopLevelClasses));
+        NSArray<Class> *platform = [objc_lookUpClass("PFCloudKitMetadataValueTransformer") allowedTopLevelClasses];
         XCTAssertNotNil(platform);
         XCTAssertTrue([defined isEqualToArray:platform]);
     }
     
     {
         BOOL defined = [OCCloudKitMetadataValueTransformer allowsReverseTransformation];
-        BOOL platform = ((BOOL (*)(Class, SEL))objc_msgSend)(objc_lookUpClass("PFCloudKitMetadataValueTransformer"), @selector(allowsReverseTransformation));
+        BOOL platform = [objc_lookUpClass("PFCloudKitMetadataValueTransformer") allowsReverseTransformation];
         XCTAssertEqual(defined, platform);
     }
     
     {
         Class defined = [OCCloudKitMetadataValueTransformer transformedValueClass];
-        Class platform = ((Class (*)(Class, SEL))objc_msgSend)(objc_lookUpClass("PFCloudKitMetadataValueTransformer"), @selector(transformedValueClass));
+        Class platform = [objc_lookUpClass("PFCloudKitMetadataValueTransformer") transformedValueClass];
         XCTAssertEqual(defined, platform);
     }
     
     {
         NSArray<NSString *> *defined = [OCCloudKitMetadataValueTransformer valueTransformerNames];
         XCTAssertNotNil(defined);
-        NSArray<NSString *> *platform = ((id (*)(Class, SEL))objc_msgSend)(objc_lookUpClass("PFCloudKitMetadataValueTransformer"), @selector(valueTransformerNames));
+        NSArray<NSString *> *platform = [objc_lookUpClass("PFCloudKitMetadataValueTransformer") valueTransformerNames];
         XCTAssertNotNil(platform);
         XCTAssertTrue([defined isEqualToArray:platform]);
     }

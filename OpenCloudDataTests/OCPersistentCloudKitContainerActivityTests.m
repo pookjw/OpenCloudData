@@ -7,8 +7,8 @@
 
 #import <XCTest/XCTest.h>
 #import <OpenCloudData/OCPersistentCloudKitContainerActivity.h>
+#import <OpenCloudData/NSPersistentCloudKitContainerActivity.h>
 #import <objc/message.h>
-#import <objc/runtime.h>
 
 @interface OCPersistentCloudKitContainerActivityTests : XCTestCase
 @end
@@ -102,10 +102,10 @@
         NSString *storeIdentifier = [NSUUID UUID].UUIDString;
         
         OCPersistentCloudKitContainerActivity *activity = [[OCPersistentCloudKitContainerActivity alloc] _initWithIdentifier:identifier forStore:storeIdentifier activityType:activityType];
-        id platform = ((id (*)(id, SEL, id, id, NSUInteger))objc_msgSend)([objc_lookUpClass("NSPersistentCloudKitContainerActivity") alloc], sel_registerName("_initWithIdentifier:forStore:activityType:"), identifier, storeIdentifier, activityType);
+        NSPersistentCloudKitContainerActivity *platform = [[objc_lookUpClass("NSPersistentCloudKitContainerActivity") alloc] _initWithIdentifier:identifier forStore:storeIdentifier activityType:activityType];
         
         NSMutableDictionary *dictionary_1 = [activity createDictionaryRepresentation];
-        NSMutableDictionary *dictionary_2 = ((id (*)(id, SEL))objc_msgSend)(platform, sel_registerName("createDictionaryRepresentation"));
+        NSMutableDictionary *dictionary_2 = [platform createDictionaryRepresentation];
         
         XCTAssertNotNil(dictionary_1[@"startDate"]);
         [dictionary_1 removeObjectForKey:@"startDate"];
@@ -114,10 +114,10 @@
         XCTAssertTrue([dictionary_1 isEqualToDictionary:dictionary_2]);
         
         [activity finishWithError:error];
-        ((void (*)(id, SEL, id))objc_msgSend)(platform, sel_registerName("finishWithError:"), error);
+        [platform finishWithError:error];
         
         NSMutableDictionary *dictionary_3 = [activity createDictionaryRepresentation];
-        NSMutableDictionary *dictionary_4 = ((id (*)(id, SEL))objc_msgSend)(platform, sel_registerName("createDictionaryRepresentation"));
+        NSMutableDictionary *dictionary_4 = [platform createDictionaryRepresentation];
         
         XCTAssertNotNil(dictionary_3[@"startDate"]);
         [dictionary_3 removeObjectForKey:@"startDate"];

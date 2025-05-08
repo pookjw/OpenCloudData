@@ -108,16 +108,3 @@ OBJC_EXPORT id objc_msgSendSuper2(void);
 }
 
 @end
-
-void _OCCloudKitHistoryAnalyzerOptions_setIncludePrivateTransactions_(OCCloudKitHistoryAnalyzerOptions *self, BOOL value) {
-    self.includePrivateTransactions = value;
-}
-BOOL _OCCloudKitHistoryAnalyzerOptions_includePrivateTransactions_(OCCloudKitHistoryAnalyzerOptions *self) {
-    return self.includePrivateTransactions;
-}
-void _OCCloudKitHistoryAnalyzerOptions_setRequest_(OCCloudKitHistoryAnalyzerOptions *self, OCCloudKitMirroringRequest *value) {
-    self.request = value;
-}
-OCCloudKitMirroringRequest * _OCCloudKitHistoryAnalyzerOptions_request(OCCloudKitHistoryAnalyzerOptions *self) {
-    return self.request;
-}

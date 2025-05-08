@@ -19,9 +19,4 @@ NS_ASSUME_NONNULL_BEGIN
 @property (retain, nonatomic, nullable, direct) OCCloudKitMirroringRequest *request;
 @end
 
-extern void _OCCloudKitHistoryAnalyzerOptions_setIncludePrivateTransactions_(OCCloudKitHistoryAnalyzerOptions *self, BOOL value);
-extern BOOL _OCCloudKitHistoryAnalyzerOptions_includePrivateTransactions_(OCCloudKitHistoryAnalyzerOptions *self);
-extern void _OCCloudKitHistoryAnalyzerOptions_setRequest_(OCCloudKitHistoryAnalyzerOptions *self, OCCloudKitMirroringRequest * _Nullable value);
-extern OCCloudKitMirroringRequest * _Nullable _OCCloudKitHistoryAnalyzerOptions_request(OCCloudKitHistoryAnalyzerOptions *self);
-
 NS_ASSUME_NONNULL_END

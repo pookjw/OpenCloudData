@@ -8,8 +8,8 @@
 #import <XCTest/XCTest.h>
 #import <OpenCloudData/OCCloudKitHistoryAnalyzerOptions.h>
 #import <OpenCloudData/OCCloudKitMirroringRequest.h>
+#import <OpenCloudData/_OCDirectMethodResolver.h>
 #import <objc/message.h>
-#import <objc/runtime.h>
 
 @interface OCCloudKitHistoryAnalyzerOptionsTests : XCTestCase
 @end
@@ -27,31 +27,31 @@
 - (void)test_properties {
     OCCloudKitHistoryAnalyzerOptions *options = [OCCloudKitHistoryAnalyzerOptions new];
     
-    _OCCloudKitHistoryAnalyzerOptions_setIncludePrivateTransactions_(options, YES);
-    XCTAssertTrue(_OCCloudKitHistoryAnalyzerOptions_includePrivateTransactions_(options));
-    _OCCloudKitHistoryAnalyzerOptions_setIncludePrivateTransactions_(options, NO);
-    XCTAssertFalse(_OCCloudKitHistoryAnalyzerOptions_includePrivateTransactions_(options));
+    [_OCDirectMethodResolver OCCloudKitHistoryAnalyzerOptions:options setIncludePrivateTransactions:YES];
+    XCTAssertTrue([_OCDirectMethodResolver OCCloudKitHistoryAnalyzerOptions_includePrivateTransactions:options]);
+    [_OCDirectMethodResolver OCCloudKitHistoryAnalyzerOptions:options setIncludePrivateTransactions:NO];
+    XCTAssertFalse([_OCDirectMethodResolver OCCloudKitHistoryAnalyzerOptions_includePrivateTransactions:options]);
     
     OCCloudKitMirroringRequest *request = [[OCCloudKitMirroringRequest alloc] initWithOptions:nil completionBlock:^(OCCloudKitMirroringResult * _Nonnull result) {}];
-    _OCCloudKitHistoryAnalyzerOptions_setRequest_(options, request);
+    [_OCDirectMethodResolver OCCloudKitHistoryAnalyzerOptions:options setRequest:request];
     [request release];
-    XCTAssertNotNil(_OCCloudKitHistoryAnalyzerOptions_request(options));
-    XCTAssertNotNil(_OCCloudKitHistoryAnalyzerOptions_request(options).description); // check that request is retained
-    _OCCloudKitHistoryAnalyzerOptions_setRequest_(options, nil);
-    XCTAssertNil(_OCCloudKitHistoryAnalyzerOptions_request(options));
+    XCTAssertNotNil([_OCDirectMethodResolver OCCloudKitHistoryAnalyzerOptions_request:options]);
+    XCTAssertNotNil([_OCDirectMethodResolver OCCloudKitHistoryAnalyzerOptions_request:options].description); // check that request is retained
+    [_OCDirectMethodResolver OCCloudKitHistoryAnalyzerOptions:options setRequest:nil];
+    XCTAssertNil([_OCDirectMethodResolver OCCloudKitHistoryAnalyzerOptions_request:options]);
     
     [options release];
 }
 
 - (void)test_copyWithZone {
     OCCloudKitHistoryAnalyzerOptions *options = [OCCloudKitHistoryAnalyzerOptions new];
-    _OCCloudKitHistoryAnalyzerOptions_setIncludePrivateTransactions_(options, YES);
+    [_OCDirectMethodResolver OCCloudKitHistoryAnalyzerOptions:options setIncludePrivateTransactions:YES];
     OCCloudKitMirroringRequest *request = [[OCCloudKitMirroringRequest alloc] initWithOptions:nil completionBlock:^(OCCloudKitMirroringResult * _Nonnull result) {}];
-    _OCCloudKitHistoryAnalyzerOptions_setRequest_(options, request);
+    [_OCDirectMethodResolver OCCloudKitHistoryAnalyzerOptions:options setRequest:request];
     
     OCCloudKitHistoryAnalyzerOptions *copy = [options copy];
-    XCTAssertEqual(_OCCloudKitHistoryAnalyzerOptions_includePrivateTransactions_(options), _OCCloudKitHistoryAnalyzerOptions_includePrivateTransactions_(copy));
-    XCTAssertEqualObjects(_OCCloudKitHistoryAnalyzerOptions_request(options), _OCCloudKitHistoryAnalyzerOptions_request(copy));
+    XCTAssertEqual([_OCDirectMethodResolver OCCloudKitHistoryAnalyzerOptions_includePrivateTransactions:options], [_OCDirectMethodResolver OCCloudKitHistoryAnalyzerOptions_includePrivateTransactions:copy]);
+    XCTAssertEqualObjects([_OCDirectMethodResolver OCCloudKitHistoryAnalyzerOptions_request:options], [_OCDirectMethodResolver OCCloudKitHistoryAnalyzerOptions_request:copy]);
     
     [options release];
     [request release];

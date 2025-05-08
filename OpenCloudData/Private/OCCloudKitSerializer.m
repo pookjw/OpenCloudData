@@ -8,7 +8,6 @@
 #import <OpenCloudData/OCCloudKitSerializer.h>
 #import <OpenCloudData/OCSPIResolver.h>
 #import <OpenCloudData/Log.h>
-#import <OpenCloudData/OCCKRecordMetadata.h>
 #import <OpenCloudData/OCCKRecordZoneMetadata.h>
 #import <OpenCloudData/CKRecord+Private.h>
 #import <OpenCloudData/NSPropertyDescription+Private.h>
@@ -88,15 +87,261 @@ static CKRecordZoneID *zoneID_2;
 }
 
 + (size_t)estimateByteSizeOfRecordID:(CKRecordID *)recordID {
-    abort();
+    /*
+     recordID = x19
+     */
+    return recordID.zoneID.zoneName.length + recordID.recordName.length + 0x18;
 }
 
 + (CKRecordType)recordTypeForEntity:(NSEntityDescription *)entity {
-    abort();
+    /*
+     entity = x20
+     */
+    BOOL _isImmutable;
+    {
+        if (entity == nil) {
+            _isImmutable = NO;
+        } else {
+            Ivar ivar = object_getInstanceVariable(entity, "_isImmutable", NULL);
+            assert(ivar != NULL);
+            _isImmutable = *(BOOL *)((uintptr_t)entity + ivar_getOffset(ivar));
+        }
+    }
+    
+    // x21
+    NSEntityDescription *targetEntity;
+    if (_isImmutable) {
+        assert(object_getInstanceVariable(entity, "_rootentity", (void **)&targetEntity) != NULL);
+    } else {
+        targetEntity = entity;
+        while (YES) {
+            NSEntityDescription *superentity = targetEntity.superentity;
+            if (superentity != nil) {
+                targetEntity = superentity;
+            } else {
+                break;
+            }
+        }
+    }
+    
+    return [@"CD_" stringByAppendingString:targetEntity.name];
 }
 
 + (BOOL)isMirroredRelationshipRecordType:(CKRecordType)recordType {
+    /*
+     recordType = x19
+     */
+    if ([recordType hasPrefix:[OCSPIResolver PFCloudKitMirroringDelegateToManyPrefix]]){
+        return YES;
+    }
+    if ([recordType isEqualToString:@"CDMR"]) {
+        return YES;
+    }
+    return NO;
+}
+
++ (NSSet<NSManagedObjectID *> *)createSetOfObjectIDsRelatedToObject:(NSManagedObject *)object {
+    /*
+     object = x21
+     */
+    // x19
+    NSMutableSet<NSManagedObjectID *> *set_1 = [[NSMutableSet alloc] init];
+    // x20
+    NSMutableArray<NSManagedObject *> *array = [[NSMutableArray alloc] initWithObjects:object, nil];
+    // x21
+    NSMutableSet<NSManagedObjectID *> *set_2 = [[NSMutableSet alloc] initWithObjects:object.objectID, nil];
+    
+    do {
+        // x22 / sp + 0x30
+        NSManagedObject *_object = [[array objectAtIndex:0] retain];
+        [array removeObjectAtIndex:0];
+        [set_1 addObject:_object.objectID];
+        // sp + 0x28
+        NSEntityDescription *_entity = _object.entity;
+        
+        @autoreleasepool {
+            // x23
+            for (NSString *name in _entity.relationshipsByName) @autoreleasepool {
+                NSRelationshipDescription *relationship = [_entity.relationshipsByName objectForKey:name];
+                // x25
+                BOOL isToMany = relationship.isToMany;
+                // x28
+                id value = [_object valueForKey:name];
+                
+                if (isToMany) {
+                    // <+364>
+                    // x25
+                    for (NSManagedObject *refObject in (NSSet *)value) {
+                        if (!([set_1 containsObject:refObject.objectID]) && !([set_2 containsObject:refObject.objectID])) {
+                            [array addObject:refObject];
+                            [set_2 addObject:refObject.objectID];
+                        }
+                    }
+                    // <+564>
+                } else {
+                    if (value != nil) {
+                        // <+572>
+                        NSManagedObject *refObject = (NSManagedObject *)value;
+                        if (!([set_1 containsObject:refObject.objectID]) && !([set_2 containsObject:refObject.objectID])) {
+                            [array addObject:refObject];
+                            [set_2 addObject:refObject.objectID];
+                        }
+                    }
+                }
+            }
+        }
+        
+        // x23
+        NSManagedObjectContext *managedObjectContext = _object.managedObjectContext;
+        [managedObjectContext refreshObject:_object mergeChanges:managedObjectContext.hasChanges];
+        [_object release];
+    } while (array.count != 0);
+    
+    [array release];
+    [set_2 release];
+    return set_1;
+}
+
++ (NSURL *)generateCKAssetFileURLForObjectInStore:(NSPersistentStore *)store {
     abort();
+}
+
++ (BOOL)isVariableLengthAttributeType:(NSAttributeType)attributeType {
+    abort();
+}
+
++ (size_t)sizeOfVariableLengthAttribute:(NSAttributeDescription *)attribute withValue:(id)value {
+    abort();
+}
+
+- (BOOL)shouldEncryptValueForAttribute:(NSAttributeDescription *)attribute {
+    abort();
+}
+
++ (NSString *)mtmKeyForObjectWithRecordName:(NSString *)recordName relatedToObjectWithRecordName:(NSString *)relatedToObjectWithRecordName byRelationship:(NSRelationshipDescription *)relationship withInverse:(NSRelationshipDescription *)inverseRelationship {
+    /*
+     recordName = x21
+     relatedToObjectWithRecordName = x20
+     relationship = x19
+     inverseRelationship = x22
+     */
+    /*
+     __111+[PFCloudKitSerializer mtmKeyForObjectWithRecordName:relatedToObjectWithRecordName:byRelationship:withInverse:]_block_invoke
+     */
+    // x22
+    NSArray<NSRelationshipDescription *> *relationships = [@[relationship, inverseRelationship] sortedArrayUsingComparator:^NSComparisonResult(NSRelationshipDescription * _Nonnull obj1, NSRelationshipDescription* _Nonnull obj2) {
+        /*
+         obj1 = x20
+         obj2 = x19
+         */
+        NSEntityDescription *entity_1 = obj1.entity;
+        if (entity_1 == nil) {
+            return NSOrderedSame;
+        }
+        
+        BOOL _isImmutable_1;
+        {
+            Ivar ivar = object_getInstanceVariable(entity_1, "_isImmutable", NULL);
+            assert(ivar != NULL);
+            _isImmutable_1 = *(BOOL *)((uintptr_t)entity_1 + ivar_getOffset(ivar));
+        }
+        
+        // x21
+        NSEntityDescription *targetEntity_1;
+        if (_isImmutable_1) {
+            assert(object_getInstanceVariable(entity_1, "_rootentity", (void **)&targetEntity_1) != NULL);
+        } else {
+            targetEntity_1 = entity_1;
+            while (YES) {
+                NSEntityDescription *superentity = targetEntity_1.superentity;
+                if (superentity != nil) {
+                    targetEntity_1 = superentity;
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        
+       NSEntityDescription *entity_2 = obj2.entity;
+       if (entity_2 == nil) {
+           return NSOrderedSame;
+       }
+       
+       BOOL _isImmutable_2;
+       {
+           Ivar ivar = object_getInstanceVariable(entity_2, "_isImmutable", NULL);
+           assert(ivar != NULL);
+           _isImmutable_2 = *(BOOL *)((uintptr_t)entity_2 + ivar_getOffset(ivar));
+       }
+       
+       // x22
+       NSEntityDescription *targetEntity_2;
+       if (_isImmutable_2) {
+           assert(object_getInstanceVariable(entity_2, "_rootentity", (void **)&targetEntity_2) != NULL);
+       } else {
+           targetEntity_2 = entity_2;
+           while (YES) {
+               NSEntityDescription *superentity = targetEntity_2.superentity;
+               if (superentity != nil) {
+                   targetEntity_2 = superentity;
+               } else {
+                   break;
+               }
+           }
+       }
+        
+        return [targetEntity_1.name compare:targetEntity_2.name options:NSCaseInsensitiveSearch];
+    }];
+    
+    NSEntityDescription *firstRelationshipEntity = relationships[0].entity;
+    // x24
+    NSString * _Nullable firstName;
+    if (firstRelationshipEntity != nil) {
+        BOOL _isImmutable;
+        {
+            Ivar ivar = object_getInstanceVariable(firstRelationshipEntity, "_isImmutable", NULL);
+            assert(ivar != NULL);
+            _isImmutable = *(BOOL *)((uintptr_t)firstRelationshipEntity + ivar_getOffset(ivar));
+        }
+        
+        // x24
+        NSEntityDescription *targetEntityDescription;
+        if (_isImmutable) {
+            assert(object_getInstanceVariable(firstRelationshipEntity, "_rootentity", (void **)&targetEntityDescription) != NULL);
+        } else {
+            targetEntityDescription = firstRelationshipEntity;
+            while (YES) {
+                NSEntityDescription *superentity = targetEntityDescription.superentity;
+                if (superentity != nil) {
+                    targetEntityDescription = superentity;
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        firstName = targetEntityDescription.name;
+    } else {
+        firstName = nil;
+    }
+    
+    // x24
+    NSString *string_1 = [NSString stringWithFormat:@"%@%@_%@", [OCSPIResolver PFCloudKitMirroringDelegateToManyPrefix], firstName, relationships[0].name];
+    // x23
+    NSMutableArray *array = [[NSMutableArray alloc] init];
+    // x19
+    for (NSRelationshipDescription *_relationship in relationships) {
+        if (relationship == _relationship) {
+            [array addObject:recordName];
+        } else {
+            [array addObject:relatedToObjectWithRecordName];
+        }
+    }
+    NSString *string_2 = [array componentsJoinedByString:@":"];
+    NSString *string_3 = [NSString stringWithFormat:@"%@:%@", string_1, string_2];
+    [array release];
+    return string_3;
 }
 
 - (instancetype)initWithMirroringOptions:(OCCloudKitMirroringDelegateOptions *)mirroringOptions metadataCache:(OCCloudKitMetadataCache *)metadataCache recordNamePrefix:(NSString *)recordNamePrefix {
@@ -759,7 +1004,7 @@ static CKRecordZoneID *zoneID_2;
         }
         
         // sp + 0x38
-        id<NSFastEnumeration> refObjects = [object valueForKey:name];
+        NSSet<NSManagedObject *> *refObjects = [object valueForKey:name];
         // sp + 0x40
         NSMutableSet *mtmKeySet = [[NSMutableSet alloc] init];
         
@@ -918,32 +1163,65 @@ static CKRecordZoneID *zoneID_2;
     return array_1;
 }
 
-- (OCCKRecordMetadata * _Nullable)getRecordMetadataForObject:(NSManagedObject *)managedObject inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) {
-    abort();
-}
-
-+ (NSSet<NSManagedObjectID *> *)createSetOfObjectIDsRelatedToObject:(NSManagedObject *)object {
-    abort();
-}
-
-+ (NSURL *)generateCKAssetFileURLForObjectInStore:(NSPersistentStore *)store {
-    abort();
-}
-
-+ (BOOL)isVariableLengthAttributeType:(NSAttributeType)attributeType {
-    abort();
-}
-
-+ (size_t)sizeOfVariableLengthAttribute:(NSAttributeDescription *)attribute withValue:(id)value {
-    abort();
-}
-
-- (BOOL)shouldEncryptValueForAttribute:(NSAttributeDescription *)attribute {
-    abort();
-}
-
-+ (NSString *)mtmKeyForObjectWithRecordName:(NSString *)recordName relatedToObjectWithRecordName:(NSString *)relatedToObjectWithRecordName byRelationship:(NSRelationshipDescription *)relationship withInverse:(NSRelationshipDescription *)inverseRelationship {
-    abort();
+- (OCCKRecordMetadata * _Nullable)getRecordMetadataForObject:(NSManagedObject *)managedObject inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error {
+    /*
+     self = x21
+     managedObject = x20
+     managedObjectContext = x23
+     error = x19
+     */
+    // sp + 0x8
+    NSError * _Nullable _error = nil;
+    OCCloudKitMetadataCache * _Nullable metadataCache = self->_metadataCache;
+    
+    // x22
+    OCCKRecordMetadata * _Nullable recordMetadata;
+    if (metadataCache != nil) {
+        NSMutableDictionary<NSManagedObjectID *, OCCKRecordMetadata *> *recordZoneIDToZoneMetadata = metadataCache->_recordZoneIDToZoneMetadata;
+        recordMetadata = [recordZoneIDToZoneMetadata objectForKey:managedObject.objectID];
+    } else {
+        recordMetadata = nil;
+    }
+    
+    if (recordMetadata == nil) {
+        recordMetadata = [OCCKRecordMetadata metadataForObject:managedObject inManagedObjectContext:managedObjectContext error:&_error];
+    }
+    
+    if (recordMetadata != nil) {
+        [metadataCache registerRecordMetadata:recordMetadata forObject:managedObject];
+        return recordMetadata;
+    }
+    
+    // <+204>
+    if (_error != nil) {
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to get a metadata zone: %@", __func__, __LINE__, _error);
+        if (error != NULL) {
+            *error = _error;
+        }
+        return nil;
+    }
+    
+    // x23
+    CKRecordZoneID *zoneID = [OCCloudKitSerializer defaultRecordZoneIDForDatabaseScope:self->_mirroringOptions.databaseScope];
+    recordMetadata = [OCCKRecordMetadata insertMetadataForObject:managedObject setRecordName:self->_mirroringOptions.preserveLegacyRecordMetadataBehavior inZoneWithID:zoneID recordNamePrefix:self->_recordNamePrefix error:&_error];
+    recordMetadata.needsUpload = YES;
+    [zoneID release];
+    
+    if (recordMetadata != nil) {
+        [metadataCache registerRecordMetadata:recordMetadata forObject:managedObject];
+        return recordMetadata;
+    } else {
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to get a metadata zone: %@", __func__, __LINE__, _error);
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) {
+                *error = _error;
+            }
+        }
+        return nil;
+    }
 }
 
 @end

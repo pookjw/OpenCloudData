@@ -7,8 +7,8 @@
 
 #import <XCTest/XCTest.h>
 #import <OpenCloudData/OCCKRecordZoneQueryCursorTransformer.h>
+#import <OpenCloudData/NSCKRecordZoneQueryCursorTransformer.h>
 #import <objc/runtime.h>
-#import <objc/message.h>
 
 @interface OCCKRecordZoneQueryCursorTransformerTests : XCTestCase
 @end
@@ -19,27 +19,27 @@
     {
         NSArray<Class> *defined = [OCCKRecordZoneQueryCursorTransformer allowedTopLevelClasses];
         XCTAssertNotNil(defined);
-        NSArray<Class> *platform = ((id (*)(Class, SEL))objc_msgSend)(objc_lookUpClass("NSCKRecordZoneQueryCursorTransformer"), @selector(allowedTopLevelClasses));
+        NSArray<Class> *platform = [objc_lookUpClass("NSCKRecordZoneQueryCursorTransformer") allowedTopLevelClasses];
         XCTAssertNotNil(platform);
         XCTAssertTrue([defined isEqualToArray:platform]);
     }
     
     {
         BOOL defined = [OCCKRecordZoneQueryCursorTransformer allowsReverseTransformation];
-        BOOL platform = ((BOOL (*)(Class, SEL))objc_msgSend)(objc_lookUpClass("NSCKRecordZoneQueryCursorTransformer"), @selector(allowsReverseTransformation));
+        BOOL platform = [objc_lookUpClass("NSCKRecordZoneQueryCursorTransformer") allowsReverseTransformation];
         XCTAssertEqual(defined, platform);
     }
     
     {
         Class defined = [OCCKRecordZoneQueryCursorTransformer transformedValueClass];
-        Class platform = ((Class (*)(Class, SEL))objc_msgSend)(objc_lookUpClass("NSCKRecordZoneQueryCursorTransformer"), @selector(transformedValueClass));
+        Class platform = [objc_lookUpClass("NSCKRecordZoneQueryCursorTransformer") transformedValueClass];
         XCTAssertEqual(defined, platform);
     }
     
     {
         NSArray<NSString *> *defined = [OCCKRecordZoneQueryCursorTransformer valueTransformerNames];
         XCTAssertNotNil(defined);
-        NSArray<NSString *> *platform = ((id (*)(Class, SEL))objc_msgSend)(objc_lookUpClass("NSCKRecordZoneQueryCursorTransformer"), @selector(valueTransformerNames));
+        NSArray<NSString *> *platform = [objc_lookUpClass("NSCKRecordZoneQueryCursorTransformer") valueTransformerNames];
         XCTAssertNotNil(platform);
         XCTAssertTrue([defined isEqualToArray:platform]);
     }

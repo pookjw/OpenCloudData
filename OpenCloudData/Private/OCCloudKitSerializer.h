@@ -10,6 +10,7 @@
 #import <OpenCloudData/OCCloudKitMirroringDelegateOptions.h>
 #import <OpenCloudData/OCCloudKitMetadataCache.h>
 #import <OpenCloudData/PFMirroredManyToManyRelationshipV2.h>
+#import <OpenCloudData/OCCKRecordMetadata.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -35,15 +36,16 @@ NS_ASSUME_NONNULL_BEGIN
 + (size_t)estimateByteSizeOfRecordID:(CKRecordID *)recordID __attribute__((objc_direct));
 + (CKRecordType)recordTypeForEntity:(NSEntityDescription *)entity __attribute__((objc_direct));
 + (BOOL)isMirroredRelationshipRecordType:(CKRecordType)recordType __attribute__((objc_direct));
-
-- (instancetype)initWithMirroringOptions:(OCCloudKitMirroringDelegateOptions * _Nullable)mirroringOptions metadataCache:(OCCloudKitMetadataCache *)metadataCache recordNamePrefix:(NSString * _Nullable)recordNamePrefix;
-
-- (NSArray<CKRecord *> * /* 정확하지 않음*/)newCKRecordsFromObject:(NSManagedObject *)object fullyMaterializeRecords:(BOOL)fullyMaterializeRecords includeRelationships:(BOOL)includeRelationships error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 + (NSSet<NSManagedObjectID *> *)createSetOfObjectIDsRelatedToObject:(NSManagedObject *)object __attribute__((objc_direct)) NS_RETURNS_RETAINED;
 + (NSURL *)generateCKAssetFileURLForObjectInStore:(NSPersistentStore *)store __attribute__((objc_direct));
 + (BOOL)isVariableLengthAttributeType:(NSAttributeType)attributeType __attribute__((objc_direct));
 + (size_t)sizeOfVariableLengthAttribute:(NSAttributeDescription *)attribute withValue:(id)value;
 + (NSString *)mtmKeyForObjectWithRecordName:(NSString *)recordName relatedToObjectWithRecordName:(NSString *)relatedToObjectWithRecordName byRelationship:(NSRelationshipDescription *)relationship withInverse:(NSRelationshipDescription *)inverseRelationship __attribute__((objc_direct));
+
+- (instancetype)initWithMirroringOptions:(OCCloudKitMirroringDelegateOptions * _Nullable)mirroringOptions metadataCache:(OCCloudKitMetadataCache *)metadataCache recordNamePrefix:(NSString * _Nullable)recordNamePrefix;
+
+- (NSArray<CKRecord *> * _Nullable)newCKRecordsFromObject:(NSManagedObject *)object fullyMaterializeRecords:(BOOL)fullyMaterializeRecords includeRelationships:(BOOL)includeRelationships error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
+- (OCCKRecordMetadata * _Nullable)getRecordMetadataForObject:(NSManagedObject *)managedObject inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

@@ -7,8 +7,8 @@
 
 #import <XCTest/XCTest.h>
 #import <OpenCloudData/OCCKRecordZoneQueryPredicateTransformer.h>
+#import <OpenCloudData/NSCKRecordZoneQueryPredicateTransformer.h>
 #import <objc/runtime.h>
-#import <objc/message.h>
 
 @interface OCCKRecordZoneQueryPredicateTransformerTests : XCTestCase
 @end
@@ -19,27 +19,27 @@
     {
         NSArray<Class> *defined = [OCCKRecordZoneQueryPredicateTransformer allowedTopLevelClasses];
         XCTAssertNotNil(defined);
-        NSArray<Class> *platform = ((id (*)(Class, SEL))objc_msgSend)(objc_lookUpClass("NSCKRecordZoneQueryPredicateTransformer"), @selector(allowedTopLevelClasses));
+        NSArray<Class> *platform = [objc_lookUpClass("NSCKRecordZoneQueryPredicateTransformer") allowedTopLevelClasses];
         XCTAssertNotNil(platform);
         XCTAssertTrue([defined isEqualToArray:platform]);
     }
     
     {
         BOOL defined = [OCCKRecordZoneQueryPredicateTransformer allowsReverseTransformation];
-        BOOL platform = ((BOOL (*)(Class, SEL))objc_msgSend)(objc_lookUpClass("NSCKRecordZoneQueryPredicateTransformer"), @selector(allowsReverseTransformation));
+        BOOL platform = [objc_lookUpClass("NSCKRecordZoneQueryPredicateTransformer") allowsReverseTransformation];
         XCTAssertEqual(defined, platform);
     }
     
     {
         Class defined = [OCCKRecordZoneQueryPredicateTransformer transformedValueClass];
-        Class platform = ((Class (*)(Class, SEL))objc_msgSend)(objc_lookUpClass("NSCKRecordZoneQueryPredicateTransformer"), @selector(transformedValueClass));
+        Class platform = [objc_lookUpClass("NSCKRecordZoneQueryPredicateTransformer") transformedValueClass];
         XCTAssertEqual(defined, platform);
     }
     
     {
         NSArray<NSString *> *defined = [OCCKRecordZoneQueryPredicateTransformer valueTransformerNames];
         XCTAssertNotNil(defined);
-        NSArray<NSString *> *platform = ((id (*)(Class, SEL))objc_msgSend)(objc_lookUpClass("NSCKRecordZoneQueryPredicateTransformer"), @selector(valueTransformerNames));
+        NSArray<NSString *> *platform = [objc_lookUpClass("NSCKRecordZoneQueryPredicateTransformer") valueTransformerNames];
         XCTAssertNotNil(platform);
         XCTAssertTrue([defined isEqualToArray:platform]);
     }

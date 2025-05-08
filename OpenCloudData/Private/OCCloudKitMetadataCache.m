@@ -13,4 +13,8 @@
     abort();
 }
 
+- (void)registerRecordMetadata:(OCCKRecordMetadata *)recordMetadata forObject:(NSManagedObject *)object {
+    abort();
+}
+
 @end

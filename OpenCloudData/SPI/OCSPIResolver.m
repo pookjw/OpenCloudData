@@ -192,6 +192,31 @@ __attribute__((objc_direct_members))
     return ((id (*)(id, id, id, id, id *))addr)(x0, x1, x2, x3, x4);
 }
 
++ (NSString *)PFCloudKitSerializer_mtmKeyForObjectWithRecordName_relatedToObjectWithRecordName_byRelationship_withInverse_:(Class)x0 x1:(NSString *)x1 x2:(NSString *)x2 x3:(NSRelationshipDescription *)x3 x4:(NSRelationshipDescription *)x4 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[PFCloudKitSerializer mtmKeyForObjectWithRecordName:relatedToObjectWithRecordName:byRelationship:withInverse:]"];
+    return ((id (*)(Class, id, id, id, id))addr)(x0, x1, x2, x3, x4);
+}
+
++ (size_t)PFCloudKitSerializer_estimateByteSizeOfRecordID_:(Class)x0 x1:(CKRecordID *)x1 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[PFCloudKitSerializer estimateByteSizeOfRecordID:]"];
+    return ((size_t (*)(Class, id))addr)(x0, x1);
+}
+
++ (CKRecordType)PFCloudKitSerializer_recordTypeForEntity_:(Class)x0 x1:(NSEntityDescription *)x1 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[PFCloudKitSerializer recordTypeForEntity:]"];
+    return ((id (*)(Class, id))addr)(x0, x1);
+}
+
++ (BOOL)PFCloudKitSerializer_isMirroredRelationshipRecordType_:(Class)x0 x1:(CKRecordType)x1 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[PFCloudKitSerializer isMirroredRelationshipRecordType:]"];
+    return ((BOOL (*)(Class, id))addr)(x0, x1);
+}
+
++ (NSSet<NSManagedObjectID *> *)PFCloudKitSerializer_createSetOfObjectIDsRelatedToObject_:(Class)x0 x1:(NSManagedObject *)x1 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[PFCloudKitSerializer createSetOfObjectIDsRelatedToObject:]"];
+    return ((id (*)(Class, id))addr)(x0, x1);
+}
+
 + (NSString *)_PFModelMapPathForEntity:(NSEntityDescription *)x0 {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"__PFModelMapPathForEntity"];
     return ((id (*)(id))addr)(x0);
@@ -314,6 +339,11 @@ __attribute__((objc_direct_members))
 
 + (NSString *)NSCloudKitMirroringDelegateEventAuthor {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateEventAuthor"];
+    return *(id *)addr;
+}
+
++ (NSString *)PFCloudKitMirroringDelegateToManyPrefix {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_PFCloudKitMirroringDelegateToManyPrefix"];
     return *(id *)addr;
 }
 

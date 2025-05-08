@@ -8,7 +8,7 @@
 #import <XCTest/XCTest.h>
 #import <CloudKit/CloudKit.h>
 #import <OpenCloudData/OCCKRecordMetadata.h>
-#import <objc/message.h>
+#import <OpenCloudData/NSCKRecordMetadata.h>
 #import <objc/runtime.h>
 
 @interface OCCKRecordMetadataTests : XCTestCase
@@ -44,7 +44,7 @@
     XCTAssertNil(error);
     XCTAssertNotNil(data_1);
     
-    NSData * _Nullable data_2 = ((id (*)(Class, SEL, id, id *))objc_msgSend)(objc_lookUpClass("NSCKRecordMetadata"), sel_registerName("encodeRecord:error:"), record, &error);
+    NSData * _Nullable data_2 = [objc_lookUpClass("NSCKRecordMetadata") encodeRecord:record error:&error];
     XCTAssertNil(error);
     XCTAssertNotNil(data_2);
     

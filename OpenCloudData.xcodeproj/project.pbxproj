@@ -61,6 +61,7 @@
 		4F2422DD2D99522D005BA6EA /* Exceptions for "OpenCloudData" folder in "OpenCloudData" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			privateHeaders = (
+				Helper/_OCDirectMethodResolver.h,
 				"Helper/NSObject+Foundation_IvarDescription.h",
 				Private/Analyzer/OCCloudKitHistoryAnalyzer.h,
 				Private/Analyzer/OCCloudKitHistoryAnalyzerContext.h,
@@ -144,11 +145,13 @@
 				SPI/CKRecordValueStore.h,
 				SPI/CKScheduler.h,
 				SPI/CKSchedulerActivity.h,
+				SPI/Model/NSCKRecordMetadata.h,
 				"SPI/NSAttributeDescription+Private.h",
 				SPI/NSCloudKitMirroringDelegate.h,
 				SPI/NSKnownKeysDictionary.h,
 				"SPI/NSManagedObjectContext+Private.h",
 				"SPI/NSManagedObjectID+Private.h",
+				SPI/NSPersistentCloudKitContainerActivity.h,
 				"SPI/NSPersistentContainer+Private.h",
 				"SPI/NSPersistentHistoryToken+Private.h",
 				"SPI/NSPersistentStore+Private.h",
@@ -169,6 +172,7 @@
 				SPI/OCSPIResolver.h,
 				SPI/PFApplicationStateMonitor.h,
 				SPI/PFApplicationStateMonitorDelegate.h,
+				SPI/PFCloudKitSerializer.h,
 				SPI/PFHistoryAnalyzer.h,
 				SPI/PFHistoryAnalyzerContext.h,
 				SPI/PFHistoryAnalyzerDefaultObjectState.h,
@@ -182,6 +186,9 @@
 				SPI/SQLProperty/NSSQLColumn.h,
 				SPI/SQLProperty/NSSQLPrimaryKey.h,
 				SPI/SQLProperty/NSSQLProperty.h,
+				SPI/ValueTransformers/NSCKRecordZoneQueryCursorTransformer.h,
+				SPI/ValueTransformers/NSCKRecordZoneQueryPredicateTransformer.h,
+				SPI/ValueTransformers/PFCloudKitMetadataValueTransformer.h,
 			);
 			publicHeaders = (
 				"NSPersistentStoreDescription+OpenCloudData.h",
