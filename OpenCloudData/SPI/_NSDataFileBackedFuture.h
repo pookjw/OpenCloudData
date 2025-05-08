@@ -10,7 +10,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface _NSDataFileBackedFuture : NSData <_NSFileBackedFuture>
-
+- (instancetype)initWithStoreMetadata:(NSData *)storeMetadata directory:(NSURL *)directory originalFileURL:(NSURL *)originalFileURL;
+- (instancetype)initWithStoreMetadata:(NSData *)storeMetadata directory:(NSURL *)directory;
 @end
 
 NS_ASSUME_NONNULL_END
