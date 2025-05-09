@@ -21,6 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
     @package NSMutableDictionary<NSManagedObjectID *, OCCKRecordMetadata *> *_objectIDToRecordMetadata; // 0x10
     @package NSMutableDictionary<CKRecordZoneID *, NSMutableDictionary<NSString *, OCCKMirroredRelationship *> *> *_zoneIDToMtmKeyToMirroredRelationship; // 0x20
     @package NSMutableDictionary<NSManagedObjectID *, NSMutableDictionary<NSString *, NSMutableSet<NSString *> *> *> *_objectIDToRelationshipNameToExistingMTMKeys; // 0x28
+    @package NSMutableDictionary<NSManagedObjectID *, NSMutableArray<NSString *> *> *_objectIDToChangedPropertyKeys; // 0x30
     @package NSMutableSet<CKRecordZoneID *> *_mutableZoneIDs; // 0x40
 }
 - (BOOL)cacheMetadataForObjectsWithIDs:(NSArray<NSManagedObjectID *> *)objectIDs andRecordsWithIDs:(NSArray *)recordsWithIDs inStore:(NSSQLCore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext mirroringOptions:(OCCloudKitMirroringDelegateOptions * _Nullable)mirroringOptions error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));

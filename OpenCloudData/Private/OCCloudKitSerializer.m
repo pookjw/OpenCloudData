@@ -83,7 +83,7 @@ static CKRecordZoneID *zoneID_2;
 }
 
 + (BOOL)shouldTrackProperty:(NSPropertyDescription *)property {
-    if (property.isTransient) return NO;
+    if (property.transient) return NO;
     
     BOOL boolValue = ((NSNumber *)[property.userInfo objectForKey:[OCSPIResolver NSCloudKitMirroringDelegateIgnoredPropertyKey]]).boolValue;
     if (boolValue) return NO;
@@ -685,7 +685,7 @@ static CKRecordZoneID *zoneID_2;
         /*
          evaluatedObject = x19
          */
-        if (evaluatedObject.isTransient) return NO;
+        if (evaluatedObject.transient) return NO;
         return !evaluatedObject.isReadOnly;
     }]];
     // x22
@@ -1611,7 +1611,7 @@ static CKRecordZoneID *zoneID_2;
     }
     // x27
     for (NSAttributeDescription *attributeDescription in attributes) {
-        if (!([OCCloudKitSerializer isPrivateAttribute:attributeDescription]) && !attributeDescription.isTransient && attributeDescription.isReadOnly && !(((NSNumber *)[attributeDescription.userInfo objectForKey:[OCSPIResolver NSCloudKitMirroringDelegateIgnoredPropertyKey]]).boolValue)) {
+        if (!([OCCloudKitSerializer isPrivateAttribute:attributeDescription]) && !attributeDescription.transient && attributeDescription.isReadOnly && !(((NSNumber *)[attributeDescription.userInfo objectForKey:[OCSPIResolver NSCloudKitMirroringDelegateIgnoredPropertyKey]]).boolValue)) {
             // <+2244>
             // x24
             NSString *_name_1 = attributeDescription.name;
@@ -1784,11 +1784,33 @@ static CKRecordZoneID *zoneID_2;
                     // x20
                     CKAsset * _Nullable _ckAsset = [record objectForKey:key];
                     // <+2836>
-                    abort();
-                } else {
-                    // <+2840>
-                    abort();
+                    
+                    if (_ckAsset == nil) {
+                        // <+2840>
+                        // fin
+                    } else {
+                        // <+2440>
+                        abort();
+                    }
+                    // fin
                 }
+                // <+2840>
+                if (!attributeDescription.transient) {
+                    // x20
+                    OCCloudKitMetadataCache * _Nullable metadataCache = self->_metadataCache;
+                    NSManagedObjectID *objectID = managedObject.objectID;
+                    if (metadataCache == nil) {
+                        [managedObject setValue:attributeDescription.defaultValue forKey:_name_1];
+                    } else if (![[metadataCache->_objectIDToChangedPropertyKeys objectForKey:objectID] containsObject:_name_1]) {
+                        [managedObject setValue:attributeDescription.defaultValue forKey:_name_1];
+                    } else {
+                        os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Importer is rejecting updated value for '%@' on '%@' because there are pending local edits that haven't been exported yet.", __func__, __LINE__, _name_1, managedObject.objectID);
+                    }
+                }
+                // <+3916>
+                [resultValue release];
+                resultValue = nil;
+                // <+4692>
                 abort();
             }
             abort();
