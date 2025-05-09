@@ -1635,7 +1635,40 @@ static CKRecordZoneID *zoneID_2;
             id value = [target objectForKey:_name_2];
             // x22
             id _Nullable resultValue = [value retain];
-            if (value != nil) {
+            
+            BOOL flag; // 1 = <+2440> / 0 = <+2840>
+            if (value == nil) {
+                // <+2688>
+                if ([OCCloudKitSerializer isVariableLengthAttributeType:attributeDescription.attributeType]) {
+                    // <+2728>
+                    NSString *key = _name_1;
+                    if (hasCDPrefix) {
+                        key = [@"CD_" stringByAppendingString:_name_1];
+                    }
+                    key = [key stringByAppendingString:@"_ckAsset"];
+                    
+                    // x20
+                    CKAsset * _Nullable _ckAsset = [record objectForKey:key];
+                    // <+2836>
+                    
+                    if (_ckAsset == nil) {
+                        // <+2840>
+                        // fin
+                        flag = NO;
+                    } else {
+                        // <+2440>
+                        flag = YES;
+                    }
+                    // fin
+                } else {
+                    // <+2840>
+                    flag = NO;
+                }
+            } else {
+                flag = YES;
+            }
+            
+            if (flag) {
                 // <+2440>
                 // sp + 0x110
                 NSObject<OCCloudKitSerializerDelegate> * _Nullable delegate = [self->_delegate retain];
@@ -1923,28 +1956,6 @@ static CKRecordZoneID *zoneID_2;
                 // <+4728>
                 continue;
             } else {
-                // <+2688>
-                if ([OCCloudKitSerializer isVariableLengthAttributeType:attributeDescription.attributeType]) {
-                    // <+2728>
-                    NSString *key = _name_1;
-                    if (hasCDPrefix) {
-                        key = [@"CD_" stringByAppendingString:_name_1];
-                    }
-                    key = [key stringByAppendingString:@"_ckAsset"];
-                    
-                    // x20
-                    CKAsset * _Nullable _ckAsset = [record objectForKey:key];
-                    // <+2836>
-                    
-                    if (_ckAsset == nil) {
-                        // <+2840>
-                        // fin
-                    } else {
-                        // <+2440>
-                        abort();
-                    }
-                    // fin
-                }
                 // <+2840>
                 if (!attributeDescription.transient) {
                     // x20
@@ -1966,6 +1977,22 @@ static CKRecordZoneID *zoneID_2;
         }
     }
     // <+6228>
+    
+    NSArray<NSRelationshipDescription *> * _Nullable _relationships = relationships;
+    if (_relationships == nil) {
+        _relationships = managedObject.entity.relationshipsByName.allValues;
+    }
+    
+    // x20
+    for (NSRelationshipDescription *relationship in _relationships) {
+        // x20 = relationship
+        if ((!relationship.isToMany || !relationship.inverseRelationship.isToMany) && !relationship.isToMany) {
+            // <+6384>
+        } else {
+            // <+7124>
+        }
+    }
+    // <+7264>
     abort();
 }
 
