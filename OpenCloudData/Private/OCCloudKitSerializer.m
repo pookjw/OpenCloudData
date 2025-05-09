@@ -1664,6 +1664,8 @@ static CKRecordZoneID *zoneID_2;
                             id _value_1 = [[target objectForKey:_name_3] retain];
                             
                             if (_value_1 != nil) {
+                                // x20
+                                _NSCloudKitDataFileBackedFuture *futureData;
                                 // <+3300>
                                 if (_ckAsset != nil)  {
                                     // x20
@@ -1682,7 +1684,7 @@ static CKRecordZoneID *zoneID_2;
                                         }
                                     }
                                     // x20
-                                    _NSCloudKitDataFileBackedFuture *futureData = [[objc_lookUpClass("_NSCloudKitDataFileBackedFuture") alloc] initWithStoreMetadata:_value_1 directory:fileBackedFuturesDirectory originalFileURL:safeSaveURL];
+                                    futureData = [[objc_lookUpClass("_NSCloudKitDataFileBackedFuture") alloc] initWithStoreMetadata:_value_1 directory:fileBackedFuturesDirectory originalFileURL:safeSaveURL];
                                     // <+4224>
                                     // fin
                                 } else {
@@ -1696,11 +1698,43 @@ static CKRecordZoneID *zoneID_2;
                                         }
                                     }
                                     // x20
-                                    _NSCloudKitDataFileBackedFuture *futureData = [[objc_lookUpClass("_NSCloudKitDataFileBackedFuture") alloc] initWithStoreMetadata:_value_1 directory:fileBackedFuturesDirectory];
+                                    futureData = [[objc_lookUpClass("_NSCloudKitDataFileBackedFuture") alloc] initWithStoreMetadata:_value_1 directory:fileBackedFuturesDirectory];
                                     // <+4224>
                                     // fin
                                 }
                                 // <+4224>
+                                // x25
+                                id objectValue = [managedObject valueForKey:attributeDescription.name];
+                                
+                                NSURL * _Nullable _fileURL;
+                                if ([objectValue isEqual:futureData]) {
+                                    NSURL * _Nullable fileURL = ((id<_NSFileBackedFuture>)objectValue).fileURL;
+                                    if ((fileURL == nil) && (futureData != nil)) {
+                                        // <+4276>
+                                        NSURL * _Nullable originalFileURL;
+                                        assert(object_getInstanceVariable(futureData, "_originalFileURL", (void **)&originalFileURL) != NULL);
+                                        
+                                        if (originalFileURL != nil) {
+                                            [resultValue release];
+                                            objectValue = futureData;
+                                        } else {
+                                            [resultValue release];
+                                            // <+4316>
+                                        }
+                                    } else {
+                                        // <+4312>
+                                        [resultValue release];
+                                        // <+4316>
+                                    }
+                                } else {
+                                    // <+4300>
+                                    [resultValue release];
+                                    objectValue = futureData;
+                                    // <+4316>
+                                }
+                                
+                                // <+4316>
+                                objectValue = [futureData retain];
                                 abort();
                             } else {
                                 // <+4328>
