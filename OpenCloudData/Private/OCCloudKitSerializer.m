@@ -22,6 +22,7 @@
 #import <OpenCloudData/_PFEvanescentData.h>
 #import <OpenCloudData/CKEncryptedData.h>
 #import <OpenCloudData/NSObject+NSKindOfAdditions.h>
+#import <OpenCloudData/NSMergeableTransformableStringAttributeValue.h>
 #import <objc/runtime.h>
 
 CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
@@ -1554,7 +1555,7 @@ static CKRecordZoneID *zoneID_2;
     return _succeed;
 }
 
-- (BOOL)updateAttributes:(NSArray<NSAttributeDescription *> *)attributes andRelationships:(NSArray<NSRelationshipDescription *> *)relationships onManagedObject:(NSManagedObject *)managedObject fromRecord:(CKRecord *)record withRecordMetadata:(OCCKRecordMetadata *)recordMetadata importContext:(OCCloudKitImportZoneContext *)importContext error:(NSError * _Nullable *)error {
+- (BOOL)updateAttributes:(NSArray<NSAttributeDescription *> *)attributes andRelationships:(NSArray<NSRelationshipDescription *> *)relationships onManagedObject:(NSManagedObject *)managedObject fromRecord:(CKRecord *)record withRecordMetadata:(OCCKRecordMetadata *)recordMetadata importContext:(OCCloudKitImportZoneContext *)importContext error:(NSError * _Nullable * _Nonnull)error {
     // inlined from __150-[PFCloudKitSerializer applyUpdatedRecords:deletedRecordIDs:toStore:inManagedObjectContext:onlyUpdatingAttributes:andRelationships:madeChanges:error:]_block_invoke <+1828>~<+7232>
     /*
      self = sp + 0x130
@@ -1635,17 +1636,22 @@ static CKRecordZoneID *zoneID_2;
             // x22
             id _Nullable resultValue = [value retain];
             if (value != nil) {
+                // <+2440>
                 // sp + 0x110
                 NSObject<OCCloudKitSerializerDelegate> * _Nullable delegate = [self->_delegate retain];
                 
                 if ((attributeDescription.attributeType == NSBinaryDataAttributeType) || (attributeDescription.attributeType == NSTransformableAttributeType) || (attributeDescription.attributeType == NSCompositeAttributeType)) {
                     // <+2504>
                     if (attributeDescription.isFileBackedFuture) {
+                        // x23
+                        CKAsset * _Nullable _ckAsset;
+                        // x26
+                        id _Nullable _value_1;
+                        
                         // original : getCloudKitCKAssetClass
                         if ([value isKindOfClass:[CKAsset class]]) {
                             // <+2556>
-                            // x23
-                            CKAsset * _Nullable _ckAsset = [value retain];
+                            _ckAsset = [value retain];
                             // x20
                             NSString *_name_3;
                             if (hasCDPrefix) {
@@ -1660,21 +1666,34 @@ static CKRecordZoneID *zoneID_2;
                                     target = record.encryptedValues;
                                 }
                             }
-                            // x26
-                            id _value_1 = [[target objectForKey:_name_3] retain];
-                            
-                            if (_value_1 != nil) {
+                            _value_1 = [[target objectForKey:_name_3] retain];
+                        } else {
+                            // <+3196>
+                            _value_1 = [value retain];
+                            NSString *_name_3;
+                            if (hasCDPrefix) {
+                                _name_3 = [@"CD_" stringByAppendingString:_name_1];
+                            } else {
+                                _name_3 = _name_1;
+                            }
+                            _name_3 = [_name_3 stringByAppendingString:@"_ckAsset"];
+                            _ckAsset = [[record valueForKey:_name_3] retain];
+                        }
+                        
+                        if (_value_1 != nil) {
+                            // <+3300>
+                            // x20
+                            _NSCloudKitDataFileBackedFuture * _Nullable futureData;
+                            if (_ckAsset != nil)  {
                                 // x20
-                                _NSCloudKitDataFileBackedFuture *futureData;
-                                // <+3300>
-                                if (_ckAsset != nil)  {
-                                    // x20
-                                    NSURL * _Nullable safeSaveURL = [delegate cloudKitSerializer:self safeSaveURLForAsset:_ckAsset];
-                                    if (safeSaveURL == nil) {
-                                        // <+4172>
-                                        abort();
-                                    }
-                                    
+                                NSURL * _Nullable safeSaveURL = [delegate cloudKitSerializer:self safeSaveURLForAsset:_ckAsset];
+                                if (safeSaveURL == nil) {
+                                    // <+4172>
+                                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Delegate didn't return a file url for asset: %@\n", _ckAsset);
+                                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Delegate didn't return a file url for asset: %@\n", _ckAsset);
+                                    // <+4220>
+                                    futureData = nil;
+                                } else {
                                     NSURL * _Nullable fileBackedFuturesDirectory;
                                     {
                                         if (importContext == nil) {
@@ -1685,68 +1704,63 @@ static CKRecordZoneID *zoneID_2;
                                     }
                                     // x20
                                     futureData = [[objc_lookUpClass("_NSCloudKitDataFileBackedFuture") alloc] initWithStoreMetadata:_value_1 directory:fileBackedFuturesDirectory originalFileURL:safeSaveURL];
-                                    // <+4224>
-                                    // fin
-                                } else {
-                                    // <+3844>
-                                    NSURL * _Nullable fileBackedFuturesDirectory;
-                                    {
-                                        if (importContext == nil) {
-                                            fileBackedFuturesDirectory = nil;
-                                        } else {
-                                            fileBackedFuturesDirectory = importContext->_fileBackedFuturesDirectory;
-                                        }
-                                    }
-                                    // x20
-                                    futureData = [[objc_lookUpClass("_NSCloudKitDataFileBackedFuture") alloc] initWithStoreMetadata:_value_1 directory:fileBackedFuturesDirectory];
-                                    // <+4224>
-                                    // fin
                                 }
                                 // <+4224>
-                                // x25
-                                id objectValue = [managedObject valueForKey:attributeDescription.name];
-                                
-                                NSURL * _Nullable _fileURL;
-                                if ([objectValue isEqual:futureData]) {
-                                    NSURL * _Nullable fileURL = ((id<_NSFileBackedFuture>)objectValue).fileURL;
-                                    if ((fileURL == nil) && (futureData != nil)) {
-                                        // <+4276>
-                                        NSURL * _Nullable originalFileURL;
-                                        assert(object_getInstanceVariable(futureData, "_originalFileURL", (void **)&originalFileURL) != NULL);
-                                        
-                                        if (originalFileURL != nil) {
-                                            [resultValue release];
-                                            objectValue = futureData;
-                                        } else {
-                                            [resultValue release];
-                                            // <+4316>
-                                        }
+                                // fin
+                            } else {
+                                // <+3844>
+                                NSURL * _Nullable fileBackedFuturesDirectory;
+                                {
+                                    if (importContext == nil) {
+                                        fileBackedFuturesDirectory = nil;
                                     } else {
-                                        // <+4312>
+                                        fileBackedFuturesDirectory = importContext->_fileBackedFuturesDirectory;
+                                    }
+                                }
+                                // x20
+                                futureData = [[objc_lookUpClass("_NSCloudKitDataFileBackedFuture") alloc] initWithStoreMetadata:_value_1 directory:fileBackedFuturesDirectory];
+                                // <+4224>
+                                // fin
+                            }
+                            // <+4224>
+                            // x25
+                            id objectValue = [managedObject valueForKey:attributeDescription.name];
+                            
+                            if ([objectValue isEqual:futureData]) {
+                                NSURL * _Nullable fileURL = ((id<_NSFileBackedFuture>)objectValue).fileURL;
+                                if ((fileURL == nil) && (futureData != nil)) {
+                                    // <+4276>
+                                    NSURL * _Nullable originalFileURL;
+                                    assert(object_getInstanceVariable(futureData, "_originalFileURL", (void **)&originalFileURL) != NULL);
+                                    
+                                    if (originalFileURL != nil) {
+                                        [resultValue release];
+                                        objectValue = futureData;
+                                    } else {
                                         [resultValue release];
                                         // <+4316>
                                     }
                                 } else {
-                                    // <+4300>
+                                    // <+4312>
                                     [resultValue release];
-                                    objectValue = futureData;
                                     // <+4316>
                                 }
-                                
-                                // <+4316>
-                                objectValue = [futureData retain];
-                                abort();
                             } else {
-                                // <+4328>
-                                abort();
+                                // <+4300>
+                                [resultValue release];
+                                objectValue = futureData;
+                                // <+4316>
                             }
                             
-                            abort();
-                        } else {
-                            // <+3196>
-                            abort();
+                            // <+4316>
+                            resultValue = [objectValue retain];
+                            [futureData release];
                         }
-                        abort();
+                        // <+4328>
+                        [_ckAsset release];
+                        [_value_1 release];
+                        // <+4336>
+                        // fin
                     } else {
                         // <+3100>
                         // original : getCloudKitCKAssetClass
@@ -1758,11 +1772,11 @@ static CKRecordZoneID *zoneID_2;
                             _PFEvanescentData * _Nullable evanescentData = [[objc_lookUpClass("_PFEvanescentData") alloc] initWithURL:safeSaveURL];
                             if (evanescentData == nil) {
                                 // <+3940>
-                                abort();
+                                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Error attempting to read CKAsset file: %@", __func__, __LINE__, value);
+                            } else {
+                                [value release];
+                                resultValue = evanescentData;
                             }
-                            
-                            [value release];
-                            resultValue = evanescentData;
                             // x22 = evanescentData
                             // <+4104>
                             // fin
@@ -1786,9 +1800,17 @@ static CKRecordZoneID *zoneID_2;
                             // fin
                         }
                         // <+4104>
-                        abort();
+                        if ((attributeDescription.attributeType == NSTransformableAttributeType) || (attributeDescription.attributeType == NSCompositeAttributeType)) {
+                            // <+4136>
+                            value = [OCSPIResolver _PFRoutines_retainedEncodeObjectValue_forTransformableAttribute_:objc_lookUpClass("_PFRoutines") x1:resultValue x2:attributeDescription];
+                            [resultValue release];
+                            resultValue = value;
+                            // <+4336>
+                        }
+                        // <+4336>
+                        // fin
                     }
-                    abort();
+                    // fin
                 } else if (attributeDescription.attributeType == NSUUIDAttributeType) {
                     // <+3620>
                     [value release];
@@ -1802,9 +1824,104 @@ static CKRecordZoneID *zoneID_2;
                     // fin
                 } else {
                     // <+4732>
-                    abort();
+                    if ((attributeDescription.attributeType == NSStringAttributeType) || (attributeDescription.attributeType == NSURIAttributeType)) {
+                        // <+4764>
+                        // original : getCloudKitCKAssetClass
+                        if ([value isKindOfClass:[CKAsset class]]) {
+                            // x26
+                            NSURL * _Nullable safeSaveURL = [delegate cloudKitSerializer:self safeSaveURLForAsset:value];
+                            if (safeSaveURL == nil) {
+                                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Delegate didn't return a file url for asset: %@\n", value);
+                                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Delegate didn't return a file url for asset: %@\n", value);
+                            }
+                            
+                            // <+4872>
+                            // x23
+                            NSString * _Nullable string = [[NSString alloc] initWithContentsOfURL:safeSaveURL encoding:NSUTF8StringEncoding error:&_error];
+                            if (string == nil) {
+                                // <+5296>
+                                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to read value from asset at URL: %@\n%@", __func__, __LINE__, safeSaveURL, _error);
+                                // <+5520>
+                                [string release];
+                                // <+4336>
+                            } else {
+                                if (attributeDescription.attributeType == NSStringAttributeType) {
+                                    [resultValue release];
+                                    resultValue = [string retain];
+                                    [string release];
+                                    // <+4336>
+                                } else if (attributeDescription.attributeType == NSURIAttributeType) {
+                                    [resultValue release];
+                                    NSURL * _Nullable resolvedURL = [[NSURL alloc] initWithString:string];
+                                    
+                                    if (resolvedURL == nil) {
+                                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to initialize NSURL from CKAsset with value: %@\n%@", __func__, __LINE__, value, record);
+                                        [string release];
+                                        // <+4336>
+                                    } else {
+                                        resultValue = resolvedURL;
+                                        [string release];
+                                        // <+4336>
+                                    }
+                                    // <+4336>
+                                }
+                                // fin
+                            }
+                            // fin
+                        } else if (attributeDescription.attributeType == NSURIAttributeType) {
+                            // <+5120>
+                            [resultValue release];
+                            NSURL * _Nullable url = [[NSURL alloc] initWithString:value];
+                            
+                            if (url == nil) {
+                                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to initialize NSURL from CKRecord with value: %@\n%@", __func__, __LINE__, value, record);
+                            } else {
+                                // <+3648>
+                                resultValue = url;
+                            }
+                            // <+4336>
+                        }
+                        // <+4336>
+                    }
+                    // <+4336>
+                    // fin
                 }
-                abort();
+                
+                // <+4336>
+                NSMutableDictionary<NSManagedObjectID *, NSMutableArray<NSString *> *> * _Nullable objectIDToChangedPropertyKeys;
+                {
+                    OCCloudKitMetadataCache * _Nullable metadataCache = self->_metadataCache;
+                    if (metadataCache == nil) {
+                        objectIDToChangedPropertyKeys = nil;
+                    } else {
+                        objectIDToChangedPropertyKeys = metadataCache->_objectIDToChangedPropertyKeys;
+                    }
+                }
+                if ([[objectIDToChangedPropertyKeys objectForKey:managedObject.objectID] containsObject:_name_1]) {
+                    if (attributeDescription.usesMergeableStorage) {
+                        // <+4404>
+                        @autoreleasepool {
+                            [(id<NSMergeableTransformableAttributeValue>)resultValue merge:[managedObject valueForKey:_name_1]];
+                            // x25
+                            id copy = [resultValue copy];
+                            [resultValue release];
+                            resultValue = copy;
+                            [managedObject setValue:copy forKey:_name_1];
+                        }
+                        // <+4684>
+                    } else {
+                        // <+4512>
+                        os_log_error(_OCLogGetLogStream(0x11), "CoreData+CloudKit: %s(%d): Importer is rejecting updated value for '%@' on '%@' because there are pending local edits that haven't been exported yet.", __func__, __LINE__, _name_1, managedObject);
+                    }
+                } else {
+                    // <+4492>
+                    [managedObject setValue:resultValue forKey:_name_1];
+                }
+                // <+4684>
+                [resultValue release];
+                [delegate release];
+                // <+4728>
+                continue;
             } else {
                 // <+2688>
                 if ([OCCloudKitSerializer isVariableLengthAttributeType:attributeDescription.attributeType]) {
@@ -1844,13 +1961,9 @@ static CKRecordZoneID *zoneID_2;
                 // <+3916>
                 [resultValue release];
                 resultValue = nil;
-                // <+4692>
-                abort();
+                continue;
             }
-            abort();
         }
-        // <+4716>
-        abort();
     }
     // <+6228>
     abort();

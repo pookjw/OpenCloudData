@@ -155,6 +155,8 @@
 				SPI/CoreData/NSKnownKeysDictionary.h,
 				"SPI/CoreData/NSManagedObjectContext+Private.h",
 				"SPI/CoreData/NSManagedObjectID+Private.h",
+				SPI/CoreData/NSMergeableTransformableAttributeValue.h,
+				SPI/CoreData/NSMergeableTransformableStringAttributeValue.h,
 				SPI/CoreData/NSPersistentCloudKitContainerActivity.h,
 				"SPI/CoreData/NSPersistentContainer+Private.h",
 				"SPI/CoreData/NSPersistentHistoryToken+Private.h",
