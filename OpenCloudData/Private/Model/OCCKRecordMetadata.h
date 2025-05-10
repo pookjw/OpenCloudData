@@ -50,6 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (CKRecord * _Nullable)createRecordFromSystemFields NS_RETURNS_RETAINED;
 - (NSManagedObjectID * _Nullable)createObjectIDForLinkedRow NS_RETURNS_RETAINED __attribute__((objc_direct));
 - (NSData * _Nullable)createEncodedMoveReceiptData:(NSError * _Nullable * _Nullable)error;
+- (BOOL)mergeMoveReceiptsWithData:(NSData *)data error:(NSError * _Nullable * _Nullable)error;
 @end
 
 NS_ASSUME_NONNULL_END

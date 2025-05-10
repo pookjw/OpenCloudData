@@ -23,6 +23,7 @@
 #import <OpenCloudData/CKEncryptedData.h>
 #import <OpenCloudData/NSObject+NSKindOfAdditions.h>
 #import <OpenCloudData/NSMergeableTransformableStringAttributeValue.h>
+#import <OpenCloudData/OCCKImportPendingRelationship.h>
 #import <objc/runtime.h>
 
 CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
@@ -1536,9 +1537,487 @@ static CKRecordZoneID *zoneID_2;
             }
             
             BOOL result = [self updateAttributes:_onlyUpdatingAttributes andRelationships:_relationships onManagedObject:managedObject fromRecord:modifiedRecord withRecordMetadata:recordMetadata importContext:importZoneContext error:&_error];
-            abort();
+            // <+7264>
+            if (!result) {
+                [_error retain];
+                _succeed = NO;
+                [managedObjectModel release];
+                [entityDescriptions release];
+                [importZoneContext release];
+                [delegate release];
+                return;
+            }
+            
+            // x19
+            id<CKRecordKeyValueSetting> target_2;
+            if (self->_mirroringOptions.useDeviceToDeviceEncryption) {
+                target_2 = modifiedRecord.encryptedValueStore;
+            } else {
+                target_2 = modifiedRecord;
+            }
+            // x20
+            NSData *moveReceiptData = [[target_2 objectForKey:[@"CD" stringByAppendingString:@"moveReceipt"]] retain];
+            if (moveReceiptData == nil) {
+                // <+7472>
+                // x19
+                CKAsset *_ckAsset = [modifiedRecord objectForKey:[[@"CD_" stringByAppendingString:@"moveReceipt"] stringByAppendingString:@"_ckAsset"]];
+                
+                if (_ckAsset == nil) {
+                    // <+7812>
+                } else {
+                    NSURL *safeSaveURL = [delegate cloudKitSerializer:self safeSaveURLForAsset:_ckAsset];
+                    moveReceiptData = [[NSData alloc] initWithContentsOfURL:safeSaveURL options:0 error:&_error];
+                    if (moveReceiptData == nil) {
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Error attempting to read move receipt CKAsset file: %@", __func__, __LINE__, target_2);
+                        _succeed = NO;
+                        [_error retain];
+                        // <+7812>
+                    }
+                }
+            }
+            
+            if (moveReceiptData != nil) {
+                // <+7384>
+                BOOL result = [recordMetadata mergeMoveReceiptsWithData:moveReceiptData error:&_error];
+                if (!result) {
+                    [moveReceiptData release];
+                    [_error retain];
+                    _succeed = NO;
+                    [managedObjectModel release];
+                    [entityDescriptions release];
+                    [importZoneContext release];
+                    [delegate release];
+                    return;
+                }
+                
+                // <+7812>
+            }
+            
+            // <+7812>
+            [moveReceiptData release];
         }
-        abort();
+        
+        // <+8796>
+        // x24
+        for (NSManagedObjectID *deletedObjectID in importZoneContext->_deletedObjectIDs) @autoreleasepool {
+            NSManagedObject *object = [managedObjectContext objectWithID:deletedObjectID];
+            [managedObjectContext deleteObject:object];
+        }
+        
+        NSSet<NSManagedObjectID *> * _Nullable deletedObjectIDs;
+        {
+            if (importZoneContext == nil) {
+                deletedObjectIDs = nil;
+            } else {
+                deletedObjectIDs = importZoneContext->_deletedObjectIDs;
+            }
+        }
+        // x19
+        NSArray<OCCKRecordMetadata *> * _Nullable recordMetadataArray = [OCCKRecordMetadata metadataForObjectIDs:deletedObjectIDs.allObjects inStore:store withManagedObjectContext:managedObjectContext error:&_error];
+        
+        if (recordMetadataArray == nil) {
+            // <+10612>
+            [_error retain];
+            _succeed = NO;
+            [managedObjectModel release];
+            [entityDescriptions release];
+            [importZoneContext release];
+            [delegate release];
+            return;
+        }
+        
+        for (OCCKRecordMetadata *recordMetadata in recordMetadataArray) {
+            [managedObjectContext deleteObject:recordMetadata];
+        }
+        
+        NSSet<CKRecordID *> * _Nullable deletedShareRecordIDs;
+        {
+            if (importZoneContext == nil) {
+                deletedShareRecordIDs = nil;
+            } else {
+                deletedShareRecordIDs = importZoneContext->_deletedShareRecordIDs;
+            }
+        }
+        // <+10668>
+        for (CKRecordID *deletedShareRecordID in deletedShareRecordIDs) {
+            // x22
+            CKRecordZoneID *zoneID = deletedShareRecordID.zoneID;
+            
+            OCCKRecordZoneMetadata * _Nullable recordZoneMetadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:zoneID inDatabaseWithScope:self->_mirroringOptions.databaseScope forStore:store inContext:managedObjectContext error:&_error];
+            if (recordZoneMetadata == nil) {
+                [_error retain];
+                _succeed = NO;
+                [managedObjectModel release];
+                [entityDescriptions release];
+                [importZoneContext release];
+                [delegate release];
+                return;
+            }
+            recordZoneMetadata.encodedShareData = nil;
+        }
+        
+        // <+9212>
+        result = [importZoneContext linkInsertedObjectsAndMetadataInContext:managedObjectContext error:&_error];
+        if (!result) {
+            [_error retain];
+            _succeed = NO;
+            [managedObjectModel release];
+            [entityDescriptions release];
+            [importZoneContext release];
+            [delegate release];
+            return;
+        }
+        
+        if (managedObjectContext.hasChanges) {
+            BOOL result = [managedObjectContext save:&_error];
+            if (!result) {
+                [_error retain];
+                _succeed = NO;
+                [managedObjectModel release];
+                [entityDescriptions release];
+                [importZoneContext release];
+                [delegate release];
+                return;
+            }
+        }
+        
+        // <+9400>
+        NSArray<PFMirroredManyToManyRelationship *> * _Nullable deletedRelationships;
+        {
+            if (importZoneContext == nil) {
+                deletedRelationships = nil;
+            } else {
+                deletedRelationships = importZoneContext->_deletedRelationships;
+            }
+        }
+        
+        /*
+         __150-[PFCloudKitSerializer applyUpdatedRecords:deletedRecordIDs:toStore:inManagedObjectContext:onlyUpdatingAttributes:andRelationships:madeChanges:error:]_block_invoke.42
+         importZoneContext = sp + 0x2c0
+         managedObjectContext = sp + 0x2c8
+         delegate = sp + 0x2d0
+         self = sp + 0x2d8
+         */
+        [deletedRelationships enumerateObjectsUsingBlock:^(PFMirroredManyToManyRelationship * _Nonnull mirroredRelationship, NSUInteger idx, BOOL * _Nonnull stop) {
+            /*
+             self(block) = x19
+             mirroredRelationship = x20
+             */
+            
+            NSError * _Nullable __error = nil;
+            
+#warning TODO PFMirroredRelationship은 직접 구현되어야 함
+            BOOL result = [mirroredRelationship updateRelationshipValueUsingImportContext:importZoneContext andManagedObjectContext:managedObjectContext error:&__error];
+            
+            if (!result) {
+                if (([__error.domain isEqualToString:NSCocoaErrorDomain]) && ((_error.code == 134412) || (__error.code == 134413))) {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Deleted relationship failed to update because one or more of the objects in it is already gone: %@", __func__, __LINE__, __error);
+                } else {
+                    [delegate cloudKitSerializer:self failedToUpdateRelationship:mirroredRelationship withError:__error];
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to update deleted mirrored relationship: %@\n%@", __func__, __LINE__, mirroredRelationship, __error);
+                }
+            }
+        }];
+        
+        // <+9480>
+        result = [importZoneContext populateUnresolvedIDsInStore:store withManagedObjectContext:managedObjectContext error:&_error];
+        if (!result) {
+            [_error retain];
+            _succeed = NO;
+            [managedObjectModel release];
+            [entityDescriptions release];
+            [importZoneContext release];
+            [delegate release];
+            return;
+        }
+        
+        NSMutableArray<PFMirroredManyToManyRelationship *> * _Nullable updatedRelationships;
+        {
+            if (importZoneContext == nil) {
+                updatedRelationships = nil;
+            } else {
+                updatedRelationships = importZoneContext->_updatedRelationships;
+            }
+        }
+        
+        /*
+         __150-[PFCloudKitSerializer applyUpdatedRecords:deletedRecordIDs:toStore:inManagedObjectContext:onlyUpdatingAttributes:andRelationships:madeChanges:error:]_block_invoke.44
+         self = sp + 0x268 = x20 + 0x20
+         store = sp + 0x270 = x20 + 0x28
+         managedObjectContext = sp + 0x278 = x20 + 0x30
+         importZoneContext = sp + 0x280 = x20 + 0x38
+         delegate = sp + 0x288 = x20 + 0x40
+         _succeed = sp + 0x290 = x20 + 0x48
+         _error = sp + 0x298 = x20 + 0x50
+         */
+        [[[updatedRelationships copy] autorelease] enumerateObjectsUsingBlock:^(PFMirroredManyToManyRelationship * _Nonnull mirroredRelationship, NSUInteger idx, BOOL * _Nonnull stop) {
+            /*
+             self(block) = x20
+             x19 = mirroredRelationship
+             */
+            
+            // sp, #0x8
+            NSError * _Nullable __error = nil;
+            
+            os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Updating relationship: %@", __func__, __LINE__ ,mirroredRelationship);
+            
+            CKRecordID *ckRecordID;
+            assert(object_getInstanceVariable(mirroredRelationship, "_ckRecordID", (void **)&ckRecordID) != NULL);
+            CKRecordID *relatedCKRecordID;
+            assert(object_getInstanceVariable(mirroredRelationship, "_relatedCKRecordID", (void **)&relatedCKRecordID) != NULL);
+            NSRelationshipDescription *relationshipDescription;
+            assert(object_getInstanceVariable(mirroredRelationship, "_relationshipDescription", (void **)&relationshipDescription) != NULL);
+            NSRelationshipDescription *inverseRelationshipDescription;
+            assert(object_getInstanceVariable(mirroredRelationship, "_inverseRelationshipDescription", (void **)&inverseRelationshipDescription) != NULL);
+            // x21
+            NSString *mtmKey = [OCCloudKitSerializer mtmKeyForObjectWithRecordName:ckRecordID.recordName relatedToObjectWithRecordName:relatedCKRecordID.recordName byRelationship:relationshipDescription withInverse:inverseRelationshipDescription];
+            
+            CKRecordID *manyToManyRecordID;
+            assert(object_getInstanceVariable(mirroredRelationship, "_manyToManyRecordID", (void **)&manyToManyRecordID) != NULL);
+            
+            // x22
+            OCCloudKitMetadataCache * _Nullable metadataCache = self->_metadataCache;
+            // x21
+            OCCKMirroredRelationship * _Nullable ocMirroredRelationship;
+            if (metadataCache != nil) {
+                ocMirroredRelationship = [[metadataCache->_zoneIDToMtmKeyToMirroredRelationship objectForKey:manyToManyRecordID.zoneID] objectForKey:mtmKey];
+            } else {
+                ocMirroredRelationship = nil;
+            }
+            
+            if (ocMirroredRelationship == nil) {
+                ocMirroredRelationship = [OCCKMirroredRelationship mirroredRelationshipForManyToMany:mirroredRelationship inStore:store withManagedObjectContext:managedObjectContext error:&__error];
+            }
+            
+            if (__error != nil) {
+                _succeed = NO;
+                _error = [__error retain];
+                return;
+            }
+            
+            if (ocMirroredRelationship == nil) {
+                // <+524>
+                // x21
+                OCCloudKitMetadataCache * _Nullable metadataCache = self->_metadataCache;
+                
+                // x21
+                OCCKRecordZoneMetadata * _Nullable recordZoneMetadata;
+                if (metadataCache != nil) {
+                    recordZoneMetadata = [metadataCache->_recordZoneIDToZoneMetadata objectForKey:ckRecordID.zoneID];
+                } else {
+                    recordZoneMetadata = nil;
+                }
+                
+                if (recordZoneMetadata == nil) {
+                    CKDatabaseScope databaseScope;
+                    {
+                        if (importZoneContext == nil) {
+                            databaseScope = 0;
+                        } else {
+                            databaseScope = importZoneContext->_mirroringOptions.databaseScope;
+                        }
+                    }
+                    recordZoneMetadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:ckRecordID.zoneID inDatabaseWithScope:databaseScope forStore:store inContext:managedObjectContext error:&_error];
+                    if (recordZoneMetadata != nil) {
+                        [self->_metadataCache cacheZoneMetadata:recordZoneMetadata];
+                    } else {
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: Need to handle fetch errors here for the zone and abort serialization. %@", __error);
+                    }
+                }
+                
+                // <+720>
+                ocMirroredRelationship = [OCCKMirroredRelationship insertMirroredRelationshipForManyToMany:mirroredRelationship inZoneWithMetadata:recordZoneMetadata inStore:store withManagedObjectContext:managedObjectContext];
+            }
+            
+            // <+748>
+#warning TODO PFMirroredRelationship은 직접 구현되어야 함
+            BOOL result = [mirroredRelationship updateRelationshipValueUsingImportContext:importZoneContext andManagedObjectContext:managedObjectContext error:&__error];
+            
+            if (result) {
+                ocMirroredRelationship.isPending = @NO;
+                ocMirroredRelationship.needsDelete = @NO;
+            } else {
+                ocMirroredRelationship.isPending = @YES;
+                ocMirroredRelationship.needsDelete = @NO;
+            }
+            ocMirroredRelationship.isUploaded = @YES;
+        }];
+        
+        // <+9652>
+        if (managedObjectContext.hasChanges) {
+            BOOL result = [managedObjectContext save:&_error];
+            if (!result) {
+                [_error retain];
+                _succeed = NO;
+                [managedObjectModel release];
+                [entityDescriptions release];
+                [importZoneContext release];
+                [delegate release];
+                return;
+            }
+        }
+        
+        // <+9788>
+        // x19
+        NSFetchRequest<OCCKImportPendingRelationship *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKImportPendingRelationship entityPath]];
+        fetchRequest.fetchBatchSize = 200;
+        fetchRequest.returnsObjectsAsFaults = NO;
+        
+        /*
+         __150-[PFCloudKitSerializer applyUpdatedRecords:deletedRecordIDs:toStore:inManagedObjectContext:onlyUpdatingAttributes:andRelationships:madeChanges:error:]_block_invoke.47
+         managedObjectContext = sp + 0x210
+         importZoneContext = sp + 0x218
+         store = sp + 0x220
+         managedObjectModel = sp + 0x228
+         _error = sp + 0x230
+         _succeed = sp + 0x238
+         madeChanges = sp + 0x240
+         */
+        [OCSPIResolver _PFRoutines_efficientlyEnumerateManagedObjectsInFetchRequest_usingManagedObjectContext_andApplyBlock_:objc_lookUpClass("_PFRoutines") x1:fetchRequest x2:managedObjectContext x3:^(NSArray<OCCKImportPendingRelationship *> * _Nullable objects, NSError * _Nullable error, BOOL * _Nonnull checkChanges, BOOL * _Nonnull reserved) {
+            abort();
+        }];
+        
+        if (!result) {
+            [_error retain];
+            _succeed = NO;
+            [managedObjectModel release];
+            [entityDescriptions release];
+            [importZoneContext release];
+            [delegate release];
+            return;
+        }
+        
+        // x19
+        NSArray<OCCKMirroredRelationship *> * _Nullable mirroredRelationships = [OCCKMirroredRelationship fetchPendingMirroredRelationshipsInStore:store withManagedObjectContext:managedObjectContext error:&_error];
+        
+        if (mirroredRelationships == nil) {
+            [_error retain];
+            _succeed = NO;
+            [managedObjectModel release];
+            [entityDescriptions release];
+            [importZoneContext release];
+            [delegate release];
+            return;
+        }
+        
+        // <+10024>
+        // x25
+        for (OCCKMirroredRelationship *ocMirroredRelationship in mirroredRelationships) {
+            // x26
+            CKRecordID *recordIDForRecord = [ocMirroredRelationship createRecordIDForRecord];
+            // x27
+            CKRecordID *recordIDForRelatedRecord = [ocMirroredRelationship createRecordIDForRelatedRecord];
+            
+            NSMutableDictionary<CKRecordType, NSMutableDictionary<CKRecordID *, NSManagedObjectID *> *> * _Nullable recordTypeToRecordIDToObjectID;
+            {
+                if (importZoneContext == nil) {
+                    recordTypeToRecordIDToObjectID = nil;
+                } else {
+                    recordTypeToRecordIDToObjectID = importZoneContext->_recordTypeToRecordIDToObjectID;
+                }
+            }
+            
+            // x28
+            NSManagedObjectID *objectID_1 = [[recordTypeToRecordIDToObjectID objectForKey:ocMirroredRelationship.cdEntityName] objectForKey:recordIDForRecord];
+            // x22
+            NSManagedObjectID *objectID_2 = [[recordTypeToRecordIDToObjectID objectForKey:ocMirroredRelationship.relatedEntityName] objectForKey:recordIDForRecord];
+            [recordIDForRecord release];
+            [recordIDForRelatedRecord release];
+            
+            if ((objectID_1 != nil) && (objectID_2 != nil)) {
+                // sp + 0x1a8
+                NSError * _Nullable __error = nil;
+                // <+10248>
+                BOOL result = [ocMirroredRelationship updateRelationshipValueUsingImportContext:importZoneContext andManagedObjectContext:managedObjectContext isDelete:ocMirroredRelationship.needsDelete.boolValue error:&__error];
+                if (!result) {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to resolve pending relationship: %@\n%@", __func__, __LINE__, ocMirroredRelationship, __error);
+                } else {
+                    ocMirroredRelationship.isPending = @NO;
+                }
+            } else {
+                // <+10316>
+                if (ocMirroredRelationship.needsDelete.boolValue) {
+                    ocMirroredRelationship.isPending = @NO;
+                }
+            }
+        }
+        
+        // <+10992>
+        NSArray<PFMirroredManyToManyRelationship *> * _Nullable deletedRelationships_2;
+        {
+            if (importZoneContext == nil) {
+                deletedRelationships_2 = nil;
+            } else {
+                deletedRelationships_2 = importZoneContext->_deletedRelationships;
+            }
+        }
+        // x25
+        for (PFMirroredManyToManyRelationship *deletedRelationship in deletedRelationships_2) {
+            // x28
+            OCCKMirroredRelationship * _Nullable ocRelationship = [OCCKMirroredRelationship mirroredRelationshipForManyToMany:deletedRelationship inStore:store withManagedObjectContext:managedObjectContext error:&_error];
+            // <+11176>
+            if (ocRelationship == nil) {
+                if (_error != nil) {
+#warning TODO Error Leak
+                    _succeed = NO;
+                    [_error retain];
+                    continue;
+                } else {
+                    continue;
+                }
+            } else {
+                ocRelationship.needsDelete = @YES;
+                
+                // sp + 0x1a8
+                NSError * _Nullable __error = nil;
+                BOOL result = [ocRelationship updateRelationshipValueUsingImportContext:importZoneContext andManagedObjectContext:managedObjectContext isDelete:YES error:&__error];
+                if (result) {
+                    continue;
+                } else {
+                    // <+11232>
+                    if (([__error.domain isEqualToString:NSCocoaErrorDomain]) && ((__error.code == 134412) || (__error.code == 134413))) {
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Marking deleted mirrored relationship fulfilled, one or more of the related objects is missing: %@", __func__, __LINE__, ocRelationship);
+                        ocRelationship.needsDelete = @YES;
+                        ocRelationship.isPending = @NO;
+                    } else {
+#warning TODO Error Leak
+                        _succeed = NO;
+                        [_error retain];
+                        continue;
+                    }
+                }
+            }
+        }
+        
+        if (!_succeed) {
+            [managedObjectModel release];
+            [entityDescriptions release];
+            [importZoneContext release];
+            [delegate release];
+            return;
+        }
+        
+        NSSet<CKRecordID *> * _Nullable deletedMirroredRelationshipRecordIDs;
+        {
+            if (importZoneContext == nil) {
+                deletedMirroredRelationshipRecordIDs = nil;
+            } else {
+                deletedMirroredRelationshipRecordIDs = (NSSet *)importZoneContext->_deletedMirroredRelationshipRecordIDs;
+            }
+        }
+        
+        result = [OCCKMirroredRelationship purgeMirroredRelationshipsWithRecordIDs:deletedMirroredRelationshipRecordIDs.allObjects fromStore:store withManagedObjectContext:managedObjectContext error:&_error];
+        
+        if (!result) {
+            _succeed = NO;
+            [_error retain];
+        }
+        
+        [managedObjectModel release];
+        [entityDescriptions release];
+        [importZoneContext release];
+        [delegate release];
+        return;
     }];
     
     if (!_succeed) {
@@ -1988,12 +2467,62 @@ static CKRecordZoneID *zoneID_2;
         // x20 = relationship
         if ((!relationship.isToMany || !relationship.inverseRelationship.isToMany) && !relationship.isToMany) {
             // <+6384>
-        } else {
-            // <+7124>
+            // x22
+            OCCloudKitMetadataCache * _Nullable metadataCache = self->_metadataCache;
+            // x21
+            NSString *name_1 = relationship.name;
+            
+            if (metadataCache != nil) {
+                if ([[metadataCache->_objectIDToChangedPropertyKeys objectForKey:managedObject.objectID] containsObject:name_1]) {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Importer is rejecting updated value for '%@' on '%@' because there are pending local edits that haven't been exported yet.", __func__, __LINE__, relationship.name, managedObject.objectID);
+                    // <+7124>
+                    continue;
+                }
+            }
+            
+            // <+6636>
+            // x22
+            NSString *name_2 = name_1;
+            if (hasCDPrefix) {
+                name_2 = [@"CD_" stringByAppendingString:name_1];
+            }
+            
+            id<CKRecordKeyValueSetting> target = record;
+            if ((self->_mirroringOptions.useDeviceToDeviceEncryption) && !([name_2 hasSuffix:@"_ckAsset"])) {
+                target = record.encryptedValues;
+            }
+            // x27
+            id value = [target objectForKey:name_2];
+            
+            if (value != nil) {
+                // <+6768>
+                // x21
+                CKRecordID *recordID_1 = [recordMetadata createRecordID];
+                // original : getCloudKitCKRecordIDClass
+                // x22
+                CKRecordID *recordID_2 = [[CKRecordID alloc] initWithRecordName:name_1 zoneID:recordID_1.zoneID];
+                os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Adding mirrored relationship to link for record %@ related to %@ by %@", __func__, __LINE__, recordID_1, value, relationship.name);
+                
+                PFMirroredOneToManyRelationship *mirroredRelationship = [OCSPIResolver PFMirroredRelationship_mirroredRelationshipWithManagedObject_withRecordID_relatedToObjectWithRecordID_byRelationship_:objc_lookUpClass("PFMirroredRelationship") x1:managedObject x2:recordID_1 x3:recordID_2 x4:relationship];
+                [importContext addMirroredRelationshipToLink:mirroredRelationship];
+                [recordID_1 release];
+                [recordID_2 release];
+                continue;
+            } else {
+                // <+6888>
+                if (!relationship.isTransient) {
+                    continue;
+                }
+                
+                [managedObject setValue:nil forKey:name_1];
+                continue;
+            }
         }
+        // fin
     }
+    
     // <+7264>
-    abort();
+    return YES;
 }
 
 @end

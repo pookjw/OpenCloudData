@@ -177,6 +177,7 @@
 				SPI/CoreData/NSStoreMapping.h,
 				SPI/CoreData/PFApplicationStateMonitor.h,
 				SPI/CoreData/PFApplicationStateMonitorDelegate.h,
+				SPI/CoreData/PFCloudKitImportZoneContext.h,
 				SPI/CoreData/PFCloudKitSerializer.h,
 				SPI/CoreData/PFHistoryAnalyzer.h,
 				SPI/CoreData/PFHistoryAnalyzerContext.h,

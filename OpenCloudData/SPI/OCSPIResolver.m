@@ -227,6 +227,11 @@ __attribute__((objc_direct_members))
     return ((id (*)(Class, id))addr)(x0, x1);
 }
 
++ (PFMirroredRelationship *)PFMirroredRelationship_mirroredRelationshipWithManagedObject_withRecordID_relatedToObjectWithRecordID_byRelationship_:(Class)x0 x1:(NSManagedObject *)x1 x2:(CKRecordID *)x2 x3:(CKRecordID *)x3 x4:(NSRelationshipDescription *)x4 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[PFMirroredRelationship mirroredRelationshipWithManagedObject:withRecordID:relatedToObjectWithRecordID:byRelationship:]"];
+    return ((id (*)(Class, id, id, id, id))addr)(x0, x1, x2, x3, x4);
+}
+
 + (NSString *)_PFModelMapPathForEntity:(NSEntityDescription *)x0 {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"__PFModelMapPathForEntity"];
     return ((id (*)(id))addr)(x0);

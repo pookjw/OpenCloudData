@@ -273,7 +273,7 @@
     return results;
 }
 
-+ (OCCKMirroredRelationship *)mirroredRelationshipForManyToMany:(PFMirroredManyToManyRelationshipV2 *)manyToManyRelationship inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
++ (OCCKMirroredRelationship *)mirroredRelationshipForManyToMany:(PFMirroredManyToManyRelationship *)manyToManyRelationship inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
     /*
      x19 = manyToManyRelationship
      x23 = store
@@ -307,7 +307,7 @@
     return results.lastObject;
 }
 
-+ (OCCKMirroredRelationship *)insertMirroredRelationshipForManyToMany:(PFMirroredManyToManyRelationshipV2 *)manyToManyRelationship inZoneWithMetadata:(OCCKRecordZoneMetadata *)metadata inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext {
++ (OCCKMirroredRelationship *)insertMirroredRelationshipForManyToMany:(PFMirroredManyToManyRelationship *)manyToManyRelationship inZoneWithMetadata:(OCCKRecordZoneMetadata *)metadata inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext {
     /*
      x21 = manyToManyRelationship
      x19 = metadata

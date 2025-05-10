@@ -1184,4 +1184,97 @@
     }
 }
 
+- (BOOL)mergeMoveReceiptsWithData:(NSData *)data error:(NSError * _Nullable *)error {
+    /*
+     self = x21
+     data = x22
+     error = x23
+     */
+    // sp, #0x98
+    NSError * _Nullable _error = nil;
+    // x19
+    NSPersistentStore *persistentStore = [self.objectID.persistentStore retain];
+    // x20
+    NSManagedObjectContext *managedObjectContext = [self.managedObjectContext retain];
+    
+    if (persistentStore == nil) {
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to merge move receipts before assigning a record metadata to a store: %@\n", self);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to merge move receipts before assigning a record metadata to a store: %@\n", self);
+    }
+    
+    BOOL result;
+    @autoreleasepool {
+        // x22
+        OCCKRecordMetadataReceiptArchive * _Nullable receiptArchive = [[NSKeyedUnarchiver unarchivedObjectOfClass:[OCCKRecordMetadataReceiptArchive class] fromData:data error:&_error] retain];
+        if (receiptArchive == nil) {
+            result = NO;
+            [_error retain];
+        } else {
+            /*
+             persistentStore = sp + 0x8
+             managedObjectContext = x19
+             */
+            // x23
+            NSMutableSet<CKRecordID *> *recordIDs = [[NSMutableSet alloc] init];
+            // x25
+            NSSet<OCCKRecordZoneMoveReceipt *> *moveReceipts = self.moveReceipts;
+            
+            for (OCCKRecordZoneMoveReceipt *moveReceipt in moveReceipts) {
+                // x27
+                CKRecordID *recordID = [moveReceipt createRecordIDForMovedRecord];
+                [recordIDs addObject:recordID];
+                [recordID release];
+            }
+            
+            /*
+             __54-[NSCKRecordMetadata mergeMoveReceiptsWithData:error:]_block_invoke
+             recordIDs = sp + 0x30 = x20 + 0x20
+             managedObjectContext = sp + 0x38 = x20 + 0x28
+             self = sp + 0x40 = x20 + 0x30
+             persistentStore = sp + 0x48 = x20 + 0x38
+             */
+            [receiptArchive enumerateArchivedRecordIDsUsingBlock:^(CKRecordID * _Nonnull recordID, NSDate * _Nonnull movedAt) {
+                /*
+                 self(block) = x20
+                 recordID = x19
+                 movedAt = x22
+                 */
+                if ([recordIDs containsObject:recordID]) return;
+                
+                // x21
+                OCCKRecordZoneMoveReceipt *moveReceipt = [NSEntityDescription insertNewObjectForEntityForName:[OCCKRecordZoneMoveReceipt entityPath] inManagedObjectContext:managedObjectContext];
+                moveReceipt.recordMetadata = self;
+                moveReceipt.movedAt = movedAt;
+                moveReceipt.needsCloudDelete = NO;
+                moveReceipt.zoneName = recordID.zoneID.zoneName;
+                moveReceipt.ownerName = recordID.zoneID.ownerName;
+                moveReceipt.recordName = recordID.recordName;
+                
+                [managedObjectContext assignObject:moveReceipt toPersistentStore:persistentStore];
+                [recordIDs addObject:recordID];
+            }];
+            
+            [recordIDs release];
+            [receiptArchive release];
+            result = YES;
+        }
+    }
+    
+    if (!result) {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error) {
+                *error = [[_error retain] autorelease];
+            }
+        }
+    }
+    
+    [persistentStore release];
+    [_error release];
+    [managedObjectContext release];
+    return result;
+}
+
 @end

@@ -16,6 +16,7 @@
 #import <OpenCloudData/NSSQLiteAdapter.h>
 #import <OpenCloudData/NSSQLColumn.h>
 #import <OpenCloudData/_NSDataFileBackedFuture.h>
+#import <OpenCloudData/PFMirroredOneToManyRelationship.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -71,6 +72,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSSet<NSManagedObjectID *> *)PFCloudKitSerializer_createSetOfObjectIDsRelatedToObject_:(Class)x0 x1:(NSManagedObject *)x1;
 + (NSURL *)PFCloudKitSerializer_generateCKAssetFileURLForObjectInStore_:(Class)x0 x1:(NSPersistentStore *)x1;
 + (NSURL *)PFCloudKitSerializer_assetStorageDirectoryURLForStore_:(Class)x0 x1:(NSPersistentStore *)x1;
+
++ (PFMirroredRelationship *)PFMirroredRelationship_mirroredRelationshipWithManagedObject_withRecordID_relatedToObjectWithRecordID_byRelationship_:(Class)x0 x1:(NSManagedObject *)x1 x2:(CKRecordID *)x2 x3:(CKRecordID *)x3 x4:(NSRelationshipDescription *)x4;
+//+ (PFMirroredRelationship *)PFMirroredRelationship_mirroredRelationshipWithManyToManyRecord_
 
 + (NSString *)NSCloudKitMirroringDelegateExportContextName;
 + (NSString *)NSCloudKitMirroringDelegateImportContextName;

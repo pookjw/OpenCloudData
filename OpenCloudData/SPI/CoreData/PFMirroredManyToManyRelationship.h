@@ -9,9 +9,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-
 @interface PFMirroredManyToManyRelationship : PFMirroredRelationship
+
 @end
 
 NS_ASSUME_NONNULL_END

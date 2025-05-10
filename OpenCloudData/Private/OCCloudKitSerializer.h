@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class OCCloudKitSerializer;
 @protocol OCCloudKitSerializerDelegate <NSObject>
-- (void)cloudKitSerializer:(OCCloudKitSerializer *)cloudKitSerializer failedToUpdateRelationship:(PFMirroredManyToManyRelationshipV2 *)relationship withError:(NSError *)error;
+- (void)cloudKitSerializer:(OCCloudKitSerializer *)cloudKitSerializer failedToUpdateRelationship:(PFMirroredManyToManyRelationship *)relationship withError:(NSError *)error;
 - (NSURL * _Nullable)cloudKitSerializer:(OCCloudKitSerializer *)cloudKitSerializer safeSaveURLForAsset:(CKAsset *)asset;
 @end
 
