@@ -232,6 +232,21 @@ __attribute__((objc_direct_members))
     return ((id (*)(Class, id, id, id, id))addr)(x0, x1, x2, x3, x4);
 }
 
++ (PFMirroredManyToManyRelationship *)PFMirroredRelationship_mirroredRelationshipWithManyToManyRecord_values_andManagedObjectModel_:(Class)x0 x1:(CKRecord *)x1 x2:(id<CKRecordKeyValueSetting>)x2 x3:(NSManagedObjectModel *)x3 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[PFMirroredRelationship mirroredRelationshipWithManagedObject:withRecordID:relatedToObjectWithRecordID:byRelationship:]"];
+    return ((id (*)(Class, id, id, id))addr)(x0, x1, x2, x3);
+}
+
++ (NSDictionary<NSString *, NSArray<CKRecordID *> *> *)PFMirroredManyToManyRelationship_recordTypeToRecordID:(PFMirroredManyToManyRelationship *)x0 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"-[PFMirroredManyToManyRelationship recordTypeToRecordID]"];
+    return ((id (*)(id))addr)(x0);
+}
+
++ (PFMirroredManyToManyRelationship *)PFMirroredRelationship_mirroredRelationshipWithDeletedRecordType_recordID_andManagedObjectModel_:(Class)x0 x1:(CKRecordType)x1 x2:(CKRecordID *)x2 x3:(NSManagedObjectModel *)x3 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[PFMirroredRelationship mirroredRelationshipWithDeletedRecordType:recordID:andManagedObjectModel:]"];
+    return ((id (*)(Class, id, id, id))addr)(x0, x1, x2, x3);
+}
+
 + (NSString *)_PFModelMapPathForEntity:(NSEntityDescription *)x0 {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"__PFModelMapPathForEntity"];
     return ((id (*)(id))addr)(x0);

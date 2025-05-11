@@ -6,14 +6,15 @@
 //
 
 #import <CoreData/CoreData.h>
-#import <OpenCloudData/OCCKImportOperation.h>
-#import <OpenCloudData/PFMirroredRelationship.h>
+#import <OpenCloudData/OCMirroredRelationship.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class OCCKImportOperation;
+
 @interface OCCKImportPendingRelationship : NSManagedObject
 + (NSString *)entityPath __attribute__((objc_direct));
-+ (OCCKImportPendingRelationship *)insertPendingRelationshipForFailedRelationship:(PFMirroredRelationship *)failedRelationship forOperation:(OCCKImportOperation *)operation inStore:(NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext __attribute__((objc_direct));
++ (OCCKImportPendingRelationship *)insertPendingRelationshipForFailedRelationship:(OCMirroredRelationship *)failedRelationship forOperation:(OCCKImportOperation *)operation inStore:(NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext __attribute__((objc_direct));
 @property (retain, nonatomic, nullable) NSString *recordName;
 @property (retain, nonatomic, nullable) NSString *cdEntityName;
 @property (retain, nonatomic, nullable) NSString *relatedRecordName;

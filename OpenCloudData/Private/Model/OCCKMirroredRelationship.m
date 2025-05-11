@@ -273,7 +273,7 @@
     return results;
 }
 
-+ (OCCKMirroredRelationship *)mirroredRelationshipForManyToMany:(PFMirroredManyToManyRelationship *)manyToManyRelationship inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
++ (OCCKMirroredRelationship *)mirroredRelationshipForManyToMany:(OCMirroredManyToManyRelationship *)manyToManyRelationship inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
     /*
      x19 = manyToManyRelationship
      x23 = store
@@ -288,8 +288,7 @@
     
     NSString * _Nullable recordName;
     if (manyToManyRelationship != nil) {
-        CKRecordID * _Nullable _manyToManyRecordID;
-        assert(object_getInstanceVariable(manyToManyRelationship, "_manyToManyRecordID", (void **)&_manyToManyRecordID) != NULL);
+        CKRecordID * _Nullable _manyToManyRecordID = manyToManyRelationship->_manyToManyRecordID;
         recordName = _manyToManyRecordID.recordName;
     } else {
         recordName = nil;
@@ -307,7 +306,7 @@
     return results.lastObject;
 }
 
-+ (OCCKMirroredRelationship *)insertMirroredRelationshipForManyToMany:(PFMirroredManyToManyRelationship *)manyToManyRelationship inZoneWithMetadata:(OCCKRecordZoneMetadata *)metadata inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext {
++ (OCCKMirroredRelationship *)insertMirroredRelationshipForManyToMany:(OCMirroredManyToManyRelationship *)manyToManyRelationship inZoneWithMetadata:(OCCKRecordZoneMetadata *)metadata inStore:(__kindof NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext {
     /*
      x21 = manyToManyRelationship
      x19 = metadata
@@ -321,8 +320,7 @@
     
     NSString * _Nullable ckRecordID;
     if (manyToManyRelationship != nil) {
-        CKRecordID * _Nullable _manyToManyRecordID;
-        assert(object_getInstanceVariable(manyToManyRelationship, "_manyToManyRecordID", (void **)&_manyToManyRecordID) != NULL);
+        CKRecordID * _Nullable _manyToManyRecordID = manyToManyRelationship->_manyToManyRecordID;
         ckRecordID = _manyToManyRecordID.recordName;
     } else {
         ckRecordID = nil;
@@ -331,8 +329,7 @@
     
     NSString * _Nullable cdEntityName;
     if (manyToManyRelationship != nil) {
-        NSRelationshipDescription * _Nullable _relationshipDescription;
-        assert(object_getInstanceVariable(manyToManyRelationship, "_relationshipDescription", (void **)&_relationshipDescription) != NULL);
+        NSRelationshipDescription * _Nullable _relationshipDescription = manyToManyRelationship->_relationshipDescription;
         cdEntityName = _relationshipDescription.entity.name;
     } else {
         cdEntityName = nil;
@@ -341,8 +338,7 @@
     
     NSString * _Nullable recordName;
     if (manyToManyRelationship != nil) {
-        CKRecordID * _Nullable _ckRecordID;
-        assert(object_getInstanceVariable(manyToManyRelationship, "_ckRecordID", (void **)&_ckRecordID) != NULL);
+        CKRecordID * _Nullable _ckRecordID = manyToManyRelationship->_ckRecordID;
         recordName = _ckRecordID.recordName;
     } else {
         recordName = nil;
@@ -352,8 +348,7 @@
     
     NSString * _Nullable relatedEntityName;
     if (manyToManyRelationship != nil) {
-        NSRelationshipDescription * _Nullable _inverseRelationshipDescription;
-        assert(object_getInstanceVariable(manyToManyRelationship, "_inverseRelationshipDescription", (void **)&_inverseRelationshipDescription) != NULL);
+        NSRelationshipDescription * _Nullable _inverseRelationshipDescription = manyToManyRelationship->_inverseRelationshipDescription;
         relatedEntityName = _inverseRelationshipDescription.entity.name;
     } else {
         relatedEntityName = nil;
@@ -363,8 +358,7 @@
     
     NSString * _Nullable relatedRecordName;
     if (manyToManyRelationship != nil) {
-        CKRecordID * _Nullable _relatedCKRecordID;
-        assert(object_getInstanceVariable(manyToManyRelationship, "_relatedCKRecordID", (void **)&_relatedCKRecordID) != NULL);
+        CKRecordID * _Nullable _relatedCKRecordID = manyToManyRelationship->_relatedCKRecordID;
         relatedRecordName = _relatedCKRecordID.recordName;
     } else {
         relatedRecordName = nil;
@@ -373,8 +367,7 @@
     
     NSString * _Nullable relationshipName;
     if (manyToManyRelationship != nil) {
-        NSRelationshipDescription * _Nullable _relationshipDescription;
-        assert(object_getInstanceVariable(manyToManyRelationship, "_relationshipDescription", (void **)&_relationshipDescription) != NULL);
+        NSRelationshipDescription * _Nullable _relationshipDescription = manyToManyRelationship->_relationshipDescription;
         relationshipName = _relationshipDescription.name;
     } else {
         relationshipName = nil;

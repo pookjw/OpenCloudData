@@ -8,22 +8,23 @@
 #import <CloudKit/CloudKit.h>
 #import <CoreData/CoreData.h>
 #import <OpenCloudData/OCCloudKitMirroringDelegateOptions.h>
-#import <OpenCloudData/PFMirroredOneToManyRelationship.h>
-#import <OpenCloudData/PFMirroredManyToManyRelationshipV2.h>
-#import <OpenCloudData/OCCKImportOperation.h>
+#import <OpenCloudData/OCMirroredOneToManyRelationship.h>
+#import <OpenCloudData/OCMirroredManyToManyRelationshipV2.h>
 #import <OpenCloudData/OCCKRecordMetadata.h>
 
 #warning TODO
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class OCCKImportOperation;
+
 @interface OCCloudKitImportZoneContext : NSObject {
     NSArray<CKRecord *> *_updatedRecords; // 0x8
     NSDictionary<NSString *, NSArray<CKRecordID *> *> *_deletedRecordTypeToRecordID; // 0x10
     @package NSSet<NSManagedObjectID *> *_deletedObjectIDs; // 0x18
     @package NSArray<CKRecord *> *_modifiedRecords; // 0x20
-    @package NSMutableArray<PFMirroredManyToManyRelationship *> *_updatedRelationships; // 0x28
-    @package NSArray<PFMirroredManyToManyRelationship *> *_deletedRelationships; // 0x30
+    @package NSMutableArray<OCMirroredManyToManyRelationship *> *_updatedRelationships; // 0x28
+    @package NSArray<OCMirroredManyToManyRelationship *> *_deletedRelationships; // 0x30
     // ivar 상으로는 NSArray이지만 NSSet으로 다뤄야 한다. https://x.com/_silgen_name/status/1921235608715853962
     @package NSArray<CKRecordID *> *_deletedMirroredRelationshipRecordIDs; // 0x38
     @package NSMutableDictionary<CKRecordType, NSMutableDictionary<CKRecordID *, NSManagedObjectID *> *> *_recordTypeToRecordIDToObjectID; // 0x40
@@ -37,9 +38,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithUpdatedRecords:(NSArray<CKRecord *> *)updatedRecords deletedRecordTypeToRecordIDs:(NSDictionary<NSString *, NSArray<CKRecordID *> *> *)deletedRecordTypeToRecordIDs options:(OCCloudKitMirroringDelegateOptions *)options fileBackedFuturesDirectory:(NSString * _Nullable)fileBackedFuturesDirectory;
 - (BOOL)initializeCachesWithManagedObjectContext:(NSManagedObjectContext *)managedObjectContext andObservedStore:(NSSQLCore *)observedStore error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 - (void)registerObject:(NSManagedObject *)object forInsertedRecord:(CKRecord *)record withMetadata:(OCCKRecordMetadata *)metadata __attribute__((objc_direct));
-- (void)addMirroredRelationshipToLink:(PFMirroredOneToManyRelationship *)mirroredRelationship  __attribute__((objc_direct));
+- (void)addMirroredRelationshipToLink:(OCMirroredOneToManyRelationship *)mirroredRelationship  __attribute__((objc_direct));
 - (BOOL)linkInsertedObjectsAndMetadataInContext:(NSManagedObjectContext *)context error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 - (BOOL)populateUnresolvedIDsInStore:(NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
+- (void)addObjectID:(NSManagedObjectID *)objectID toCache:(NSMutableDictionary *)cache andRecordID:(CKRecordID *)recordID __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

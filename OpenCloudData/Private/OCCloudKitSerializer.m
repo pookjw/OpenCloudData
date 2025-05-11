@@ -1155,7 +1155,7 @@ static CKRecordZoneID *zoneID_2;
             // x20
             CKRecordID *recordID_3 = [_recordMetadata createRecordID];
             // x25
-            PFMirroredManyToManyRelationshipV2 *pfRelationship = [[objc_lookUpClass("PFMirroredManyToManyRelationshipV2") alloc] initWithRecordID:recordID_1 forRecordWithID:recordID_2 relatedToRecordWithID:recordID_3 byRelationship:relationship withInverse:refObject.entity.relationshipsByName[inverseRelationship.name] andType:0];
+            OCMirroredManyToManyRelationshipV2 *pfRelationship = [[OCMirroredManyToManyRelationshipV2 alloc] initWithRecordID:recordID_1 forRecordWithID:recordID_2 relatedToRecordWithID:recordID_3 byRelationship:relationship withInverse:refObject.entity.relationshipsByName[inverseRelationship.name] andType:0];
             
             if (flag) {
                 // x26
@@ -1682,7 +1682,7 @@ static CKRecordZoneID *zoneID_2;
         }
         
         // <+9400>
-        NSArray<PFMirroredManyToManyRelationship *> * _Nullable deletedRelationships;
+        NSArray<OCMirroredManyToManyRelationship *> * _Nullable deletedRelationships;
         {
             if (importZoneContext == nil) {
                 deletedRelationships = nil;
@@ -1698,15 +1698,13 @@ static CKRecordZoneID *zoneID_2;
          delegate = sp + 0x2d0
          self = sp + 0x2d8
          */
-        [deletedRelationships enumerateObjectsUsingBlock:^(PFMirroredManyToManyRelationship * _Nonnull mirroredRelationship, NSUInteger idx, BOOL * _Nonnull stop) {
+        [deletedRelationships enumerateObjectsUsingBlock:^(OCMirroredManyToManyRelationship * _Nonnull mirroredRelationship, NSUInteger idx, BOOL * _Nonnull stop) {
             /*
              self(block) = x19
              mirroredRelationship = x20
              */
             
             NSError * _Nullable __error = nil;
-            
-#warning TODO PFMirroredRelationship은 직접 구현되어야 함
             BOOL result = [mirroredRelationship updateRelationshipValueUsingImportContext:importZoneContext andManagedObjectContext:managedObjectContext error:&__error];
             
             if (!result) {
@@ -1731,7 +1729,7 @@ static CKRecordZoneID *zoneID_2;
             return;
         }
         
-        NSMutableArray<PFMirroredManyToManyRelationship *> * _Nullable updatedRelationships;
+        NSMutableArray<OCMirroredManyToManyRelationship *> * _Nullable updatedRelationships;
         {
             if (importZoneContext == nil) {
                 updatedRelationships = nil;
@@ -1750,7 +1748,7 @@ static CKRecordZoneID *zoneID_2;
          _succeed = sp + 0x290 = x20 + 0x48
          _error = sp + 0x298 = x20 + 0x50
          */
-        [[[updatedRelationships copy] autorelease] enumerateObjectsUsingBlock:^(PFMirroredManyToManyRelationship * _Nonnull mirroredRelationship, NSUInteger idx, BOOL * _Nonnull stop) {
+        [[[updatedRelationships copy] autorelease] enumerateObjectsUsingBlock:^(OCMirroredManyToManyRelationship * _Nonnull mirroredRelationship, NSUInteger idx, BOOL * _Nonnull stop) {
             /*
              self(block) = x20
              x19 = mirroredRelationship
@@ -1761,19 +1759,14 @@ static CKRecordZoneID *zoneID_2;
             
             os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Updating relationship: %@", __func__, __LINE__ ,mirroredRelationship);
             
-            CKRecordID *ckRecordID;
-            assert(object_getInstanceVariable(mirroredRelationship, "_ckRecordID", (void **)&ckRecordID) != NULL);
-            CKRecordID *relatedCKRecordID;
-            assert(object_getInstanceVariable(mirroredRelationship, "_relatedCKRecordID", (void **)&relatedCKRecordID) != NULL);
-            NSRelationshipDescription *relationshipDescription;
-            assert(object_getInstanceVariable(mirroredRelationship, "_relationshipDescription", (void **)&relationshipDescription) != NULL);
-            NSRelationshipDescription *inverseRelationshipDescription;
-            assert(object_getInstanceVariable(mirroredRelationship, "_inverseRelationshipDescription", (void **)&inverseRelationshipDescription) != NULL);
+            CKRecordID *ckRecordID = mirroredRelationship->_ckRecordID;
+            CKRecordID *relatedCKRecordID = mirroredRelationship->_relatedCKRecordID;
+            NSRelationshipDescription *relationshipDescription = mirroredRelationship->_relationshipDescription;
+            NSRelationshipDescription *inverseRelationshipDescription = mirroredRelationship->_inverseRelationshipDescription;
             // x21
             NSString *mtmKey = [OCCloudKitSerializer mtmKeyForObjectWithRecordName:ckRecordID.recordName relatedToObjectWithRecordName:relatedCKRecordID.recordName byRelationship:relationshipDescription withInverse:inverseRelationshipDescription];
             
-            CKRecordID *manyToManyRecordID;
-            assert(object_getInstanceVariable(mirroredRelationship, "_manyToManyRecordID", (void **)&manyToManyRecordID) != NULL);
+            CKRecordID *manyToManyRecordID = mirroredRelationship->_manyToManyRecordID;
             
             // x22
             OCCloudKitMetadataCache * _Nullable metadataCache = self->_metadataCache;
@@ -1830,7 +1823,6 @@ static CKRecordZoneID *zoneID_2;
             }
             
             // <+748>
-#warning TODO PFMirroredRelationship은 직접 구현되어야 함
             BOOL result = [mirroredRelationship updateRelationshipValueUsingImportContext:importZoneContext andManagedObjectContext:managedObjectContext error:&__error];
             
             if (result) {
@@ -1943,7 +1935,7 @@ static CKRecordZoneID *zoneID_2;
         }
         
         // <+10992>
-        NSArray<PFMirroredManyToManyRelationship *> * _Nullable deletedRelationships_2;
+        NSArray<OCMirroredManyToManyRelationship *> * _Nullable deletedRelationships_2;
         {
             if (importZoneContext == nil) {
                 deletedRelationships_2 = nil;
@@ -1952,7 +1944,7 @@ static CKRecordZoneID *zoneID_2;
             }
         }
         // x25
-        for (PFMirroredManyToManyRelationship *deletedRelationship in deletedRelationships_2) {
+        for (OCMirroredManyToManyRelationship *deletedRelationship in deletedRelationships_2) {
             // x28
             OCCKMirroredRelationship * _Nullable ocRelationship = [OCCKMirroredRelationship mirroredRelationshipForManyToMany:deletedRelationship inStore:store withManagedObjectContext:managedObjectContext error:&_error];
             // <+11176>
@@ -2503,7 +2495,7 @@ static CKRecordZoneID *zoneID_2;
                 CKRecordID *recordID_2 = [[CKRecordID alloc] initWithRecordName:name_1 zoneID:recordID_1.zoneID];
                 os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Adding mirrored relationship to link for record %@ related to %@ by %@", __func__, __LINE__, recordID_1, value, relationship.name);
                 
-                PFMirroredOneToManyRelationship *mirroredRelationship = [OCSPIResolver PFMirroredRelationship_mirroredRelationshipWithManagedObject_withRecordID_relatedToObjectWithRecordID_byRelationship_:objc_lookUpClass("PFMirroredRelationship") x1:managedObject x2:recordID_1 x3:recordID_2 x4:relationship];
+                OCMirroredOneToManyRelationship *mirroredRelationship = [OCMirroredOneToManyRelationship mirroredRelationshipWithManagedObject:managedObject withRecordID:recordID_1 relatedToObjectWithRecordID:recordID_2 byRelationship:relationship];
                 [importContext addMirroredRelationshipToLink:mirroredRelationship];
                 [recordID_1 release];
                 [recordID_2 release];

@@ -20,7 +20,7 @@
 #import <objc/runtime.h>
 #import <OpenCloudData/OCCloudKitSerializer.h>
 #import <OpenCloudData/OCCloudKitMetadataCache.h>
-#import <OpenCloudData/PFMirroredManyToManyRelationshipV2.h>
+#import <OpenCloudData/OCMirroredManyToManyRelationshipV2.h>
 #import <OpenCloudData/CKRecord+Private.h>
 #import <OpenCloudData/OCSPIResolver.h>
 
@@ -1759,7 +1759,7 @@
             NSRelationshipDescription *relationship = relationshipsByName[mirroredRelationship.relationshipName];
             
             // x28
-            PFMirroredManyToManyRelationshipV2 *mirroredManyToManyRelationship = [[objc_lookUpClass("PFMirroredManyToManyRelationshipV2") alloc] initWithRecordID:recordID forRecordWithID:recordIDForRecord relatedToRecordWithID:recordIDForRelatedRecord byRelationship:relationship withInverse:relationship.inverseRelationship andType:0];
+            OCMirroredManyToManyRelationshipV2 *mirroredManyToManyRelationship = [[OCMirroredManyToManyRelationshipV2 alloc] initWithRecordID:recordID forRecordWithID:recordIDForRecord relatedToRecordWithID:recordIDForRelatedRecord byRelationship:relationship withInverse:relationship.inverseRelationship andType:0];
             
             // original : getCloudKitCKRecordClass
             // x26

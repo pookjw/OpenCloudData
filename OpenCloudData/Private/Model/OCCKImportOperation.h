@@ -6,6 +6,7 @@
 //
 
 #import <CoreData/CoreData.h>
+#import <OpenCloudData/OCCKImportPendingRelationship.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -13,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (retain, nonatomic, nullable) NSDate *importDate;
 @property (retain, nonatomic, nullable) NSUUID *operationUUID;
 @property (retain, nonatomic, nullable) NSData *changeTokenBytes;
-@property (retain, nonatomic, nullable) NSSet *pendingRelationships;
+@property (retain, nonatomic, nullable) NSSet<OCCKImportPendingRelationship *> *pendingRelationships;
 + (NSString *)entityPath __attribute__((objc_direct));
 + (NSArray<OCCKImportOperation *> * _Nullable)fetchUnfinishedImportOperationsInStore:(NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 + (OCCKImportOperation * _Nullable)fetchOperationWithIdentifier:(NSUUID *)identifier fromStore:(NSPersistentStore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));

@@ -17,6 +17,7 @@
 #import <OpenCloudData/NSSQLColumn.h>
 #import <OpenCloudData/_NSDataFileBackedFuture.h>
 #import <OpenCloudData/PFMirroredOneToManyRelationship.h>
+#import <OpenCloudData/PFMirroredManyToManyRelationship.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -74,7 +75,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSURL *)PFCloudKitSerializer_assetStorageDirectoryURLForStore_:(Class)x0 x1:(NSPersistentStore *)x1;
 
 + (PFMirroredRelationship *)PFMirroredRelationship_mirroredRelationshipWithManagedObject_withRecordID_relatedToObjectWithRecordID_byRelationship_:(Class)x0 x1:(NSManagedObject *)x1 x2:(CKRecordID *)x2 x3:(CKRecordID *)x3 x4:(NSRelationshipDescription *)x4;
-//+ (PFMirroredRelationship *)PFMirroredRelationship_mirroredRelationshipWithManyToManyRecord_
++ (PFMirroredManyToManyRelationship * _Nullable)PFMirroredRelationship_mirroredRelationshipWithManyToManyRecord_values_andManagedObjectModel_:(Class)x0 x1:(CKRecord *)x1 x2:(id<CKRecordKeyValueSetting>)x2 x3:(NSManagedObjectModel *)x3;
++ (NSDictionary<NSString *, NSArray<CKRecordID *> *> *)PFMirroredManyToManyRelationship_recordTypeToRecordID:(PFMirroredManyToManyRelationship *)x0;
++ (PFMirroredManyToManyRelationship *)PFMirroredRelationship_mirroredRelationshipWithDeletedRecordType_recordID_andManagedObjectModel_:(Class)x0 x1:(CKRecordType)x1 x2:(CKRecordID *)x2 x3:(NSManagedObjectModel *)x3;
 
 + (NSString *)NSCloudKitMirroringDelegateExportContextName;
 + (NSString *)NSCloudKitMirroringDelegateImportContextName;

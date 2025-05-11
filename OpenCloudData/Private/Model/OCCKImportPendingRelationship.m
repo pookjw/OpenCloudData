@@ -7,8 +7,8 @@
 
 #import <OpenCloudData/OCCKImportPendingRelationship.h>
 #import <OpenCloudData/OCCloudKitMetadataModel.h>
-#import <OpenCloudData/PFMirroredOneToManyRelationship.h>
-#import <OpenCloudData/PFMirroredManyToManyRelationship.h>
+#import <OpenCloudData/OCMirroredOneToManyRelationship.h>
+#import <OpenCloudData/OCMirroredManyToManyRelationship.h>
 #import <CloudKit/CloudKit.h>
 #import <objc/runtime.h>
 
@@ -30,7 +30,7 @@
     return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(objc_lookUpClass("NSCKImportPendingRelationship"))];
 }
 
-+ (OCCKImportPendingRelationship *)insertPendingRelationshipForFailedRelationship:(PFMirroredRelationship *)failedRelationship forOperation:(OCCKImportOperation *)operation inStore:(NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext {
++ (OCCKImportPendingRelationship *)insertPendingRelationshipForFailedRelationship:(OCMirroredRelationship *)failedRelationship forOperation:(OCCKImportOperation *)operation inStore:(NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext {
     /*
      failedRelationship = x23
      operation = x21
@@ -43,46 +43,42 @@
     result.needsDelete = @NO;
     
     NSRelationshipDescription * _Nullable relationshipDescription = nil;
-    if ([failedRelationship isKindOfClass:objc_lookUpClass("PFMirroredOneToManyRelationship")]) {
+    if ([failedRelationship isKindOfClass:[OCMirroredOneToManyRelationship class]]) {
+        OCMirroredOneToManyRelationship *casted = (OCMirroredOneToManyRelationship *)failedRelationship;
         result.needsDelete = @NO;
         
-        CKRecordID * _Nullable recordID; // 0xb38
-        assert(object_getInstanceVariable(failedRelationship, "_recordID", (void **)&recordID) != NULL);
+        CKRecordID * _Nullable recordID = casted->_recordID; // 0xb38
         result.recordName = recordID.recordName;
         result.recordZoneName = recordID.zoneID.zoneName;
         result.recordZoneOwnerName = recordID.zoneID.ownerName;
         
         // 0xb3c
-        assert(object_getInstanceVariable(failedRelationship, "_relationshipDescription", (void **)&relationshipDescription) != NULL);
+        relationshipDescription = casted->_relationshipDescription;
         result.cdEntityName = relationshipDescription.entity.name;
         
-        NSRelationshipDescription * _Nullable inverseRelationshipDescription; // 0xb40
-        assert(object_getInstanceVariable(failedRelationship, "_inverseRelationshipDescription", (void **)&inverseRelationshipDescription) != NULL);
+        NSRelationshipDescription * _Nullable inverseRelationshipDescription = casted->_inverseRelationshipDescription; // 0xb40
         result.relatedEntityName = inverseRelationshipDescription.entity.name;
         
-        CKRecordID * _Nullable relatedRecordID; // 0xb44
-        assert(object_getInstanceVariable(failedRelationship, "_relatedRecordID", (void **)&relatedRecordID) != NULL);
+        CKRecordID * _Nullable relatedRecordID = casted->_relatedRecordID; // 0xb44
         result.relatedRecordName = relatedRecordID.recordName;
         
         result.relatedRecordZoneName = recordID.zoneID.zoneName;
         result.relatedRecordZoneOwnerName = recordID.zoneID.ownerName;
-    } else if ([failedRelationship isKindOfClass:objc_lookUpClass("PFMirroredManyToManyRelationship")]) {
-        NSUInteger type; // 0xb34
-        assert(object_getInstanceVariable(failedRelationship, "_type", (void **)&type) != NULL);
+    } else if ([failedRelationship isKindOfClass:[OCMirroredManyToManyRelationship class]]) {
+        OCMirroredManyToManyRelationship *casted = (OCMirroredManyToManyRelationship *)failedRelationship;
         
+        NSUInteger type = casted->_type; // 0xb34
         result.needsDelete = (type == 1) ? @YES : @NO;
         
         // 0xb1c
-        assert(object_getInstanceVariable(failedRelationship, "_relationshipDescription", (void **)relationshipDescription) != NULL);
+        relationshipDescription = casted->_relationshipDescription;
         result.relatedEntityName = relationshipDescription.entity.name;
         
-        CKRecordID *ckRecordID; // 0xb2c
-        assert(object_getInstanceVariable(failedRelationship, "_ckRecordID", (void **)&ckRecordID) != NULL);
+        CKRecordID *ckRecordID = casted->_ckRecordID; // 0xb2c
         result.recordZoneName = ckRecordID.zoneID.zoneName;
         result.recordZoneOwnerName = ckRecordID.zoneID.ownerName;
         
-        CKRecordID *relatedCKRecordID; // 0xb30
-        assert(object_getInstanceVariable(failedRelationship, "_relatedCKRecordID", (void **)&relatedCKRecordID) != NULL);
+        CKRecordID *relatedCKRecordID = casted->_relatedCKRecordID; // 0xb30
         result.relatedRecordName = relatedCKRecordID.recordName;
         result.relatedRecordZoneName = relatedCKRecordID.zoneID.zoneName;
         result.relatedRecordZoneOwnerName = relatedCKRecordID.zoneID.ownerName;

@@ -9,7 +9,6 @@
 #import <CloudKit/CloudKit.h>
 #import <OpenCloudData/OCCloudKitMirroringDelegateOptions.h>
 #import <OpenCloudData/OCCloudKitMetadataCache.h>
-#import <OpenCloudData/PFMirroredManyToManyRelationshipV2.h>
 #import <OpenCloudData/OCCKRecordMetadata.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -18,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class OCCloudKitSerializer;
 @protocol OCCloudKitSerializerDelegate <NSObject>
-- (void)cloudKitSerializer:(OCCloudKitSerializer *)cloudKitSerializer failedToUpdateRelationship:(PFMirroredManyToManyRelationship *)relationship withError:(NSError *)error;
+- (void)cloudKitSerializer:(OCCloudKitSerializer *)cloudKitSerializer failedToUpdateRelationship:(OCMirroredManyToManyRelationship *)relationship withError:(NSError *)error;
 - (NSURL * _Nullable)cloudKitSerializer:(OCCloudKitSerializer *)cloudKitSerializer safeSaveURLForAsset:(CKAsset *)asset;
 @end
 
