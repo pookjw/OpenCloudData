@@ -8,8 +8,6 @@
 #import <OpenCloudData/OCMirroredRelationship.h>
 #import <CloudKit/CloudKit.h>
 
-#warning TODO
-
 NS_ASSUME_NONNULL_BEGIN
 
 @interface OCMirroredOneToManyRelationship : OCMirroredRelationship {

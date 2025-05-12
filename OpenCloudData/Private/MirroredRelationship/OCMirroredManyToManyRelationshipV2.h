@@ -9,8 +9,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-
 @interface OCMirroredManyToManyRelationshipV2 : OCMirroredManyToManyRelationship
 + (BOOL)_isValidMirroredRelationshipRecord:(CKRecord *)record values:(id<CKRecordKeyValueSetting>)values;
 + (NSArray<NSRelationshipDescription *> *)orderRelationships:(NSArray<NSRelationshipDescription *> *)relationships __attribute__((objc_direct));

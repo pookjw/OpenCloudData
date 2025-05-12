@@ -10,8 +10,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-
 @interface OCMirroredManyToManyRelationship : OCMirroredRelationship {
     @package NSUInteger _type; // 0x8
     @package NSRelationshipDescription *_relationshipDescription; // 0x10

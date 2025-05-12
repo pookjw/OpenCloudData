@@ -7,8 +7,6 @@
 
 #import <CoreData/CoreData.h>
 
-#warning TODO Unit Testing
-
 NS_ASSUME_NONNULL_BEGIN
 
 @class OCMirroredOneToManyRelationship;
