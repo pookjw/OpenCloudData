@@ -7,6 +7,7 @@
 
 #import <OpenCloudData/OCCloudKitHistoryAnalyzerOptions.h>
 #import <OpenCloudData/OCCloudKitSerializer.h>
+#import <OpenCloudData/OCMirroredOneToManyRelationship.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -26,6 +27,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSSet<NSManagedObjectID *> *)OCCloudKitSerializer:(Class)x0 createSetOfObjectIDsRelatedToObject:(NSManagedObject *)x1;
 + (NSURL *)OCCloudKitSerializer:(Class)x0 generateCKAssetFileURLForObjectInStore:(NSPersistentStore *)x1;
 + (NSURL *)OCCloudKitSerializer:(Class)x0 assetStorageDirectoryURLForStore:(NSPersistentStore *)x1;
++ (NSDictionary<NSString *, id> *)OCMirroredOneToManyRelationship_recordTypesToRecordIDs:(OCMirroredOneToManyRelationship *)x0;
++ (CKRecordType)OCMirroredManyToManyRelationship:(Class)x0 ckRecordTypeForOrderedRelationships:(NSArray<NSRelationshipDescription *> *)orderedRelationships;
++ (CKRecordType)OCMirroredManyToManyRelationship:(Class)x0 ckRecordNameForOrderedRecordNames:(NSArray<NSString *> *)orderedRecordNames;
 @end
 
 NS_ASSUME_NONNULL_END

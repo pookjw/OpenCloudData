@@ -247,6 +247,21 @@ __attribute__((objc_direct_members))
     return ((id (*)(Class, id, id, id))addr)(x0, x1, x2, x3);
 }
 
++ (NSDictionary<NSString *,NSArray<CKRecordID *> *> *)PFMirroredOneToManyRelationship_recordTypesToRecordIDs:(PFMirroredOneToManyRelationship *)x0 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"-[PFMirroredOneToManyRelationship recordTypesToRecordIDs]"];
+    return ((id (*)(id))addr)(x0);
+}
+
++ (CKRecordType)PFMirroredManyToManyRelationship_ckRecordTypeForOrderedRelationships_:(Class)x0 x1:(NSArray<NSRelationshipDescription *> *)x1 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[PFMirroredManyToManyRelationship ckRecordTypeForOrderedRelationships:]"];
+    return ((id (*)(Class, id))addr)(x0, x1);
+}
+
++ (CKRecordType)PFMirroredManyToManyRelationship_ckRecordNameForOrderedRecordNames_:(Class)x0 x1:(NSArray<NSString *> *)x1 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[PFMirroredManyToManyRelationship ckRecordNameForOrderedRecordNames:]"];
+    return ((id (*)(Class, id))addr)(x0, x1);
+}
+
 + (NSString *)_PFModelMapPathForEntity:(NSEntityDescription *)x0 {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"__PFModelMapPathForEntity"];
     return ((id (*)(id))addr)(x0);

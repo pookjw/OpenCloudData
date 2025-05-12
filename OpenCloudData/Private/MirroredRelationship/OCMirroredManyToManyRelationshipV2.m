@@ -10,7 +10,13 @@
 @implementation OCMirroredManyToManyRelationshipV2
 
 + (BOOL)_isValidMirroredRelationshipRecord:(CKRecord *)record values:(id<CKRecordKeyValueSetting>)values {
-    abort();
+    /*
+     x19 = values
+     */
+    if (((NSString *)[values objectForKey:@"CD_recordNames"]).length == 0) return NO;
+    if (((NSString *)[values objectForKey:@"CD_relationships"]).length == 0) return NO;
+    if (((NSString *)[values objectForKey:@"CD_entityNames"]).length == 0) return NO;
+    return YES;
 }
 
 + (NSArray<NSRelationshipDescription *> *)orderRelationships:(NSArray<NSRelationshipDescription *> *)relationships {
@@ -142,9 +148,9 @@
     [recordValues setObject:joinedRelationshipNames forKey:@"CD_relationships"];
     
     // sp + 0x8
-    NSString *relationshipEntityName = self->_relationshipDescription.name;
+    NSString *relationshipEntityName = self->_relationshipDescription.entity.name;
     // sp + 0x10
-    NSString *inverseRelationshipEntityName = self->_inverseRelationshipDescription.name;
+    NSString *inverseRelationshipEntityName = self->_inverseRelationshipDescription.entity.name;
     // x20
     NSArray<NSString *> *relationshipEntityNames = @[relationshipEntityName, inverseRelationshipEntityName];
     NSString *joinedRelationshipEntityNames = [relationshipEntityNames componentsJoinedByString:@":"];

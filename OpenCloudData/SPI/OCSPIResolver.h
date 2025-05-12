@@ -78,6 +78,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (PFMirroredManyToManyRelationship * _Nullable)PFMirroredRelationship_mirroredRelationshipWithManyToManyRecord_values_andManagedObjectModel_:(Class)x0 x1:(CKRecord *)x1 x2:(id<CKRecordKeyValueSetting>)x2 x3:(NSManagedObjectModel *)x3;
 + (NSDictionary<NSString *, NSArray<CKRecordID *> *> *)PFMirroredManyToManyRelationship_recordTypeToRecordID:(PFMirroredManyToManyRelationship *)x0;
 + (PFMirroredManyToManyRelationship *)PFMirroredRelationship_mirroredRelationshipWithDeletedRecordType_recordID_andManagedObjectModel_:(Class)x0 x1:(CKRecordType)x1 x2:(CKRecordID *)x2 x3:(NSManagedObjectModel *)x3;
++ (NSDictionary<NSString *, NSArray<CKRecordID *> *> *)PFMirroredOneToManyRelationship_recordTypesToRecordIDs:(PFMirroredOneToManyRelationship *)x0;
++ (CKRecordType)PFMirroredManyToManyRelationship_ckRecordTypeForOrderedRelationships_:(Class)x0 x1:(NSArray<NSRelationshipDescription *> *)orderedRelationships;
++ (CKRecordType)PFMirroredManyToManyRelationship_ckRecordNameForOrderedRecordNames_:(Class)x0 x1:(NSArray<NSString *> *)orderedRecordNames;
 
 + (NSString *)NSCloudKitMirroringDelegateExportContextName;
 + (NSString *)NSCloudKitMirroringDelegateImportContextName;

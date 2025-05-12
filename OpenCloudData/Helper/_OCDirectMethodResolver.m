@@ -59,4 +59,18 @@
     return [OCCloudKitSerializer assetStorageDirectoryURLForStore:x1];
 }
 
++ (NSDictionary<NSString *, id> *)OCMirroredOneToManyRelationship_recordTypesToRecordIDs:(OCMirroredOneToManyRelationship *)x0 {
+    return x0.recordTypesToRecordIDs;
+}
+
++ (CKRecordType)OCMirroredManyToManyRelationship:(Class)x0 ckRecordTypeForOrderedRelationships:(NSArray<NSRelationshipDescription *> *)orderedRelationships {
+    assert(x0 == [OCMirroredManyToManyRelationship class]);
+    return [OCMirroredManyToManyRelationship ckRecordTypeForOrderedRelationships:orderedRelationships];
+}
+
++ (CKRecordType)OCMirroredManyToManyRelationship:(Class)x0 ckRecordNameForOrderedRecordNames:(NSArray<NSString *> *)orderedRecordNames {
+    assert(x0 == [OCMirroredManyToManyRelationship class]);
+    return [OCMirroredManyToManyRelationship ckRecordNameForOrderedRecordNames:orderedRecordNames];
+}
+
 @end

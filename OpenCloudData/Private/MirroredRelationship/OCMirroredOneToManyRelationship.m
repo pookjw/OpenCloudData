@@ -119,13 +119,14 @@
     // x20
     NSMutableDictionary<NSString *, NSMutableArray<CKRecordID *> *> *result = [[NSMutableDictionary alloc] init];
     
-    [result setObject:array_1 forKey:self->_relationshipDescription.name];
+    [result setObject:array_1 forKey:self->_relationshipDescription.entity.name];
     [array_1 release];
     
     // x21
-    NSMutableArray<CKRecordID *> *array_2 = [[result objectForKey:_inverseRelationshipDescription.entity.name] retain];
+    NSMutableArray<CKRecordID *> *array_2 = [[result objectForKey:self->_inverseRelationshipDescription.entity.name] retain];
     if (array_2 == nil) {
         array_2 = [[NSMutableArray alloc] initWithObjects:self->_relatedRecordID, nil];
+        [result setObject:array_2 forKey:self->_inverseRelationshipDescription.entity.name];
     }
     [array_2 release];
     

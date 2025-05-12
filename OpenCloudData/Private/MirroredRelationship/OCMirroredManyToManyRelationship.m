@@ -49,7 +49,7 @@
         // x24
         NSString *PFCloudKitMirroringDelegateToManyPrefix = [OCSPIResolver PFCloudKitMirroringDelegateToManyPrefix];
         NSArray<NSRelationshipDescription *> * _Nullable relationships;
-        if (recordType.length < PFCloudKitMirroringDelegateToManyPrefix.length) {
+        if (recordType.length > PFCloudKitMirroringDelegateToManyPrefix.length) {
             // x24
             NSArray<NSString *> *components = [[recordType substringFromIndex:PFCloudKitMirroringDelegateToManyPrefix.length] componentsSeparatedByString:@"_"];
             if (components.count == 2) {
@@ -184,6 +184,14 @@
         os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Got temporary objectIDs back during import where we should have permanent ones: %@ / %@\n", objectID, relatedObjectID);
     }
     
+    if ((objectID == nil) || (relatedObjectID == nil)) {
+        NSError * _error = [NSError errorWithDomain:NSCocoaErrorDomain code:(objectID == nil) ? 134413 : 134412 userInfo:nil];
+        if (error != NULL) {
+            *error = _error;
+        }
+        return NO;
+    }
+    
     // <+252>
     // x22
     NSManagedObject *managedObject = [managedObjectContext objectWithID:objectID];
@@ -221,7 +229,7 @@
     return YES;
 }
 
-- (NSDictionary<NSString *, NSArray<CKRecordID *> *> *)recordTypesToRecordIDs {
+- (NSDictionary<NSString *, NSArray<CKRecordID *> *> *)recordTypeToRecordID {
     /*
      self = x19
      */

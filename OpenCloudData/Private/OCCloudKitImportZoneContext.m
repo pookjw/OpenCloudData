@@ -199,7 +199,7 @@
                  self = sp + 0x380 = x19 + 0x30
                  record = sp + 0x388 = x19 + 0x38
                  */
-                [mirroredRelationship.recordTypesToRecordIDs enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull recordType, NSArray<CKRecordID *> * _Nonnull recordIDArray, BOOL * _Nonnull stop) {
+                [mirroredRelationship.recordTypeToRecordID enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull recordType, NSArray<CKRecordID *> * _Nonnull recordIDArray, BOOL * _Nonnull stop) {
                     /*
                      self = x19
                      recordType = x21
@@ -271,7 +271,7 @@
                  self = sp + 0x2c0 = x20 + 0x30
                  recordID = sp + 0x2c8 = x20 + 0x38
                  */
-                [mirroredRelationship.recordTypesToRecordIDs enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull recordType, NSArray<CKRecordID *> * _Nonnull recordIDs, BOOL * _Nonnull stop) {
+                [mirroredRelationship.recordTypeToRecordID enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull recordType, NSArray<CKRecordID *> * _Nonnull recordIDs, BOOL * _Nonnull stop) {
                     /*
                      self(block) = x20
                      recordType = x19

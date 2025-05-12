@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
     @package CKRecordID *_ckRecordID; // 0x30
     @package CKRecordID *_relatedCKRecordID; // 0x38
 }
-@property (nonatomic, readonly, direct) NSDictionary<NSString *, NSArray<CKRecordID *> *> *recordTypesToRecordIDs;
+@property (nonatomic, readonly, direct) NSDictionary<NSString *, NSArray<CKRecordID *> *> *recordTypeToRecordID;
 + (BOOL)_isValidMirroredRelationshipRecord:(CKRecord *)record values:(id<CKRecordKeyValueSetting>)values;
 + (CKRecordType)ckRecordTypeForOrderedRelationships:(NSArray<NSRelationshipDescription *> *)orderedRelationships __attribute__((objc_direct));
 + (CKRecordType)ckRecordNameForOrderedRecordNames:(NSArray<NSString *> *)orderedRecordNames __attribute__((objc_direct));
