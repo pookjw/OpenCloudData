@@ -21,11 +21,20 @@
 }
 
 + (CKRecordType)ckRecordTypeForOrderedRelationships:(NSArray<NSRelationshipDescription *> *)orderedRelationships {
-    abort();
+    /*
+     orderedRelationships = x19
+     */
+    // x19
+    NSRelationshipDescription *relationship = orderedRelationships[0];
+    // x21
+    NSString *entityName = relationship.entity.name;
+    NSString *relationshipName = relationship.name;
+    
+    return [NSString stringWithFormat:@"%@%@_%@", [OCSPIResolver PFCloudKitMirroringDelegateToManyPrefix], entityName, relationshipName];
 }
 
 + (CKRecordType)ckRecordNameForOrderedRecordNames:(NSArray<NSString *> *)orderedRecordNames {
-    abort();
+    return [orderedRecordNames componentsJoinedByString:@":"];
 }
 
 - (instancetype)initWithRecordID:(CKRecordID *)recordID recordType:(CKRecordType)recordType managedObjectModel:(NSManagedObjectModel *)managedObjectModel andType:(NSUInteger)type {
@@ -235,8 +244,31 @@
     return [dictionary autorelease];
 }
 
-- (void)_setManyToManyRecordID:(CKRecordID *)manyToManyRecordID manyToManyRecordType:(CKRecordType)recordType ckRecordID:(CKRecordID *)ckRecordID relatedCKRecordID:(CKRecordID *)relatedCKRecordID relationshipDescription:(NSRelationshipDescription *)relationshipDescription inverseRelationshipDescription:(NSRelationshipDescription *)inverseRelationshipDescription type:(NSUInteger)type __attribute__((objc_direct)) {
-    abort();
+- (void)_setManyToManyRecordID:(CKRecordID *)manyToManyRecordID manyToManyRecordType:(CKRecordType)recordType ckRecordID:(CKRecordID *)ckRecordID relatedCKRecordID:(CKRecordID *)relatedCKRecordID relationshipDescription:(NSRelationshipDescription *)relationshipDescription inverseRelationshipDescription:(NSRelationshipDescription *)inverseRelationshipDescription type:(NSUInteger)type {
+    /*
+     self = x20
+     manyToManyRecordID = x26
+     recordType = x25
+     ckRecordID = x22
+     relatedCKRecordID = x21
+     relationshipDescription = x24
+     inverseRelationshipDescription = x23
+     type = x19
+     */
+    
+    if (!([manyToManyRecordID.zoneID isEqual:ckRecordID.zoneID]) || !([manyToManyRecordID.zoneID isEqual:relatedCKRecordID.zoneID])) {
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Attempt to link objects across zones: MTM `%@` is attempting to relate `%@` and `%@`\n", manyToManyRecordID, ckRecordID, relatedCKRecordID);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Attempt to link objects across zones: MTM `%@` is attempting to relate `%@` and `%@`\n", manyToManyRecordID, ckRecordID, relatedCKRecordID);
+    }
+    
+    // <+200>
+    self->_manyToManyRecordID = [manyToManyRecordID retain];
+    self->_manyToManyRecordType = [recordType retain];
+    self->_relationshipDescription = [relationshipDescription retain];
+    self->_inverseRelationshipDescription = [inverseRelationshipDescription retain];
+    self->_ckRecordID = [ckRecordID retain];
+    self->_relatedCKRecordID = [relatedCKRecordID retain];
+    self->_type = type;
 }
 
 @end
