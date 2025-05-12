@@ -23,9 +23,9 @@ NS_ASSUME_NONNULL_BEGIN
 }
 @property (nonatomic, readonly, direct) NSDictionary<NSString *, NSArray<CKRecordID *> *> *recordTypesToRecordIDs;
 + (BOOL)_isValidMirroredRelationshipRecord:(CKRecord *)record values:(id<CKRecordKeyValueSetting>)values;
-- (instancetype)initWithRecordID:(CKRecordID *)recordID recordType:(CKRecordType)recordType managedObjectModel:(NSManagedObjectModel *)managedObjectModel andType:(NSUInteger)type;
-- (CKRecordType)ckRecordTypeForOrderedRelationships:(NSArray<NSRelationshipDescription *> *)orderedRelationships __attribute__((objc_direct));
-- (CKRecordType)ckRecordNameForOrderedRecordNames:(NSArray<NSString *> *)orderedRecordNames __attribute__((objc_direct));
++ (CKRecordType)ckRecordTypeForOrderedRelationships:(NSArray<NSRelationshipDescription *> *)orderedRelationships __attribute__((objc_direct));
++ (CKRecordType)ckRecordNameForOrderedRecordNames:(NSArray<NSString *> *)orderedRecordNames __attribute__((objc_direct));
+- (instancetype _Nullable)initWithRecordID:(CKRecordID *)recordID recordType:(CKRecordType)recordType managedObjectModel:(NSManagedObjectModel *)managedObjectModel andType:(NSUInteger)type;
 @end
 
 NS_ASSUME_NONNULL_END

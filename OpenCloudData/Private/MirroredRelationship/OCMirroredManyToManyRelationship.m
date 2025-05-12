@@ -7,6 +7,8 @@
 
 #import <OpenCloudData/OCMirroredManyToManyRelationship.h>
 #import <OpenCloudData/OCSPIResolver.h>
+#import <OpenCloudData/OCCloudKitImportZoneContext.h>
+#import <OpenCloudData/Log.h>
 
 @implementation OCMirroredManyToManyRelationship
 
@@ -16,6 +18,14 @@
      */
     if (record.recordType.length == 0) return NO;
     return (record.recordID.recordName.length != 0);
+}
+
++ (CKRecordType)ckRecordTypeForOrderedRelationships:(NSArray<NSRelationshipDescription *> *)orderedRelationships {
+    abort();
+}
+
++ (CKRecordType)ckRecordNameForOrderedRecordNames:(NSArray<NSString *> *)orderedRecordNames {
+    abort();
 }
 
 - (instancetype)initWithRecordID:(CKRecordID *)recordID recordType:(CKRecordType)recordType managedObjectModel:(NSManagedObjectModel *)managedObjectModel andType:(NSUInteger)type {
@@ -29,12 +39,62 @@
         // self = x19
         // x24
         NSString *PFCloudKitMirroringDelegateToManyPrefix = [OCSPIResolver PFCloudKitMirroringDelegateToManyPrefix];
+        NSArray<NSRelationshipDescription *> * _Nullable relationships;
         if (recordType.length < PFCloudKitMirroringDelegateToManyPrefix.length) {
             // x24
             NSArray<NSString *> *components = [[recordType substringFromIndex:PFCloudKitMirroringDelegateToManyPrefix.length] componentsSeparatedByString:@"_"];
+            if (components.count == 2) {
+                // x23
+                NSEntityDescription *entity = [managedObjectModel.entitiesByName objectForKey:[components objectAtIndex:0]];
+                if (entity != nil) {
+                    NSRelationshipDescription *relationship = [entity.relationshipsByName objectForKey:[components objectAtIndex:1]];
+                    if (relationship != nil) {
+                        NSRelationshipDescription *inverseRelationship = relationship.inverseRelationship;
+                        if (inverseRelationship != nil) {
+                            relationships = @[relationship, inverseRelationship];
+                        } else {
+                            relationships = nil;
+                        }
+                    } else {
+                        relationships = nil;
+                    }
+                } else {
+                    relationships = nil;
+                }
+            } else {
+                relationships = nil;
+            }
+        } else {
+            relationships = nil;
         }
+        
         // <+332>
-        abort();
+        // x23
+        NSRelationshipDescription * _Nullable relationship = [relationships objectAtIndex:0];
+        // x24
+        NSRelationshipDescription * _Nullable inverseRelationship = [relationships objectAtIndex:1];
+        
+        if ((relationship != nil) && (inverseRelationship != nil)) {
+            // <+384>
+            // x25
+            NSArray<NSString *> * _Nullable components = [recordID.recordName componentsSeparatedByString:@":"];
+            if (components.count != 2) {
+                components = nil;
+            }
+            
+            // original : getCloudKitCKRecordIDClass
+            // x26
+            CKRecordID *_recordID_1 = [[CKRecordID alloc] initWithRecordName:[components objectAtIndex:0] zoneID:recordID.zoneID];
+            // x25
+            CKRecordID *_recordID_2 = [[CKRecordID alloc] initWithRecordName:[components objectAtIndex:1] zoneID:recordID.zoneID];
+            
+            [self _setManyToManyRecordID:recordID manyToManyRecordType:recordType ckRecordID:_recordID_1 relatedCKRecordID:_recordID_2 relationshipDescription:relationship inverseRelationshipDescription:inverseRelationship type:type];
+            [_recordID_1 release];
+            [_recordID_2 release];
+        } else {
+            [self release];
+            self = nil;
+        }
     }
     
     return self;
@@ -63,23 +123,116 @@
 }
 
 - (NSString *)description {
-    abort();
+    /*
+     self = x19
+     */
+    // x20
+    NSMutableString *result = [[[super description] mutableCopy] autorelease];
+    // x23
+    CKRecordID *manyToManyRecordID = self->_manyToManyRecordID;
+    // x21
+    NSString *relationshipEntityName = self->_relationshipDescription.entity.name;
+    // x25
+    CKRecordID *ckRecordID = self->_ckRecordID;
+    // x22
+    NSString *relationshipName = self->_relationshipDescription.name;
+    NSString *inverseRelationshipEntityName = self->_relationshipDescription.inverseRelationship.entity.name;
+    
+    [result appendFormat:@" %@-%@:%@-%@-%@:%@", manyToManyRecordID, relationshipEntityName, ckRecordID, relationshipName, inverseRelationshipEntityName, self->_relatedCKRecordID];
+    
+    return result;
 }
 
 - (BOOL)updateRelationshipValueUsingImportContext:(OCCloudKitImportZoneContext *)importContext andManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
-    abort();
+    /*
+     self = x19
+     importContext = x23
+     managedObjectContext = x21
+     error = x20
+     */
+    // x22
+    CKRecordID *ckRecordID = self->_ckRecordID;
+    // x22
+    NSManagedObjectID * _Nullable objectID;
+    if (importContext == nil) {
+        objectID = nil;
+    } else {
+        objectID = [[importContext->_recordTypeToRecordIDToObjectID objectForKey:self->_relationshipDescription.entity.name] objectForKey:ckRecordID];
+    }
+    
+    // x24
+    CKRecordID *relatedCKRecordID = self->_relatedCKRecordID;
+    // x23
+    NSManagedObjectID * _Nullable relatedObjectID;
+    if (importContext == nil) {
+        relatedObjectID = nil;
+    } else {
+        relatedObjectID = [[importContext->_recordTypeToRecordIDToObjectID objectForKey:self->_inverseRelationshipDescription.entity.name] objectForKey:relatedCKRecordID];
+    }
+    
+    if (objectID.temporaryID || relatedObjectID.temporaryID) {
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Got temporary objectIDs back during import where we should have permanent ones: %@ / %@\n", objectID, relatedObjectID);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Got temporary objectIDs back during import where we should have permanent ones: %@ / %@\n", objectID, relatedObjectID);
+    }
+    
+    // <+252>
+    // x22
+    NSManagedObject *managedObject = [managedObjectContext objectWithID:objectID];
+    // x21
+    NSManagedObject *relatedManatedObject = [managedObjectContext objectWithID:relatedObjectID];
+    
+    // x20
+    NSMutableSet *set = [[managedObject valueForKey:self->_relationshipDescription.name] mutableCopy];
+    
+    NSUInteger type = self->_type;
+    if (type == 1) {
+        // <+576>
+        [set removeObject:relatedManatedObject];
+        // <+588>
+    } else if (type != 0) {
+        // <+616>
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: New many to many relationship type?: %@\n", self);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: New many to many relationship type?: %@\n", self);
+        [set release];
+        return YES;
+    } else {
+        // <+352>
+        if (set == nil) {
+            set = [[NSMutableSet alloc] init];
+        }
+        
+        [set addObject:relatedManatedObject];
+        // <+588>
+    }
+    
+    // <+588>
+    [managedObject setValue:set forKey:self->_relationshipDescription.name];
+    [set release];
+    
+    return YES;
 }
 
 - (NSDictionary<NSString *, NSArray<CKRecordID *> *> *)recordTypesToRecordIDs {
-    abort();
-}
-
-- (CKRecordType)ckRecordTypeForOrderedRelationships:(NSArray<NSRelationshipDescription *> *)orderedRelationships {
-    abort();
-}
-
-- (CKRecordType)ckRecordNameForOrderedRecordNames:(NSArray<NSString *> *)orderedRecordNames {
-    abort();
+    /*
+     self = x19
+     */
+    // x21
+    NSMutableArray<CKRecordID *> *recordIDs = [[NSMutableArray alloc] initWithObjects:self->_ckRecordID, nil];
+    // x20
+    NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
+    
+    [dictionary setObject:recordIDs forKey:self->_relationshipDescription.entity.name];
+    [recordIDs release];
+    
+    // x21
+    recordIDs = [[dictionary objectForKey:self->_inverseRelationshipDescription.entity.name] retain];
+    if (recordIDs == nil) {
+        recordIDs = [[NSMutableArray alloc] initWithObjects:self->_relatedCKRecordID, nil];
+        [dictionary setObject:recordIDs forKey:self->_inverseRelationshipDescription.entity.name];
+    }
+    [recordIDs release];
+    
+    return [dictionary autorelease];
 }
 
 - (void)_setManyToManyRecordID:(CKRecordID *)manyToManyRecordID manyToManyRecordType:(CKRecordType)recordType ckRecordID:(CKRecordID *)ckRecordID relatedCKRecordID:(CKRecordID *)relatedCKRecordID relationshipDescription:(NSRelationshipDescription *)relationshipDescription inverseRelationshipDescription:(NSRelationshipDescription *)inverseRelationshipDescription type:(NSUInteger)type __attribute__((objc_direct)) {
