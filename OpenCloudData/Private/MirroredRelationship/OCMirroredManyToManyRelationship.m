@@ -19,7 +19,25 @@
 }
 
 - (instancetype)initWithRecordID:(CKRecordID *)recordID recordType:(CKRecordType)recordType managedObjectModel:(NSManagedObjectModel *)managedObjectModel andType:(NSUInteger)type {
-    abort();
+    /*
+     recordID = x22
+     recordType = x21
+     managedObjectModel = x23
+     type = x20
+     */
+    if (self = [super init]) {
+        // self = x19
+        // x24
+        NSString *PFCloudKitMirroringDelegateToManyPrefix = [OCSPIResolver PFCloudKitMirroringDelegateToManyPrefix];
+        if (recordType.length < PFCloudKitMirroringDelegateToManyPrefix.length) {
+            // x24
+            NSArray<NSString *> *components = [[recordType substringFromIndex:PFCloudKitMirroringDelegateToManyPrefix.length] componentsSeparatedByString:@"_"];
+        }
+        // <+332>
+        abort();
+    }
+    
+    return self;
 }
 
 - (void)dealloc {
