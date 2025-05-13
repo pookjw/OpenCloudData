@@ -6,13 +6,14 @@
 //
 
 #import <Foundation/Foundation.h>
+#include <stdatomic.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 #warning TODO
 
 @interface OCCloudKitThrottledNotificationObserver : NSObject {
-    void *_notificationIteration; // type을 모르겠음 // 0x8
+    int _notificationIteration;// 0x8
     NSString *_assertionLabel; // 0x10
     NSString *_label; // 0x18
     @package NSInteger _notificationStalenessInterval; // 0x20

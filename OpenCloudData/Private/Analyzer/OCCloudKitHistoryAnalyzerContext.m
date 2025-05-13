@@ -302,7 +302,7 @@ OBJC_EXPORT id objc_msgSendSuper2(void);
     NSSQLEntity * _Nullable sqlEntity = [OCSPIResolver _sqlEntityForEntityDescription:model x1:entity];
     uint _entityID;
     {
-        if (entity == nil) {
+        if (sqlEntity == nil) {
             _entityID = 0;
         } else {
             Ivar ivar = object_getInstanceVariable(sqlEntity, "_entityID", NULL);

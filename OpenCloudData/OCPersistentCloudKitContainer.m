@@ -115,12 +115,9 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
         
         if ([description.oc_cloudKitContainerOptions isKindOfClass:[OCPersistentCloudKitContainerOptions class]]) {
             OCPersistentCloudKitContainerOptions *cloudKitContainerOptions = description.oc_cloudKitContainerOptions;
-            
             cloudKitContainerOptions.progressProvider = self;
             
-#warning TODO
-            OCCloudKitMirroringDelegate *mirroringDelegate = [[NSCloudKitMirroringDelegate alloc] initWithCloudKitContainerOptions:cloudKitContainerOptions];
-            
+            OCCloudKitMirroringDelegate *mirroringDelegate = [[OCCloudKitMirroringDelegate alloc] initWithCloudKitContainerOptions:cloudKitContainerOptions];
             description.mirroringDelegate = mirroringDelegate;
             
             if (description.options[NSPersistentHistoryTrackingKey] == nil) {
@@ -131,11 +128,9 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
         } else if ([description.oc_cloudKitContainerOptions isKindOfClass:[OCCloudKitMirroringDelegateOptions class]]) {
             // interface가 일치함
             OCCloudKitMirroringDelegateOptions *mirroringDelegateOptions = (OCCloudKitMirroringDelegateOptions *)description.oc_cloudKitContainerOptions;
-            
             mirroringDelegateOptions.progressProvider = self;
             
-#warning TODO
-            OCCloudKitMirroringDelegate *mirroringDelegate = [[NSCloudKitMirroringDelegate alloc] initWithCloudKitContainerOptions:mirroringDelegateOptions];
+            OCCloudKitMirroringDelegate *mirroringDelegate = [[OCCloudKitMirroringDelegate alloc] initWithCloudKitContainerOptions:(OCPersistentCloudKitContainerOptions *)mirroringDelegateOptions];
             
             description.mirroringDelegate = mirroringDelegate;
             

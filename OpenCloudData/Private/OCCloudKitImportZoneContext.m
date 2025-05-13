@@ -15,6 +15,7 @@
 #import <OpenCloudData/OCMirroredManyToManyRelationshipV2.h>
 #import <OpenCloudData/OCCloudKitSerializer.h>
 #import <OpenCloudData/OCCKImportOperation.h>
+#import <OpenCloudData/NSManagedObjectID+Private.h>
 #import <objc/runtime.h>
 
 @implementation OCCloudKitImportZoneContext
@@ -435,8 +436,8 @@
         [_error autorelease];
         
         if (_error == nil) {
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error != NULL) {
                 *error = _error;
@@ -460,8 +461,8 @@
     NSArray<OCCKMirroredRelationship *> * _Nullable fetchedMirroredRelationships = [OCCKMirroredRelationship fetchMirroredRelationshipsMatchingRelatingRecords:self->_updatedRecords andRelatingRecordIDs:@[] fromStore:observedStore inManagedObjectContext:managedObjectContext error:&_error];
     if (fetchedMirroredRelationships == nil) {
         if (_error == nil) {
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error != NULL) {
                 *error = _error;
@@ -530,8 +531,8 @@
             [mapOfMetadata release];
             
             if (_error == nil) {
-                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
             } else {
                 if (error != NULL) {
                     *error = _error;
@@ -572,8 +573,8 @@
     
     if (unfinishedImportOperations == nil) {
         if (_error == nil) {
-            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
-            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __func__, __LINE__);
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error != NULL) {
                 *error = _error;
@@ -603,50 +604,49 @@
             
             if ((entityDescription != nil) && (relatedEntityDescription != nil)) {
                 // <+5740>
-                abort();
-            }
-            
-            // <+5560>
-            os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Deleting pending relationship because it's entities are no longer in the model: %@", __func__, __LINE__, pendingRelationship);
-            
-            [managedObjectContext deleteObject:pendingRelationship];
-            // <+6220>
-            // x24
-            CKRecordType recordType = [OCCloudKitSerializer recordTypeForEntity:entityDescription];
-            
-            // original : getCloudKitCKRecordZoneIDClass
-            // x21
-            CKRecordZoneID *zoneID = [[CKRecordZoneID alloc] initWithZoneName:pendingRelationship.recordZoneName ownerName:pendingRelationship.recordZoneOwnerName];
-            // original : getCloudKitCKRecordIDClass
-            // x25
-            CKRecordID *recordID = [[CKRecordID alloc] initWithRecordName:pendingRelationship.recordName zoneID:zoneID];
-            
-            // original : getCloudKitCKRecordZoneIDClass
-            // x23
-            CKRecordZoneID *relatedZoneID = [[CKRecordZoneID alloc] initWithZoneName:pendingRelationship.relatedRecordZoneName ownerName:pendingRelationship.relatedRecordZoneOwnerName];
-            // original : getCloudKitCKRecordIDClass
-            // x22
-            CKRecordID *relatedRecordID = [[CKRecordID alloc] initWithRecordName:pendingRelationship.relatedRecordName zoneID:relatedZoneID];
-            
-            if (![zoneID isEqual:relatedZoneID]) {
-                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Import is attempting to link objects across zones: %@\n", pendingRelationship);
-                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Import is attempting to link objects across zones: %@\n", pendingRelationship);
-            }
-            
-            // <+6048>
-            [self addUnresolvedRecordID:recordID forRecordType:recordType toCache:self->_recordTypeToUnresolvedRecordIDs];
-            // x28
-            CKRecordType relatedRecordType = [OCCloudKitSerializer recordTypeForEntity:[managedObjectModel.entitiesByName objectForKey:pendingRelationship.relatedEntityName]];
-            [self addUnresolvedRecordID:relatedRecordID forRecordType:relatedRecordType toCache:self->_recordTypeToUnresolvedRecordIDs];
-            
-            if (([[dictionary_2 objectForKey:recordType] containsObject:recordID]) || ([[dictionary_2 objectForKey:relatedRecordType] containsObject:relatedRecordID])) {
+                // x24
+                CKRecordType recordType = [OCCloudKitSerializer recordTypeForEntity:entityDescription];
+                
+                // original : getCloudKitCKRecordZoneIDClass
+                // x21
+                CKRecordZoneID *zoneID = [[CKRecordZoneID alloc] initWithZoneName:pendingRelationship.recordZoneName ownerName:pendingRelationship.recordZoneOwnerName];
+                // original : getCloudKitCKRecordIDClass
+                // x25
+                CKRecordID *recordID = [[CKRecordID alloc] initWithRecordName:pendingRelationship.recordName zoneID:zoneID];
+                
+                // original : getCloudKitCKRecordZoneIDClass
+                // x23
+                CKRecordZoneID *relatedZoneID = [[CKRecordZoneID alloc] initWithZoneName:pendingRelationship.relatedRecordZoneName ownerName:pendingRelationship.relatedRecordZoneOwnerName];
+                // original : getCloudKitCKRecordIDClass
+                // x22
+                CKRecordID *relatedRecordID = [[CKRecordID alloc] initWithRecordName:pendingRelationship.relatedRecordName zoneID:relatedZoneID];
+                
+                if (![zoneID isEqual:relatedZoneID]) {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Import is attempting to link objects across zones: %@\n", pendingRelationship);
+                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Import is attempting to link objects across zones: %@\n", pendingRelationship);
+                }
+                
+                // <+6048>
+                [self addUnresolvedRecordID:recordID forRecordType:recordType toCache:self->_recordTypeToUnresolvedRecordIDs];
+                // x28
+                CKRecordType relatedRecordType = [OCCloudKitSerializer recordTypeForEntity:[managedObjectModel.entitiesByName objectForKey:pendingRelationship.relatedEntityName]];
+                [self addUnresolvedRecordID:relatedRecordID forRecordType:relatedRecordType toCache:self->_recordTypeToUnresolvedRecordIDs];
+                
+                if (([[dictionary_2 objectForKey:recordType] containsObject:recordID]) || ([[dictionary_2 objectForKey:relatedRecordType] containsObject:relatedRecordID])) {
+                    [managedObjectContext deleteObject:pendingRelationship];
+                }
+                
+                [recordID release];
+                [zoneID release];
+                [relatedRecordID release];
+                [relatedZoneID release];
+            } else {
+                // <+5560>
+                os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Deleting pending relationship because it's entities are no longer in the model: %@", __func__, __LINE__, pendingRelationship);
+                
                 [managedObjectContext deleteObject:pendingRelationship];
             }
             
-            [recordID release];
-            [zoneID release];
-            [relatedRecordID release];
-            [relatedZoneID release];
         }
     }
     
@@ -698,28 +698,279 @@
     return YES;
 }
 
-- (void)registerObject:(NSManagedObject *)object forInsertedRecord:(CKRecord *)record withMetadata:(id)metadata {
-    abort();
+- (void)registerObject:(NSManagedObject *)object forInsertedRecord:(CKRecord *)record withMetadata:(OCCKRecordMetadata *)metadata {
+    /*
+     self = x19
+     object = x21
+     record = x22
+     metadata = x20
+     */
+    [self addObjectID:object.objectID toCache:_recordTypeToRecordIDToObjectID andRecordID:record.recordID];
+    // x22
+    _OCCKInsertedMetadataLink *metadataLink = [[_OCCKInsertedMetadataLink alloc] initWithRecordMetadata:metadata insertedObject:object];
+    os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "CoreData+CloudKit: %s(%d): Linking %@ to %@", __func__, __LINE__, object.objectID, metadata);
+    [self->_metadatasToLink addObject:metadataLink];
+    [metadataLink release];
 }
 
-- (void)addMirroredRelationshipToLink:(OCMirroredOneToManyRelationship *)mirroredRelationship {
-    abort();
+- (void)addMirroredRelationshipToLink:(OCMirroredRelationship *)mirroredRelationship {
+    /*
+     self = x19
+     mirroredRelationship = x20
+     */
+    [_updatedRelationships addObject:mirroredRelationship];
+    
+    if ([mirroredRelationship isKindOfClass:[OCMirroredOneToManyRelationship class]]) {
+        // <+68>
+        OCMirroredOneToManyRelationship *casted = (OCMirroredOneToManyRelationship *)mirroredRelationship;
+        /*
+         __61-[PFCloudKitImportZoneContext addMirroredRelationshipToLink:]_block_invoke
+         self = sp + 0x48
+         */
+        [casted.recordTypesToRecordIDs enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull recordType, NSArray<CKRecordID *> * _Nonnull recordIDs, BOOL * _Nonnull stop) {
+            /*
+             self(block) = x21
+             recordType = x20
+             recordIDs = x19
+             */
+            // x23
+            for (CKRecordID *recordID in recordIDs) {
+                NSManagedObjectID * _Nullable objectID = [[self->_recordTypeToRecordIDToObjectID objectForKey:recordType] objectForKey:recordID];
+                if (objectID != nil) continue;
+                // x24
+                NSMutableArray<CKRecordID *> *unresolvedRecordIDs = [[self->_recordTypeToUnresolvedRecordIDs objectForKey:recordType] retain];
+                if (unresolvedRecordIDs == nil) {
+                    unresolvedRecordIDs = [[NSMutableArray alloc] init];
+                    [self->_recordTypeToUnresolvedRecordIDs setObject:unresolvedRecordIDs forKey:recordType];
+                }
+                [unresolvedRecordIDs addObject:recordID];
+                [unresolvedRecordIDs release];
+            }
+        }];
+    } else if ([mirroredRelationship isKindOfClass:[OCMirroredManyToManyRelationship class]]) {
+        // <+160>
+        OCMirroredManyToManyRelationship *casted = (OCMirroredManyToManyRelationship *)mirroredRelationship;
+        /*
+         __61-[PFCloudKitImportZoneContext addMirroredRelationshipToLink:]_block_invoke_2
+         self = sp + 0x20
+         */
+        [casted.recordTypeToRecordID enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull recordType, NSArray<CKRecordID *> * _Nonnull recordIDs, BOOL * _Nonnull stop) {
+            /*
+             self(block) = x21
+             recordType = x20
+             recordIDs = x19
+             */
+            // x23
+            for (CKRecordID *recordID in recordIDs) {
+                NSManagedObjectID * _Nullable objectID = [[self->_recordTypeToRecordIDToObjectID objectForKey:recordType] objectForKey:recordID];
+                if (objectID != nil) continue;
+                // x24
+                NSMutableArray<CKRecordID *> *unresolvedRecordIDs = [[self->_recordTypeToUnresolvedRecordIDs objectForKey:recordType] retain];
+                if (unresolvedRecordIDs == nil) {
+                    unresolvedRecordIDs = [[NSMutableArray alloc] init];
+                    [self->_recordTypeToUnresolvedRecordIDs setObject:unresolvedRecordIDs forKey:recordType];
+                }
+                [unresolvedRecordIDs addObject:recordID];
+                [unresolvedRecordIDs release];
+            }
+        }];
+    }
 }
 
 - (BOOL)linkInsertedObjectsAndMetadataInContext:(NSManagedObjectContext *)context error:(NSError * _Nullable *)error {
-    abort();
+    /*
+     self = x20
+     context = x22
+     error = x19
+     */
+    // sp, #0x98
+    NSError * _Nullable _error = nil;
+    
+    BOOL result = [context obtainPermanentIDsForObjects:context.insertedObjects.allObjects error:&_error];
+    if (!result) {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) {
+                *error = _error;
+            }
+        }
+        return NO;
+    }
+    // x23
+    for (_OCCKInsertedMetadataLink *metadataLink in _metadatasToLink) {
+        // x19
+        NSManagedObjectID *objectID = metadataLink->_insertedObject.objectID;
+        
+        if (objectID.temporaryID) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Found temporary objectID for metadata link: %@\n%@\n%@\n%@\n", objectID, metadataLink, context.insertedObjects, _error);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Found temporary objectID for metadata link: %@\n%@\n%@\n%@\n", objectID, metadataLink, context.insertedObjects, _error);
+            
+            _error = [NSError errorWithDomain:NSCocoaErrorDomain code:134410 userInfo:@{
+                NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Found temporary objectID for metadata link: %@\n%@\n%@", objectID, metadataLink, context.insertedObjects]
+            }];
+            // break 없음
+            continue;
+        }
+        
+        // <+436>
+        OCCKRecordMetadata * _Nullable recordMetadata;
+        {
+            if (metadataLink == nil) {
+                recordMetadata = nil;
+            } else {
+                recordMetadata = metadataLink->_recordMetadata;
+            }
+        }
+        recordMetadata.entityPK = @([objectID _referenceData64]);
+        
+        NSSQLEntity * _Nullable sqlEntity = [OCSPIResolver _sqlEntityForEntityDescription:[((NSSQLCore *)objectID.persistentStore) model] x1:objectID.entity];
+        
+        uint _entityID;
+        {
+            if (sqlEntity == nil) {
+                _entityID = 0;
+            } else {
+                Ivar ivar = object_getInstanceVariable(sqlEntity, "_entityID", NULL);
+                assert(ivar != NULL);
+                _entityID = *(uint *)((uintptr_t)sqlEntity + ivar_getOffset(ivar));
+            }
+        }
+        recordMetadata.entityId = @(_entityID);
+        // x26
+        CKRecordID *recordID = [recordMetadata createRecordID];
+        [self addObjectID:objectID toCache:self->_recordTypeToRecordIDToObjectID andRecordID:recordID];
+        [recordID release];
+    }
+    
+    return YES;
 }
 
 - (BOOL)populateUnresolvedIDsInStore:(NSPersistentStore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
-    abort();
+    /*
+     managedObjectContext = x8
+     error = x19
+     */
+    // x29 - #0x50
+    __block BOOL _succeed = YES;
+    // sp, #0x50
+    __block NSError * _Nullable _error = nil;
+    
+    /*
+     __91-[PFCloudKitImportZoneContext populateUnresolvedIDsInStore:withManagedObjectContext:error:]_block_invoke
+     self = sp + 0x28 = x20 + 0x20
+     store = sp + 0x30 = x20 + 0x28
+     managedObjectContext = sp + 0x38 = x20 + 0x30
+     _error = sp + 0x40 = x20 + 0x38
+     _succeed = sp + 0x48 = x20 + 0x40
+     */
+    [managedObjectContext performBlockAndWait:^{
+        /*
+         self(block) = x20
+         */
+        os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Populating unresolved relationships:\n%@", __func__, __LINE__, self->_recordTypeToUnresolvedRecordIDs);
+        
+        // sp + 0x8
+        NSMutableSet<CKRecordType> *set = [[NSMutableSet alloc] initWithArray:self->_recordTypeToUnresolvedRecordIDs.allKeys];
+        
+        for (CKRecordType recordType in set) @autoreleasepool {
+            // x24
+            NSMutableArray<CKRecordID *> *recordIDs = [self->_recordTypeToUnresolvedRecordIDs objectForKey:recordType];
+            // x25
+            NSDictionary<CKRecordID *, OCCKRecordMetadata *> * _Nullable map = [OCCKRecordMetadata createMapOfMetadataMatchingRecords:@[] andRecordIDs:recordIDs inStore:store withManagedObjectContext:managedObjectContext error:&_error];
+            
+            if (map == nil) {
+                _succeed = NO;
+                [_error retain];
+                [map release];
+                break;
+            }
+            
+            // x27
+            for (CKRecordID *recordID in recordIDs) {
+                // x28
+                OCCKRecordMetadata * _Nullable recordMetadata = [map objectForKey:recordID];
+                if (recordMetadata == nil) continue;
+                if (recordMetadata.inserted) continue;
+                // x28
+                NSManagedObjectID *_objectID = [recordMetadata createObjectIDForLinkedRow];
+                [self addObjectID:_objectID toCache:self->_recordTypeToRecordIDToObjectID andRecordID:recordID];
+                [_objectID release];
+            }
+            
+            [map release];
+        }
+        
+        [set release];
+    }];
+    
+    if (!_succeed) {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) {
+                *error = [[_error retain] autorelease];
+            }
+        }
+    }
+    
+    [_error release];
+    return _succeed;
 }
 
-- (void)addObjectID:(NSManagedObjectID *)objectID toCache:(NSMutableDictionary *)cache andRecordID:(CKRecordID *)recordID {
-    abort();
+- (void)addObjectID:(NSManagedObjectID *)objectID toCache:(NSMutableDictionary<CKRecordType, NSMutableDictionary<CKRecordID *, NSManagedObjectID *> *> *)cache andRecordID:(CKRecordID *)recordID {
+    /*
+     self = x22
+     objectID = x21
+     cache = x20
+     recordID = x19
+     */
+    // x23
+    
+    NSEntityDescription * _Nullable entity = objectID.entity;
+    NSString * _Nullable name = entity.name;
+    
+    do {
+        [self addObjectID:objectID toCache:cache forRecordWithType:name andUniqueIdentifier:recordID];
+        entity = entity.superentity;
+        name = entity.name;
+    } while (name != nil);
 }
 
-- (void)addUnresolvedRecordID:(CKRecordID *)recordID forRecordType:(CKRecordType)recordType toCache:(NSMutableDictionary<CKRecordType, NSMutableArray<CKRecordID *> *> *)cache __attribute__((objc_direct)) {
-    abort();
+- (void)addObjectID:(NSManagedObjectID *)objectID toCache:(NSMutableDictionary<CKRecordType, NSMutableDictionary<CKRecordID *, NSManagedObjectID *> *> *)cache forRecordWithType:(CKRecordType)recordType andUniqueIdentifier:(CKRecordID *)uniqueIdentifier {
+    /*
+     objectID = x20
+     cache = x22
+     recordType = x21
+     uniqueIdentifier = x19
+     */
+    
+    // sp + 0x8
+    NSMutableDictionary<CKRecordID *, NSManagedObjectID *> *dictionary = [[cache objectForKey:recordType] retain];
+    if (dictionary == nil) {
+        dictionary = [[NSMutableDictionary alloc] init];
+        [cache setObject:dictionary forKey:recordType];
+    }
+    [dictionary setObject:objectID forKey:uniqueIdentifier];
+    [dictionary release];
+}
+
+- (void)addUnresolvedRecordID:(CKRecordID *)recordID forRecordType:(CKRecordType)recordType toCache:(NSMutableDictionary<CKRecordType, NSMutableArray<CKRecordID *> *> *)cache {
+    /*
+     recordID = x19
+     recordType = x20
+     cache = x21
+     */
+    // sp + 0x8
+    NSMutableArray<CKRecordID *> *array = [[cache objectForKey:recordType] retain];
+    if (array == nil) {
+        array = [[NSMutableArray alloc] init];
+        [cache setObject:array forKey:recordType];
+    }
+    [array addObject:recordID];
+    [array release];
 }
 
 @end

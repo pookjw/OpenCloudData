@@ -182,6 +182,11 @@ __attribute__((objc_direct_members))
     return ((BOOL (*)(Class, id))addr)(x0, x1);
 }
 
++ (BOOL)_PFRoutines__isInMemoryStoreURL_:(Class)x0 x1:(NSURL *)x1 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[_PFRoutines _isInMemoryStoreURL:]"];
+    return ((BOOL (*)(Class, id))addr)(x0, x1);
+}
+
 + (NSData *)_PFRoutines_retainedEncodeObjectValue_forTransformableAttribute_:(Class)x0 x1:(id)x1 x2:(NSAttributeDescription *)x2 {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[_PFRoutines retainedEncodeObjectValue:forTransformableAttribute:]"];
     return ((id (*)(Class, id, id))addr)(x0, x1, x2);

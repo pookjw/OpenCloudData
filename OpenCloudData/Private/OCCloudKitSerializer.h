@@ -13,8 +13,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-
 @class OCCloudKitSerializer;
 @protocol OCCloudKitSerializerDelegate <NSObject>
 - (void)cloudKitSerializer:(OCCloudKitSerializer *)cloudKitSerializer failedToUpdateRelationship:(OCMirroredManyToManyRelationship *)relationship withError:(NSError *)error;
@@ -38,11 +36,15 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSSet<NSManagedObjectID *> *)createSetOfObjectIDsRelatedToObject:(NSManagedObject *)object __attribute__((objc_direct)) NS_RETURNS_RETAINED;
 + (NSURL *)generateCKAssetFileURLForObjectInStore:(NSPersistentStore *)store __attribute__((objc_direct));
 + (NSURL *)assetStorageDirectoryURLForStore:(NSPersistentStore *)store __attribute__((objc_direct));
++ (NSURL *)oldAssetStorageDirectoryURLForStore:(NSPersistentStore *)store __attribute__((objc_direct));
 + (BOOL)isVariableLengthAttributeType:(NSAttributeType)attributeType __attribute__((objc_direct));
 + (size_t)sizeOfVariableLengthAttribute:(NSAttributeDescription *)attribute withValue:(id _Nullable)value __attribute__((objc_direct));
 + (NSString *)mtmKeyForObjectWithRecordName:(NSString *)recordName relatedToObjectWithRecordName:(NSString *)relatedToObjectWithRecordName byRelationship:(NSRelationshipDescription *)relationship withInverse:(NSRelationshipDescription *)inverseRelationship __attribute__((objc_direct));
 + (NSString *)applyCDPrefixToName:(NSString *)name __attribute__((objc_direct));
 + (BOOL)isPrivateAttribute:(NSAttributeDescription *)attribute __attribute__((objc_direct));
++ (NSArray<CKAsset *> *)assetsOnRecord:(CKRecord *)record withOptions:(OCCloudKitMirroringDelegateOptions *)options __attribute__((objc_direct));
++ (NSSet<NSString *> *)newSetOfRecordKeysForEntitiesInConfiguration:(NSString *)configurationName inManagedObjectModel:(NSManagedObjectModel *)managedObjectModel includeCKAssetsForFileBackedFutures:(BOOL)includeCKAssetsForFileBackedFutures __attribute__((objc_direct));
++ (NSSet<NSString *> *)newSetOfRecordKeysForAttribute:(NSAttributeDescription *)attribute includeCKAssetsForFileBackedFutures:(BOOL)includeCKAssetsForFileBackedFutures __attribute__((objc_direct));
 
 - (instancetype)initWithMirroringOptions:(OCCloudKitMirroringDelegateOptions * _Nullable)mirroringOptions metadataCache:(OCCloudKitMetadataCache *)metadataCache recordNamePrefix:(NSString * _Nullable)recordNamePrefix;
 

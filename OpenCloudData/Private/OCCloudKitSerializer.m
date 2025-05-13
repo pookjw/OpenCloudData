@@ -225,7 +225,7 @@ static CKRecordZoneID *zoneID_2;
     BOOL isInMemoryStore = [OCSPIResolver _PFRoutines__isInMemoryStore_:objc_lookUpClass("_PFRoutines") x1:store];
     if (isInMemoryStore) {
         // x21
-        NSString *tempDir =  NSTemporaryDirectory();
+        NSString *tempDir = NSTemporaryDirectory();
         NSString *filePath = [[tempDir stringByAppendingPathComponent:store.identifier] stringByAppendingPathComponent:@"inMemory_store_ckAssets"];
         return [NSURL fileURLWithPath:filePath];
     }
@@ -238,6 +238,21 @@ static CKRecordZoneID *zoneID_2;
     NSURL *url_2 = [url_1 URLByDeletingLastPathComponent];
     NSString *name_2 = [NSString stringWithFormat:@"%@_ckAssets", name_1];
     return [url_2 URLByAppendingPathComponent:name_2];
+}
+
++ (NSURL *)oldAssetStorageDirectoryURLForStore:(NSPersistentStore *)store {
+    /*
+     store = x19
+     */
+    BOOL isInMemoryStore = [OCSPIResolver _PFRoutines__isInMemoryStoreURL_:objc_lookUpClass("_PFRoutines") x1:store.URL];
+    if (isInMemoryStore) {
+        // x21
+        NSString *tempDir = NSTemporaryDirectory();
+        NSString *filePath = [[tempDir stringByAppendingPathComponent:store.identifier] stringByAppendingPathComponent:@"inMemory_store_ckAssets"];
+        return [NSURL fileURLWithPath:filePath];
+    }
+    
+    return [[store.URL URLByDeletingLastPathComponent] URLByAppendingPathComponent:@"ckAssetFiles" isDirectory:YES];
 }
 
 + (BOOL)isVariableLengthAttributeType:(NSAttributeType)attributeType {
@@ -414,7 +429,104 @@ static CKRecordZoneID *zoneID_2;
 }
 
 + (BOOL)isPrivateAttribute:(NSAttributeDescription *)attribute {
-    abort();
+    /*
+     attribute = x19
+     */
+    if ([attribute.name isEqualToString:[OCSPIResolver NSCKRecordSystemFieldsAttributeName]]) {
+        return YES;
+    }
+    if ([attribute.name isEqualToString:[OCSPIResolver NSCKRecordIDAttributeName]]) {
+        return YES;
+    }
+    return NO;
+}
+
++ (NSArray<CKAsset *> *)assetsOnRecord:(CKRecord *)record withOptions:(OCCloudKitMirroringDelegateOptions *)options {
+    /*
+     x19 = record
+     */
+    // x20
+    NSMutableArray<CKAsset *> *array = [[NSMutableArray alloc] init];
+    
+    // x24
+    for (CKRecordFieldKey key in record.allKeys) {
+        if ([key hasSuffix:@"_ckAsset"]) {
+            [array addObject:[record objectForKey:key]];
+        }
+    }
+    
+    NSArray<CKAsset *> *copy = [array copy];
+    [array release];
+    return [copy autorelease];
+}
+
++ (NSSet<NSString *> *)newSetOfRecordKeysForEntitiesInConfiguration:(NSString *)configurationName inManagedObjectModel:(NSManagedObjectModel *)managedObjectModel includeCKAssetsForFileBackedFutures:(BOOL)includeCKAssetsForFileBackedFutures {
+    /*
+     configurationName = x21
+     managedObjectModel = x20
+     includeCKAssetsForFileBackedFutures = x27
+     */
+    // sp + 0x20
+    NSMutableSet<NSString *> *set_1 = [[NSMutableSet alloc] init];
+    // x20
+    for (NSEntityDescription *entity in [managedObjectModel entitiesForConfiguration:configurationName]) @autoreleasepool {
+        // x21
+        NSMutableSet<NSString *> *set_2 = [[NSMutableSet alloc] init];
+        [set_2 addObject:[@"CD_" stringByAppendingString:@"entityName"]];
+        
+        for (NSAttributeDescription *attribute in entity.attributesByName.allValues) @autoreleasepool {
+            NSSet<NSString *> *set_3 = [OCCloudKitSerializer newSetOfRecordKeysForAttribute:attribute includeCKAssetsForFileBackedFutures:includeCKAssetsForFileBackedFutures];
+            [set_2 unionSet:set_3];
+            [set_3 release];
+        }
+        // x22
+        for (NSRelationshipDescription *relation in entity.relationshipsByName.allValues) @autoreleasepool {
+            // x24
+            NSMutableSet<NSString *> *set_3 = [[NSMutableSet alloc] init];
+            
+            if (!relation.isToMany) {
+                // <+656>
+                if ([OCCloudKitSerializer shouldTrackProperty:relation]) {
+                    // <+680>
+                    [set_3 addObject:[@"CD_" stringByAppendingString:relation.name]];
+                }
+            } else if (relation.inverseRelationship.isToMany) {
+                // <+608>
+                [set_3 addObject:@"CD_recordNames"];
+                [set_3 addObject:@"CD_relationships"];
+                [set_3 addObject:@"CD_entityNames"];
+            }
+            
+            [set_2 unionSet:set_3];
+            [set_3 release];
+        }
+        
+        [set_2 addObject:[@"CD_" stringByAppendingString:@"moveReceipt"]];
+        [set_1 unionSet:set_2];
+        [set_2 release];
+    }
+    
+    return set_1;
+}
+
++ (NSSet<NSString *> *)newSetOfRecordKeysForAttribute:(NSAttributeDescription *)attribute includeCKAssetsForFileBackedFutures:(BOOL)includeCKAssetsForFileBackedFutures {
+    /*
+     attribute = x20
+     includeCKAssetsForFileBackedFutures = x21
+     */
+    
+    NSMutableSet<NSString *> *set = [[NSMutableSet alloc] init];
+    
+    if ([OCCloudKitSerializer shouldTrackProperty:attribute]) {
+        [set addObject:[@"CD_" stringByAppendingString:attribute.name]];
+        if ([OCCloudKitSerializer isVariableLengthAttributeType:attribute.attributeType]) {
+            if (attribute.isFileBackedFuture || includeCKAssetsForFileBackedFutures) {
+                [set addObject:[[@"CD_" stringByAppendingString:attribute.name] stringByAppendingString:@"_ckAsset"]];
+            }
+        }
+    }
+    
+    return set;
 }
 
 - (instancetype)initWithMirroringOptions:(OCCloudKitMirroringDelegateOptions *)mirroringOptions metadataCache:(OCCloudKitMetadataCache *)metadataCache recordNamePrefix:(NSString *)recordNamePrefix {
