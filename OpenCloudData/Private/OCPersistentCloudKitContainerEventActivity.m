@@ -32,12 +32,12 @@
 }
 
 - (__kindof OCPersistentCloudKitContainerActivity *)beginActivityForPhase:(NSUInteger)phase {
-    OCPersistentCloudKitContainerSetupPhaseActivity *activity = [OCPersistentCloudKitContainerSetupPhaseActivity alloc];
+    OCPersistentCloudKitContainerSetupPhaseActivity *activity;
     
     if (self) {
-        [activity initWithPhase:phase storeIdentifier:_storeIdentifier];
+        activity = [[OCPersistentCloudKitContainerSetupPhaseActivity alloc] initWithPhase:phase storeIdentifier:_storeIdentifier];
     } else {
-        [activity initWithPhase:phase storeIdentifier:nil];
+        activity = [[OCPersistentCloudKitContainerSetupPhaseActivity alloc] initWithPhase:phase storeIdentifier:nil];
     }
     
     NSUUID *identifier = _identifier;

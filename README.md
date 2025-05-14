@@ -1,2 +1,6 @@
-- OCCloudKitMirroringDelegate
-    - OCCloudKitStoreComparer
+- `-[OCCloudKitMirroringDelegate checkAndExecuteNextRequest]`
+    - `OCCloudKitMirroringRequest` subclasses
+    - `-[OCCloudKitMirroringDelegate _performFetchRecordsRequest:]`
+        - `OCCKEvent`
+        - `OCCloudKitImporterOptions`
+        - `OCCloudKitImporter`

@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
     NSMutableArray *_containerBlocks;
     BOOL _isContainerRequest;
     @package CKSchedulerActivity *_schedulerActivity; // 0x40
-    @package OCPersistentCloudKitContainerEventActivity *_activity; // 0x48
+    @package OCPersistentCloudKitContainerActivity *_activity; // 0x48
 }
 + (NSSet<Class> *)allRequestClasses;
 
@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (copy, nonatomic, readonly, nullable) OCCloudKitMirroringRequestOptions *options;
 @property (copy, nonatomic, readonly) void (^ requestCompletionBlock)(OCCloudKitMirroringResult * result);
+@property (retain, nonatomic, nullable, direct) OCPersistentCloudKitContainerActivity *activity;
 
 - (instancetype)initWithOptions:(OCCloudKitMirroringRequestOptions * _Nullable)options completionBlock:(void (^ _Nullable)(OCCloudKitMirroringResult * result))requestCompletionBlock;
 - (instancetype)initWithActivity:(CKSchedulerActivity *)activity options:(OCCloudKitMirroringRequestOptions * _Nullable)options completionBlock:(void (^ _Nullable)(OCCloudKitMirroringResult * result))requestCompletionBlock;

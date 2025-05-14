@@ -15,7 +15,7 @@
      {(
          NSCloudKitMirroringResetMetadataRequest,
          NSCloudKitMirroringDelegateSetupRequest,
-         NSCloudKitMirroringInitializeSchemaRequest, 🙃
+         NSCloudKitMirroringInitializeSchemaRequest,
          NSCloudKitMirroringExportProgressRequest,
          NSCloudKitMirroringAcceptShareInvitationsRequest,
          NSCloudKitMirroringFetchRecordsRequest,

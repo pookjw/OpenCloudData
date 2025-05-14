@@ -11,6 +11,12 @@
 #import <OpenCloudData/Log.h>
 #import <OpenCloudData/OCCloudKitMirroringDelegateResetRequest.h>
 #import <OpenCloudData/OCCloudKitMirroringDelegateWorkBlockContext.h>
+#import <OpenCloudData/OCCloudKitMirroringDelegateSetupRequest.h>
+#import <OpenCloudData/OCCloudKitMirroringFetchRecordsRequest.h>
+#import <OpenCloudData/OCCKEvent.h>
+#import <OpenCloudData/OCCloudKitImporterOptions.h>
+#import <OpenCloudData/OCCloudKitSerializer.h>
+#import <OpenCloudData/OCCloudKitImporter.h>
 #import <objc/runtime.h>
 
 CK_EXTERN NSString * const CKIdentityUpdateNotification;
@@ -223,9 +229,9 @@ CK_EXTERN NSString * const CKIdentityUpdateNotification;
          __47-[NSCloudKitMirroringDelegate initWithOptions:]_block_invoke_2
          weakSelf = sp + 0x20
          */
-        _accountChangeObserver = [[OCCloudKitThrottledNotificationObserver alloc] initWithLabel:@"AccountChangeObserver" handlerBlock:^(NSString * _Nonnull label) {
+        _accountChangeObserver = [[OCCloudKitThrottledNotificationObserver alloc] initWithLabel:@"AccountChangeObserver" handlerBlock:^(NSString * _Nonnull assertionLabel) {
             /*
-             label = x20
+             assertionLabel = x20
              */
             
             // sp + 0x8
@@ -237,9 +243,9 @@ CK_EXTERN NSString * const CKIdentityUpdateNotification;
             // x19 / sp + 0x38
             NSError * _Nullable error;
             // original : getCloudKitCKIdentityUpdateNotification
-            if ([label isEqualToString:CKIdentityUpdateNotification]) {
+            if ([assertionLabel isEqualToString:CKIdentityUpdateNotification]) {
                 error = [NSError errorWithDomain:NSCocoaErrorDomain code:134416 userInfo:nil];
-            } else if ([label isEqualToString:CKAccountChangedNotification]) {
+            } else if ([assertionLabel isEqualToString:CKAccountChangedNotification]) {
                 error = [NSError errorWithDomain:NSCocoaErrorDomain code:134415 userInfo:nil];
             } else {
                 error = nil;
@@ -469,10 +475,330 @@ CK_EXTERN NSString * const CKIdentityUpdateNotification;
 }
 
 - (void)beginActivitiesForRequest:(__kindof OCCloudKitMirroringRequest *)request {
-    abort();
+    /*
+     self = x20
+     request = x19
+     */
+    // sp + 0x8
+    NSObject<OCCloudKitMirroringDelegateProgressProvider> *progressProvider = [self->_options.progressProvider retain];
+    
+    if (progressProvider == nil) {
+        [progressProvider release];
+        return;
+    }
+    
+    if ([request isKindOfClass:[OCCloudKitMirroringDelegateSetupRequest class]]) {
+        // x20
+        OCPersistentCloudKitContainerEventActivity *activity = [[OCPersistentCloudKitContainerEventActivity alloc] initWithRequestIdentifier:request.requestIdentifier storeIdentifier:self->_observedStoreIdentifier eventType:0];
+        request.activity = activity;
+        
+        // x19
+        __kindof OCPersistentCloudKitContainerActivity *beganActivity = [activity beginActivityForPhase:0];
+        [progressProvider publishActivity:activity];
+        [progressProvider publishActivity:beganActivity];
+        
+        [activity release];
+        [beganActivity release];
+    }
 }
 
 - (void)checkAndExecuteNextRequest {
+    /*
+     self = x19
+     */
+    
+    os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: Checking for pending requests.", __func__, __LINE__, self);
+    
+    // sp, #0x30
+    __weak OCCloudKitMirroringDelegate *weakSelf = self;
+    
+    /*
+     original : @"com.apple.coredata.cloudkit.schedule", @"CoreData: CloudKit Scheduling"
+     */
+    /*
+     __57-[NSCloudKitMirroringDelegate checkAndExecuteNextRequest]_block_invoke
+     weakSelf = sp + 0x28
+     */
+    [self _openTransactionWithLabel:@"com.pookjw.openclouddata.cloudkit.schedule" assertionLabel:@"OpenCloudData: CloudKit Scheduling" andExecuteWorkBlock:^(OCCloudKitMirroringDelegateWorkBlockContext *context) {
+        // x19
+        OCCloudKitMirroringDelegate *loaded = [weakSelf retain];
+        if (loaded == nil) {
+            os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Unable to schedule work because the mirroring delegate was deallocated.", __func__, __LINE__);
+            [loaded release];
+            return;
+        }
+        
+        // x20
+        OCCloudKitMirroringRequestManager *requestManager = [loaded->_requestManager retain];
+        if (requestManager != nil) {
+            if (requestManager->_activeRequest != nil) {
+                os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: Deferring additional work. There is still an active request: %@", __func__, __LINE__, loaded, requestManager->_activeRequest);
+                [loaded release];
+                return;
+            }
+        }
+        
+        // <+424>
+        // x21
+        OCCloudKitMirroringRequest *dequeuedRequest = [requestManager dequeueNextRequest];
+        os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: Executing: %@", __func__, __LINE__, self, dequeuedRequest);
+        // x22
+        OCPersistentCloudKitContainerActivity *activity = [dequeuedRequest->_activity retain];
+        
+        if ([activity isKindOfClass:[OCPersistentCloudKitContainerEventActivity class]]) {
+            // <+652>
+            OCPersistentCloudKitContainerEventActivity *casted = (OCPersistentCloudKitContainerEventActivity *)activity;
+            // x23
+            __kindof OCPersistentCloudKitContainerActivity *endedActivity = [casted endActivityForPhase:0 withError:NULL];
+            [loaded->_options.progressProvider publishActivity:endedActivity];
+            [endedActivity release];
+            // <+852>
+            // fin
+        } else {
+            // <+800>
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: I don't know how to handle this type of activity yet: %@\n", activity);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: I don't know how to handle this type of activity yet: %@\n", activity);
+        }
+        
+        // <+852>
+        [activity release];
+        
+        if ([dequeuedRequest isKindOfClass:[OCCloudKitMirroringFetchRecordsRequest class]]) {
+            // <+884>
+            [self _performFetchRecordsRequest:(OCCloudKitMirroringFetchRecordsRequest *)dequeuedRequest];
+        } else if ([dequeuedRequest isKindOfClass:[OCCloudKitMirroringImportRequest class]]) {
+            // <+980>
+            [self _performImportWithRequest:(OCCloudKitMirroringImportRequest *)dequeuedRequest];
+        } else if ([dequeuedRequest isKindOfClass:[OCCloudKitMirroringExportRequest class]]) {
+            // <+1076>
+            [self _performExportWithRequest:(OCCloudKitMirroringExportRequest *)dequeuedRequest];
+        } else if ([dequeuedRequest isKindOfClass:[OCCloudKitMirroringResetZoneRequest class]]) {
+            // <+1172>
+            [self _performResetZoneRequest:(OCCloudKitMirroringResetZoneRequest *)dequeuedRequest];
+        } else if ([dequeuedRequest isKindOfClass:[OCCloudKitMirroringResetMetadataRequest class]]) {
+            // <+1268>
+            [self _performMetadataResetRequest:(OCCloudKitMirroringResetMetadataRequest *)dequeuedRequest];
+        } else if ([dequeuedRequest isKindOfClass:[OCCloudKitMirroringDelegateSetupRequest class]]) {
+            // <+1432>
+            [self _performSetupRequest:(OCCloudKitMirroringDelegateSetupRequest *)dequeuedRequest];
+        } else if ([dequeuedRequest isKindOfClass:[OCCloudKitMirroringDelegateResetRequest class]]) {
+            // <+1588>
+            [self _performDelegateResetRequest:(OCCloudKitMirroringDelegateResetRequest *)dequeuedRequest];
+        } else if ([dequeuedRequest isKindOfClass:[OCCloudKitMirroringInitializeSchemaRequest class]]) {
+            // <+1632>
+            [self _performSchemaInitializationRequest:(OCCloudKitMirroringInitializeSchemaRequest *)dequeuedRequest];
+        } else if ([dequeuedRequest isKindOfClass:[OCCloudKitMirroringDelegateSerializationRequest class]]) {
+            // <+1676>
+            [self _performSerializationRequest:(OCCloudKitMirroringDelegateSerializationRequest *)dequeuedRequest];
+        } else if ([dequeuedRequest isKindOfClass:[OCCloudKitMirroringExportProgressRequest class]]) {
+            // <+1720>
+            [self _performExportProgressRequest:(OCCloudKitMirroringExportProgressRequest *)dequeuedRequest];
+        } else if ([dequeuedRequest isKindOfClass:[OCCloudKitMirroringAcceptShareInvitationsRequest class]]) {
+            // <+1764>
+            [self _performAcceptShareInvitationsRequest:(OCCloudKitMirroringAcceptShareInvitationsRequest *)dequeuedRequest];
+        } else {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: %@: Asked to execute a request that isn't understood yet: %@\n", self, dequeuedRequest);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: %@: Asked to execute a request that isn't understood yet: %@\n", self, dequeuedRequest);
+        }
+        
+        [dequeuedRequest release];
+        [requestManager release];
+        [loaded release];
+    }];
+}
+
+- (void)_performFetchRecordsRequest:(OCCloudKitMirroringFetchRecordsRequest *)request __attribute__((objc_direct)) {
+    // inlined from __57-[NSCloudKitMirroringDelegate checkAndExecuteNextRequest]_block_invoke <+884>~<+948>
+    /*
+     request = x21
+     */
+    /*
+     original : @"com.apple.coredata.cloudkit.fetch.records", @"CoreData: CloudKit Fetch Records"
+     */
+    /*
+     __59-[NSCloudKitMirroringDelegate _performFetchRecordsRequest:]_block_invoke
+     loaded = sp + 0x20
+     request = sp + 0x28
+     */
+    [self _openTransactionWithLabel:@"com.pookjw.openclouddata.cloudkit.fetch.records" assertionLabel:@"OpenCloudData: CloudKit Fetch Records" andExecuteWorkBlock:^(OCCloudKitMirroringDelegateWorkBlockContext *context) {
+        /*
+         self(block) = x21
+         context = x23
+         */
+        
+        if (!self->_successfullyInitialized) {
+            [self _requestAbortedNotInitialized:request];
+            return;
+        }
+        // x19
+        NSSQLCore * _Nullable observedStore = [self->_observedStore retain];
+        
+        OCCloudKitStoreMonitorProvider * _Nullable storeMonitorProvider;
+        {
+            if (self == nil) {
+                storeMonitorProvider = nil;
+            } else {
+                OCCloudKitMirroringDelegateOptions *options = self->_options;
+                if (options == nil) {
+                    storeMonitorProvider = nil;
+                } else {
+                    storeMonitorProvider = options->_storeMonitorProvider;
+                }
+            }
+        }
+        
+        // x20
+        OCCloudKitStoreMonitor *monitor = [storeMonitorProvider createMonitorForObservedStore:observedStore inTransactionWithLabel:context->_transactionLabel];
+        
+        // sp, #0x48
+        NSError * _Nullable error = nil;
+        
+        // <+132>
+        // x22
+        OCPersistentCloudKitContainerEvent * _Nullable event = [OCCKEvent beginEventForRequest:request withMonitor:monitor error:&error];
+        if (event == nil) {
+            // <+408>
+            // x22
+            OCCloudKitMirroringResult *result = [[OCCloudKitMirroringResult alloc] initWithRequest:request storeIdentifier:self->_observedStoreIdentifier success:NO madeChanges:NO error:error];
+            [self _importFinishedWithResult:result importer:nil];
+            [result release];
+            [monitor release];
+            [observedStore release];
+            return;
+        }
+        
+        NSObject<OCCloudKitMirroringDelegateProgressProvider> * _Nullable progressProvider;
+        {
+            if (self == nil) {
+                progressProvider = nil;
+            } else {
+                progressProvider = self->_options.progressProvider;
+            }
+        }
+        
+        [progressProvider eventUpdated:event];
+        // <+168>
+        // x25
+        OCCloudKitImporterOptions *importerOptions = [[OCCloudKitImporterOptions alloc] initWithOptions:self->_options monitor:monitor assetStorageURL:[OCCloudKitSerializer assetStorageDirectoryURLForStore:observedStore] workQueue:self->_cloudKitQueue andDatabase:self->_database];
+        // x24
+        OCCloudKitImporter *importer = [[OCCloudKitImporter alloc] initWithOptions:importerOptions request:request];
+        [importerOptions release];
+        
+        /*
+         __59-[NSCloudKitMirroringDelegate _performFetchRecordsRequest:]_block_invoke_2
+         */
+        [importer importIfNecessaryWithCompletion:^(OCCloudKitMirroringResult * _Nonnull result) {
+            abort();
+        }];
+        
+        [event release];
+        [monitor release];
+        [importer release];
+        [observedStore release];
+    }];
+}
+
+- (void)_performImportWithRequest:(OCCloudKitMirroringImportRequest *)request __attribute__((objc_direct)) {
+    // inlined from __57-[NSCloudKitMirroringDelegate checkAndExecuteNextRequest]_block_invoke <+980>~<+1044>
+    /*
+     request = x21
+     */
+    /*
+     original : @"com.apple.coredata.cloudkit.import", @"CoreData: CloudKit Import"
+     */
+    /*
+     __57-[NSCloudKitMirroringDelegate _performImportWithRequest:]_block_invoke
+     loaded = sp + 0x20
+     request = sp + 0x28
+     */
+    [self _openTransactionWithLabel:@"com.pookjw.openclouddata.cloudkit.import" assertionLabel:@"OpenCloudData: CloudKit Import" andExecuteWorkBlock:^(OCCloudKitMirroringDelegateWorkBlockContext *context) {
+        abort();
+    }];
+}
+
+- (void)_performExportWithRequest:(OCCloudKitMirroringExportRequest *)request __attribute__((objc_direct)) {
+    // inlined from __57-[NSCloudKitMirroringDelegate checkAndExecuteNextRequest]_block_invoke <+1076>~<+1140>
+    /*
+     request = x21
+     */
+    /*
+     original : @"com.apple.coredata.cloudkit.export", @"CoreData: CloudKit Export"
+     */
+    /*
+     __57-[NSCloudKitMirroringDelegate _performExportWithRequest:]_block_invoke
+     loaded = sp + 0x20
+     request = sp + 0x28
+     */
+    [self _openTransactionWithLabel:@"com.pookjw.openclouddata.cloudkit.export" assertionLabel:@"OpenCloudData: CloudKit Export" andExecuteWorkBlock:^(OCCloudKitMirroringDelegateWorkBlockContext *context) {
+        abort();
+    }];
+}
+
+- (void)_performResetZoneRequest:(OCCloudKitMirroringResetZoneRequest *)request __attribute__((objc_direct)) {
+    // inlined from __57-[NSCloudKitMirroringDelegate checkAndExecuteNextRequest]_block_invoke <+1172>~<+1236>
+    /*
+     request = x21
+     */
+    /*
+     original : @"com.apple.coredata.cloudkit.zone.reset", @"CoreData: CloudKit Zone Reset"
+     */
+    /*
+     __57-[NSCloudKitMirroringDelegate _performResetZoneRequest:]_block_invoke
+     loaded = sp + 0x20
+     request = sp + 0x28
+     */
+    [self _openTransactionWithLabel:@"com.pookjw.openclouddata.cloudkit.zone.reset" assertionLabel:@"OpenCloudData: CloudKit Zone Reset" andExecuteWorkBlock:^(OCCloudKitMirroringDelegateWorkBlockContext *context) {
+        abort();
+    }];
+}
+
+- (void)_performMetadataResetRequest:(OCCloudKitMirroringResetMetadataRequest *)request __attribute__((objc_direct)) {
+    // inlined from __57-[NSCloudKitMirroringDelegate checkAndExecuteNextRequest]_block_invoke <+1268>~<+1340>
+    /*
+     request = x21
+     */
+    /*
+     original : @"com.apple.coredata.cloudkit.metadata.reset", @"CoreData: CloudKit Metadata Reset"
+     */
+    /*
+     __57-[NSCloudKitMirroringDelegate _performMetadataResetRequest:]_block_invoke
+     loaded = sp + 0x20
+     request = sp + 0x28
+     */
+    [self _openTransactionWithLabel:@"com.pookjw.openclouddata.cloudkit.metadata.reset" assertionLabel:@"OpenCloudData: CloudKit Metadata Reset" andExecuteWorkBlock:^(OCCloudKitMirroringDelegateWorkBlockContext *context) {
+        abort();
+    }];
+}
+
+- (void)_performSetupRequest:(OCCloudKitMirroringDelegateSetupRequest *)request __attribute__((objc_direct)) {
+    abort();
+}
+
+- (void)_performDelegateResetRequest:(OCCloudKitMirroringDelegateResetRequest *)request __attribute__((objc_direct)) {
+    abort();
+}
+
+- (void)_performSchemaInitializationRequest:(OCCloudKitMirroringInitializeSchemaRequest *)request __attribute__((objc_direct)) {
+    abort();
+}
+
+- (void)_performSerializationRequest:(OCCloudKitMirroringDelegateSerializationRequest *)request __attribute__((objc_direct)) {
+    abort();
+}
+
+- (void)_performExportProgressRequest:(OCCloudKitMirroringExportProgressRequest *)request __attribute__((objc_direct)) {
+    abort();
+}
+
+- (void)_performAcceptShareInvitationsRequest:(OCCloudKitMirroringAcceptShareInvitationsRequest *)request __attribute__((objc_direct)) {
+    abort();
+}
+
+- (void)_requestAbortedNotInitialized:(OCCloudKitMirroringRequest *)request __attribute__((objc_direct)) {
+    abort();
+}
+
+- (void)_importFinishedWithResult:(OCCloudKitMirroringResult *)result importer:(OCCloudKitImporter * _Nullable)importer __attribute__((objc_direct)) {
     abort();
 }
 

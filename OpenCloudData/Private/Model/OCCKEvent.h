@@ -6,6 +6,9 @@
 //
 
 #import <CoreData/CoreData.h>
+#import <OpenCloudData/OCPersistentCloudKitContainerEvent.h>
+#import <OpenCloudData/OCCloudKitMirroringRequest.h>
+#import <OpenCloudData/OCCloudKitStoreMonitor.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -20,6 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) int64_t errorCode;
 @property (nonatomic) int64_t countAffectedObjects;
 @property (nonatomic) int64_t countFinishedObjects;
++ (OCPersistentCloudKitContainerEvent * _Nullable)beginEventForRequest:(OCCloudKitMirroringRequest *)request withMonitor:(OCCloudKitStoreMonitor *)monitor error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct)) NS_RETURNS_RETAINED;
 @end
 
 NS_ASSUME_NONNULL_END

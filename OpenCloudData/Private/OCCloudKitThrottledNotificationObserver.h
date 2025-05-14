@@ -6,7 +6,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#include <stdatomic.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -17,9 +16,10 @@ NS_ASSUME_NONNULL_BEGIN
     NSString *_assertionLabel; // 0x10
     NSString *_label; // 0x18
     @package NSInteger _notificationStalenessInterval; // 0x20
-    void (^_notificationHandlerBlock)(NSString *label); // 0x28
+    void (^_notificationHandlerBlock)(NSString *assertionLabel); // 0x28
 }
-- (instancetype)initWithLabel:(NSString *)label handlerBlock:(void (^)(NSString *label))handlerBlock;
+- (instancetype)initWithLabel:(NSString *)label handlerBlock:(void (^)(NSString *assertionLabel))handlerBlock;
+- (void)noteRecievedNotification:(NSNotification *)notification __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

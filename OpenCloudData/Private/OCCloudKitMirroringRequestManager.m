@@ -13,4 +13,8 @@
     abort();
 }
 
+- (OCCloudKitMirroringRequest *)dequeueNextRequest {
+    abort();
+}
+
 @end

@@ -26,4 +26,8 @@
     return [NSString stringWithFormat:@"%@/%@", [OCCloudKitMetadataModel ancillaryModelNamespace], NSStringFromClass(objc_lookUpClass("NSCKEvent"))];
 }
 
++ (OCPersistentCloudKitContainerEvent *)beginEventForRequest:(OCCloudKitMirroringRequest *)request withMonitor:(OCCloudKitStoreMonitor *)monitor error:(NSError * _Nullable *)error {
+    abort();
+}
+
 @end
