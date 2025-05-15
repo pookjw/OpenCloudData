@@ -9,7 +9,12 @@
 #import <OpenCloudData/OCCloudKitMirroringFetchRecordsRequest.h>
 #import <OpenCloudData/OCCloudKitImporterFetchRecordsWorkItem.h>
 #import <OpenCloudData/OCCloudKitImportDatabaseContext.h>
+#import <OpenCloudData/OCCloudKitSerializer.h>
+#import <OpenCloudData/OCCloudKitCKQueryBackedImportWorkItem.h>
+#import <OpenCloudData/OCCloudKitImporterZoneChangedWorkItem.h>
 #import <OpenCloudData/Log.h>
+#import <OpenCloudData/_PFRoutines.h>
+#include <objc/runtime.h>
 
 @implementation OCCloudKitImporter
 
@@ -292,17 +297,47 @@
                 if (configurationName == nil) configurationName = @"PF_DEFAULT_CONFIGURATION_NAME";
                 
                 // x22
-                NSMutableSet *set = [[NSMutableSet alloc] init];
+                NSMutableSet<CKRecordType> *set = [[NSMutableSet alloc] init];
                 // sp + 0x30
-                NSMutableArray *array = [[NSMutableArray alloc] init];
+                NSMutableArray<OCCloudKitCKQueryBackedImportWorkItem *> *array = [[NSMutableArray alloc] init];
                 // monitoredCoordinator = sp + 0x8
                 
+                // w20
+                BOOL flag = NO;
                 // x27
                 for (NSEntityDescription *entityDescription in [monitoredCoordinator.managedObjectModel entitiesForConfiguration:configurationName]) {
                     // <+1772>
-                    abort();
+                    CKRecordType recordType = [OCCloudKitSerializer recordTypeForEntity:entityDescription];
+                    [set addObject:recordType];
+                    
+                    if (!flag) {
+                        // x19
+                        for (NSString *name in entityDescription.relationshipsByName) {
+                            NSRelationshipDescription *relationshipDescription = [entityDescription.relationshipsByName objectForKey:name];
+                            if (relationshipDescription.toMany && relationshipDescription.inverseRelationship.toMany) {
+                                [set addObject:@"CDMR"];
+                                flag = YES;
+                            }
+                        }
+                    }
                 }
-                abort();
+                
+                // x19
+                for (CKRecordType recordType in set) {
+                    // x19
+                    OCCloudKitCKQueryBackedImportWorkItem *workItem = [[OCCloudKitCKQueryBackedImportWorkItem alloc] initForRecordType:recordType withOptions:self->_options request:self->_request];
+                    [array addObject:workItem];
+                    [workItem release];
+                }
+                
+                // 기본값 release 안하는듯
+                self->_workItems = [array copy];
+                [self processWorkItemsWithCompletion:completion];
+                [array release];
+                [monitoredCoordinator release];
+                [set release];
+                [store release];
+                return;
             } else {
                 [store release];
                 return;
@@ -312,7 +347,234 @@
 }
 
 - (void)processWorkItemsWithCompletion:(void (^)(OCCloudKitMirroringResult * _Nonnull))completion {
-    abort();
+    /*
+     self = x20
+     completion = x19
+     */
+    
+    os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: Processing work items: %@", __func__, __LINE__, self, self->_workItems);
+    // x21
+    OCCloudKitStoreMonitor * _Nullable monitor;
+    {
+        OCCloudKitImporterOptions * _Nullable options = self->_options;
+        if (options == nil) {
+            monitor = nil;
+        } else {
+            monitor = [options->_monitor retain];
+        }
+    }
+    
+    // x22
+    OCCloudKitImporterWorkItem * _Nullable workItem;
+    if (self->_workItems.count > 0) {
+        workItem = [self->_workItems objectAtIndex:0];
+        NSMutableArray<OCCloudKitImporterWorkItem *> *mutableWorkItems = [self->_workItems mutableCopy];
+        [mutableWorkItems removeObjectAtIndex:0];
+        [self->_workItems release];
+        self->_workItems = [mutableWorkItems copy];
+        [mutableWorkItems release];
+    } else {
+        workItem = nil;
+    }
+    
+    if (workItem != nil) {
+        // <+332>
+        
+        /*
+         __53-[PFCloudKitImporter processWorkItemsWithCompletion:]_block_invoke
+         monitor = sp + 0x60 = x21 + 0x20
+         self = sp + 0x68 = x21 + 0x28
+         workItem = sp + 0x70 = x21 + 0x30
+         completion = sp + 0x78 = x21 + 0x38
+         */
+        [monitor performBlock:^{
+            // self = x21
+            // x19
+            NSPersistentStoreCoordinator * _Nullable monitoredCoordinator;
+            {
+                if (monitor == nil) {
+                    monitoredCoordinator = nil;
+                } else {
+                    monitoredCoordinator = [monitor->_monitoredCoordinator retain];
+                }
+            }
+            // x20
+            NSSQLCore * _Nullable store = [monitor retainedMonitoredStore];
+            if (store == nil) {
+                // <+300>
+                NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:134407 userInfo:@{
+                    NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Request '%@' was cancelled because the store was removed from the coordinator.", self->_request.requestIdentifier]
+                }];
+                
+                NSString *storeIdentifier;
+                {
+                    if (monitor == nil) {
+                        storeIdentifier = nil;
+                    } else {
+                        storeIdentifier = monitor->_storeIdentifier;
+                    }
+                }
+                
+                // x22
+                OCCloudKitMirroringResult *result = [[OCCloudKitMirroringResult alloc] initWithRequest:self->_request storeIdentifier:storeIdentifier success:NO madeChanges:NO error:error];
+                
+                // nil 확인 없음
+                completion(result);
+                [result release];
+                [store release];
+                [monitoredCoordinator release];
+                return;
+            }
+            
+            BOOL defer;
+            {
+                if (self == nil) {
+                    defer = NO;
+                } else {
+                    // x22
+                    OCCloudKitMirroringImportRequest * _Nullable request = self->_request;
+                    if (request == nil) {
+                        defer = NO;
+                    } else {
+                        CKSchedulerActivity *schedulerActivity = request->_schedulerActivity;
+                        if (schedulerActivity.shouldDefer) {
+                            defer = YES;
+                        } else {
+                            defer = request->_deferredByBackgroundTimeout;
+                        }
+                    }
+                }
+            }
+            
+            if (defer) {
+                // <+132>
+                NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:134419 userInfo:@{
+                    NSLocalizedFailureReasonErrorKey: @"The request was aborted because it was deferred by the system."
+                }];
+                
+                NSString *storeIdentifier;
+                {
+                    if (monitor == nil) {
+                        storeIdentifier = nil;
+                    } else {
+                        storeIdentifier = monitor->_storeIdentifier;
+                    }
+                }
+                
+                // x22
+                OCCloudKitMirroringResult *result = [[OCCloudKitMirroringResult alloc] initWithRequest:self->_request storeIdentifier:storeIdentifier success:NO madeChanges:NO error:error];
+                // nil 확인 없음
+                completion(result);
+                [result release];
+                [store release];
+                [monitoredCoordinator release];
+                return;
+            }
+            
+            // <+508>
+            // sp + 0x40
+            __weak OCCloudKitImporter *weakSelf = self;
+            /*
+             __53-[PFCloudKitImporter processWorkItemsWithCompletion:]_block_invoke_2
+             workItem = sp + 0x28 = x21 + 0x20
+             completion = sp + 0x30 = x21 + 0x28
+             weakSelf = sp + 0x38 = x21 + 0x30
+             */
+            [workItem doWorkForStore:store inMonitor:monitor completion:^(OCCloudKitMirroringResult * _Nonnull result) {
+                /*
+                 self(block) = x21
+                 result = x20
+                 */
+                // x19
+                OCCloudKitImporter *loaded = [weakSelf retain];
+                if (loaded == nil) {
+                    [loaded release];
+                    return;
+                }
+                
+                dispatch_queue_t _Nullable workQueue;
+                {
+                    OCCloudKitImporterOptions * _Nullable options = loaded->_options;
+                    if (options == nil) {
+                        workQueue = nil;
+                    } else {
+                        workQueue = options->_workQueue;
+                    }
+                }
+                
+                /*
+                 __53-[PFCloudKitImporter processWorkItemsWithCompletion:]_block_invoke_3
+                 loaded = sp + 0x20 = x21 + 0x20
+                 result = sp + 0x28 = x21 + 0x28
+                 workItem = sp + 0x30 = x21 + 0x30
+                 completion = sp + 0x38 = x21 + 0x38
+                 */
+                dispatch_async(workQueue, ^{
+                    @autoreleasepool {
+                        [loaded workItemFinished:workItem withResult:result completion:completion];
+                    }
+                });
+            }];
+            
+            [store release];
+            [monitoredCoordinator release];
+        }];
+    } else {
+        // <+396>
+        /*
+         __53-[PFCloudKitImporter processWorkItemsWithCompletion:]_block_invoke_4
+         monitor = sp + 0x28 = x27 + 0x20
+         self = sp + 0x30 = x27 + 0x28
+         */
+        [monitor performBlock:^{
+            // self = x27
+            // x26
+            NSSQLCore * _Nullable store = [monitor retainedMonitoredStore];
+            abort();
+        }];
+    }
+}
+
+- (void)workItemFinished:(OCCloudKitImporterWorkItem *)workItem withResult:(OCCloudKitMirroringResult *)result completion:(void (^)(OCCloudKitMirroringResult * _Nonnull))completion {
+    // inlined from __53-[PFCloudKitImporter processWorkItemsWithCompletion:]_block_invoke_3
+    // self = x20
+    
+    /*
+     __61-[PFCloudKitImporter workItemFinished:withResult:completion:]_block_invoke
+     self = sp + 0x20 = x19 + 0x20
+     result = sp + 0x28 = x19 + 0x28
+     workItem = sp + 0x30 = x19 + 0x30
+     completion = sp + 0x38 = x21 + 0x38
+     */
+    [objc_lookUpClass("_PFRoutines") wrapBlockInGuardedAutoreleasePool:^{
+        // self(block) = x19
+        [self->_workItemResults addObject:result];
+        if (!result.success) {
+            return;
+        }
+        
+        if ([workItem isKindOfClass:[OCCloudKitImporterZoneChangedWorkItem class]]) {
+            OCCloudKitImporterZoneChangedWorkItem *casted = (OCCloudKitImporterZoneChangedWorkItem *)workItem;
+            
+            size_t sizeInBytes;
+            {
+                if (workItem == nil) {
+                    sizeInBytes = 0;
+                } else {
+                    OCCloudKitFetchedRecordBytesMetric * _Nullable fetchedRecordBytesMetric = casted->_fetchedRecordBytesMetric;
+                    if (fetchedRecordBytesMetric == nil) {
+                        sizeInBytes = 0;
+                    } else {
+                        sizeInBytes = fetchedRecordBytesMetric->_sizeInBytes.unsignedIntegerValue;
+                    }
+                }
+            }
+            
+            self->_totalImportedBytes += sizeInBytes;
+        }
+        
+        [self processWorkItemsWithCompletion:completion];
+    }];
 }
 
 @end

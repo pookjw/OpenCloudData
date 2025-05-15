@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 #warning TODO
 
 @interface OCCloudKitSizeMetric : OCCloudKitBaseMetric {
-    NSNumber *_sizeInBytes; // 0x18
+    @package NSNumber *_sizeInBytes; // 0x18
 }
 - (void)addByteSize:(size_t)byteSize __attribute__((objc_direct));
 @end

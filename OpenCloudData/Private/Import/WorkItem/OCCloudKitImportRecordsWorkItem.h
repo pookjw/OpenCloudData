@@ -6,10 +6,13 @@
 //
 
 #import <OpenCloudData/OCCloudKitImporterWorkItem.h>
+#import <OpenCloudData/OCCloudKitFetchedRecordBytesMetric.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OCCloudKitImportRecordsWorkItem : OCCloudKitImporterWorkItem
+@interface OCCloudKitImportRecordsWorkItem : OCCloudKitImporterWorkItem {
+    @package OCCloudKitFetchedRecordBytesMetric *_fetchedRecordBytesMetric; // 0x40
+}
 
 @end
 

@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithOptions:(OCCloudKitImporterOptions *)options request:(OCCloudKitMirroringImportRequest *)request;
 - (void)importIfNecessaryWithCompletion:(void (^)(OCCloudKitMirroringResult *result))completion __attribute__((objc_direct));
 - (void)processWorkItemsWithCompletion:(void (^)(OCCloudKitMirroringResult *result))completion __attribute__((objc_direct));
+- (void)workItemFinished:(OCCloudKitImporterWorkItem *)workItem withResult:(OCCloudKitMirroringResult *)result completion:(void (^)(OCCloudKitMirroringResult *result))completion __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

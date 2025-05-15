@@ -13,4 +13,8 @@
     abort();
 }
 
+- (void)doWorkForStore:(NSSQLCore *)store inMonitor:(OCCloudKitStoreMonitor *)monitor completion:(void (^)(OCCloudKitMirroringResult * _Nonnull))completion {
+    abort();
+}
+
 @end

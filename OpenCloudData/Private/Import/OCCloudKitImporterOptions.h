@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
     @package CKDatabase *_database; // 0x8
     @package OCCloudKitStoreMonitor *_monitor; // 0x10
     OCCloudKitMirroringDelegateOptions *_options; // 0x18
-    dispatch_queue_t _workQueue; // 0x20
+    @package dispatch_queue_t _workQueue; // 0x20
     NSURL *_assetStorageURL; // 0x28
 }
 - (instancetype)initWithOptions:(OCCloudKitMirroringDelegateOptions *)options monitor:(OCCloudKitStoreMonitor *)monitor assetStorageURL:(NSURL *)assetStorageURL workQueue:(dispatch_queue_t)workQueue andDatabase:(CKDatabase *)database;
