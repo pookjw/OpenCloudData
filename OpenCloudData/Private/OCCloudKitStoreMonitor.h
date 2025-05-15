@@ -11,14 +11,14 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface OCCloudKitStoreMonitor : NSObject {
-    dispatch_group_t _monitorGroup;
-    os_unfair_lock _aliveLock;
-    BOOL _storeIsAlive;
-    BOOL _declaredDead;
-    int _retryCount;
-    int _timeoutSeconds;
-    @package __weak NSPersistentStoreCoordinator *_monitoredCoordinator;
-    __weak NSPersistentStore *_monitoredStore;
+    dispatch_group_t _monitorGroup; // 0x8
+    os_unfair_lock _aliveLock; // 0x10
+    BOOL _storeIsAlive; // 0x14
+    BOOL _declaredDead; // 0x15
+    int _retryCount; // 0x18
+    int _timeoutSeconds; // 0x1c
+    @package __weak NSPersistentStoreCoordinator *_monitoredCoordinator; // 0x20
+    __weak NSPersistentStore *_monitoredStore; // 0x28
     @package NSString *_storeIdentifier; // 0x30
 }
 - (instancetype)initForStore:(__kindof NSPersistentStore *)store;

@@ -13,6 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 OC_EXTERN NSNotificationName const OCPersistentCloudKitContainerEventChangedNotification NS_SWIFT_NAME(OCPersistentCloudKitContainer.eventChangedNotification);
 OC_EXTERN NSString * const OCPersistentCloudKitContainerEventUserInfoKey NS_SWIFT_NAME(OCPersistentCloudKitContainer.eventNotificationUserInfoKey);
 
+@class OCCKEvent;
+
 @interface OCPersistentCloudKitContainerEvent : NSObject <NSCopying>
 + (NSString * _Nullable)eventTypeString:(NSInteger)type;
 @property (retain, readonly, nonatomic, nullable) NSUUID *identifier; // original : (readonly, nonatomic)
@@ -24,6 +26,7 @@ OC_EXTERN NSString * const OCPersistentCloudKitContainerEventUserInfoKey NS_SWIF
 @property (retain, readonly, nonatomic, nullable) NSError *error; // original : (readonly, nonatomic)
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithCKEvent:(OCCKEvent *)event;
 @end
 
 NS_ASSUME_NONNULL_END
