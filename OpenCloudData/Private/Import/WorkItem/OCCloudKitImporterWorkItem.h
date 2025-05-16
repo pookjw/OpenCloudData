@@ -13,9 +13,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-
-@interface OCCloudKitImporterWorkItem : NSObject
+@interface OCCloudKitImporterWorkItem : NSObject {
+    OCCloudKitImporterOptions *_options; // 0x8
+    OCCloudKitMirroringImportRequest *_request; // 0x10
+}
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithOptions:(OCCloudKitImporterOptions *)options request:(OCCloudKitMirroringImportRequest *)request;

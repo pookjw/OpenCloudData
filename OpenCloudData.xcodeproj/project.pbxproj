@@ -84,6 +84,7 @@
 				Private/Log.h,
 				Private/Metric/OCCloudKitBaseMetric.h,
 				Private/Metric/OCCloudKitExportedRecordBytesMetric.h,
+				Private/Metric/OCCloudKitFetchedAssetBytesMetric.h,
 				Private/Metric/OCCloudKitFetchedRecordBytesMetric.h,
 				Private/Metric/OCCloudKitImportedRecordBytesMetric.h,
 				Private/Metric/OCCloudKitSizeMetric.h,

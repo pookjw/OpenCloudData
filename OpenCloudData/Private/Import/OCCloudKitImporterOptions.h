@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
     @package dispatch_queue_t _workQueue; // 0x20
     NSURL *_assetStorageURL; // 0x28
 }
+@property (retain, nonatomic, readonly, direct) OCCloudKitMirroringDelegateOptions *options;
 - (instancetype)initWithOptions:(OCCloudKitMirroringDelegateOptions *)options monitor:(OCCloudKitStoreMonitor *)monitor assetStorageURL:(NSURL *)assetStorageURL workQueue:(dispatch_queue_t)workQueue andDatabase:(CKDatabase *)database;
 @end
 
