@@ -129,7 +129,7 @@
                 // nil 확인 없음
                 completion(result);
                 [result release];
-                [store retain];
+                [store release];
                 return;
             }
         }
@@ -823,6 +823,7 @@
             managedObjectContext = nil;
             [error release];
             error = nil;
+            [store release];
         }];
     }
 }

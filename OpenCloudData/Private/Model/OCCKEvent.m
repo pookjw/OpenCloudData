@@ -97,8 +97,8 @@
             newEvent.startedAt = [NSDate date];
             [managedObjectContext assignObject:newEvent toPersistentStore:store];
             
-            BOOL result = [managedObjectContext save:&__error];
-            if (!result) {
+            BOOL _result = [managedObjectContext save:&__error];
+            if (!_result) {
                 _error = [__error retain];
                 return;
             }

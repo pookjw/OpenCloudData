@@ -209,6 +209,7 @@ OBJC_EXPORT id objc_msgSendSuper2(void);
             os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Transaction appears to have been processed twice: %@\n", transaction);
         }
     } else {
+        // Analyzer 무시
         [*[self _lastProcessedTokenPtr] release];
         *[self _lastProcessedTokenPtr] = [transaction.token retain];
     }

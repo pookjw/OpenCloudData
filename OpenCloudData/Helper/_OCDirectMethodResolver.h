@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (size_t)OCCloudKitSerializer:(Class)x0 estimateByteSizeOfRecordID:(CKRecordID *)x1;
 + (CKRecordType)OCCloudKitSerializer:(Class)x0 recordTypeForEntity:(NSEntityDescription *)x1;
 + (BOOL)OCCloudKitSerializer:(Class)x0 isMirroredRelationshipRecordType:(CKRecordType)x1;
-+ (NSSet<NSManagedObjectID *> *)OCCloudKitSerializer:(Class)x0 createSetOfObjectIDsRelatedToObject:(NSManagedObject *)x1;
++ (NSSet<NSManagedObjectID *> *)OCCloudKitSerializer:(Class)x0 createSetOfObjectIDsRelatedToObject:(NSManagedObject *)x1 NS_RETURNS_RETAINED;
 + (NSURL *)OCCloudKitSerializer:(Class)x0 generateCKAssetFileURLForObjectInStore:(NSPersistentStore *)x1;
 + (NSURL *)OCCloudKitSerializer:(Class)x0 assetStorageDirectoryURLForStore:(NSPersistentStore *)x1;
 + (NSDictionary<NSString *, id> *)OCMirroredOneToManyRelationship_recordTypesToRecordIDs:(OCMirroredOneToManyRelationship *)x0;

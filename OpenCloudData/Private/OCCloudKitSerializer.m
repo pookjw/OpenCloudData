@@ -639,6 +639,7 @@ static CKRecordZoneID *zoneID_2;
                 }
             }
             
+            [zoneID release];
             [array_1 release];
             [managedObjectContext release];
             [entity release];
@@ -2479,6 +2480,9 @@ static CKRecordZoneID *zoneID_2;
                                         [string release];
                                         // <+4336>
                                     }
+                                    // <+4336>
+                                } else {
+                                    [string release];
                                     // <+4336>
                                 }
                                 // fin

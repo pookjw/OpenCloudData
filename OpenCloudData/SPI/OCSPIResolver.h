@@ -65,7 +65,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)_PFModelMapPathForEntity:(NSEntityDescription *)x0;
 
-+ (NSData *)_NSDataFileBackedFuture__storeMetadata:(_NSDataFileBackedFuture *)x0 NS_RETURNS_RETAINED;
++ (NSData *)_NSDataFileBackedFuture__storeMetadata:(_NSDataFileBackedFuture *)x0;
 
 + (NSString *)PFCloudKitSerializer_mtmKeyForObjectWithRecordName_relatedToObjectWithRecordName_byRelationship_withInverse_:(Class)x0 x1:(NSString *)x1 x2:(NSString *)x2 x3:(NSRelationshipDescription *)x3 x4:(NSRelationshipDescription *)x4;
 + (size_t)PFCloudKitSerializer_estimateByteSizeOfRecordID_:(Class)x0 x1:(CKRecordID *)x1;

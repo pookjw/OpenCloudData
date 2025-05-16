@@ -500,6 +500,8 @@ CK_EXTERN NSString * const CKIdentityUpdateNotification;
         [activity release];
         [beganActivity release];
     }
+    
+    [progressProvider release];
 }
 
 - (void)checkAndExecuteNextRequest {

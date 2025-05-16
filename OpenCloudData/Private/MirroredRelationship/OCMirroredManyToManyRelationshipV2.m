@@ -119,6 +119,8 @@
         NSRelationshipDescription *relationshipDescription = [[managedObjectModel.entitiesByName objectForKey:[entityNames objectAtIndex:0]].relationshipsByName objectForKey:[relationships objectAtIndex:0]];
         NSRelationshipDescription *inverseRelationshipDescription = [[managedObjectModel.entitiesByName objectForKey:[entityNames objectAtIndex:1]].relationshipsByName objectForKey:[relationships objectAtIndex:1]];
         [self _setManyToManyRecordID:recordID_3 manyToManyRecordType:recordType ckRecordID:recordID_1 relatedCKRecordID:recordID_2 relationshipDescription:relationshipDescription inverseRelationshipDescription:inverseRelationshipDescription type:type];
+        [recordID_1 release];
+        [recordID_2 release];
     }
     
     return self;
