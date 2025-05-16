@@ -9,4 +9,8 @@
 
 @implementation OCCloudKitImporterZoneChangedWorkItem
 
+- (instancetype)initWithChangedRecordZoneIDs:(NSArray<CKRecordZoneID *> *)recordZoneIDs options:(OCCloudKitImporterOptions *)options request:(OCCloudKitMirroringImportRequest *)request {
+    abort();
+}
+
 @end

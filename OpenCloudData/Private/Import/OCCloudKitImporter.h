@@ -10,10 +10,9 @@
 #import <OpenCloudData/OCCloudKitMirroringImportRequest.h>
 #import <OpenCloudData/OCCloudKitMirroringResult.h>
 #import <OpenCloudData/OCCloudKitImporterWorkItem.h>
+#import <OpenCloudData/OCCloudKitImportDatabaseContext.h>
 
 NS_ASSUME_NONNULL_BEGIN
-
-#warning TODO
 
 @interface OCCloudKitImporter : NSObject {
     OCCloudKitImporterOptions *_options; // 0x8
@@ -28,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)importIfNecessaryWithCompletion:(void (^)(OCCloudKitMirroringResult *result))completion __attribute__((objc_direct));
 - (void)processWorkItemsWithCompletion:(void (^)(OCCloudKitMirroringResult *result))completion __attribute__((objc_direct));
 - (void)workItemFinished:(OCCloudKitImporterWorkItem *)workItem withResult:(OCCloudKitMirroringResult *)result completion:(void (^)(OCCloudKitMirroringResult *result))completion __attribute__((objc_direct));
+- (void)databaseFetchFinishWithContext:(OCCloudKitImportDatabaseContext *)context error:(NSError * _Nullable)error completion:(void (^)(OCCloudKitMirroringResult *result))completion __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END
