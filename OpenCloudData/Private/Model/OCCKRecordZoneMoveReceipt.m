@@ -58,6 +58,7 @@
     
     if (recordIDs.count != 0) {
         /*
+         __104+[NSCKRecordZoneMoveReceipt moveReceiptsMatchingRecordIDs:inManagedObjectContext:persistentStore:error:]_block_invoke
          recordIDs = x19 + 0x20
          managedObjectContext = x19 + 0x28
          persistentStore = x19 + 0x30

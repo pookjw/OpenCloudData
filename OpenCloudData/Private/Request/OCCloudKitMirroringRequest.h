@@ -27,6 +27,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (copy, nonatomic, readonly, nullable) OCCloudKitMirroringRequestOptions *options;
 @property (copy, nonatomic, readonly) void (^ requestCompletionBlock)(OCCloudKitMirroringResult * result);
+@property (assign, nonatomic, readonly, direct) BOOL deferredByBackgroundTimeout;
+@property (retain, nonatomic, nullable, direct) CKSchedulerActivity *schedulerActivity;
 @property (retain, nonatomic, nullable, direct) OCPersistentCloudKitContainerActivity *activity;
 
 - (instancetype)initWithOptions:(OCCloudKitMirroringRequestOptions * _Nullable)options completionBlock:(void (^ _Nullable)(OCCloudKitMirroringResult * result))requestCompletionBlock;

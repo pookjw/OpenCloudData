@@ -28,6 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
     OCCloudKitMetadataCache *_metadataCache; // 0x30
     CKRecordZone *_recordZone; // 0x38
 }
+@property (weak, nonatomic, nullable, direct) NSObject<OCCloudKitSerializerDelegate> *delegate;
 + (CKRecordZoneID *)defaultRecordZoneIDForDatabaseScope:(CKDatabaseScope)databaseScope NS_RETURNS_RETAINED;
 + (BOOL)shouldTrackProperty:(NSPropertyDescription *)property __attribute__((objc_direct));
 + (size_t)estimateByteSizeOfRecordID:(CKRecordID *)recordID __attribute__((objc_direct));

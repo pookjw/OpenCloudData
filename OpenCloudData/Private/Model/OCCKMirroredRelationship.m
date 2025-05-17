@@ -298,7 +298,7 @@
     NSArray<OCCKMirroredRelationship *> * _Nullable results = [managedObjectContext executeFetchRequest:fetchRequest error:error];
     if (results == nil) return nil;
     
-    if (results.count > 2) {
+    if (results.count >= 2) {
         os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Found more than one mirrored relationship matching a many to many: %@\n%@\n", manyToManyRelationship, results);
         os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Found more than one mirrored relationship matching a many to many: %@\n%@\n", manyToManyRelationship, results);
     }

@@ -21,6 +21,9 @@ NS_ASSUME_NONNULL_BEGIN
     __weak NSPersistentStore *_monitoredStore; // 0x28
     @package NSString *_storeIdentifier; // 0x30
 }
+@property (assign, nonatomic, readonly, direct) BOOL declaredDead;
+@property (weak, nonatomic, readonly, direct) NSPersistentStoreCoordinator *monitoredCoordinator;
+@property (retain, nonatomic, readonly, direct) NSString *storeIdentifier;
 - (instancetype)initForStore:(__kindof NSPersistentStore *)store;
 - (void)coordinatorWillRemoveStore:(NSNotification *)notification;
 - (void)performBlock:(void (^ NS_NOESCAPE _Nullable)(void))block __attribute__((objc_direct));

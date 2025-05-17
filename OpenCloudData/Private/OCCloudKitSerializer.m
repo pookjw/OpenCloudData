@@ -1065,7 +1065,7 @@ static CKRecordZoneID *zoneID_2;
                     
                     if (!flag) {
                         // <+704>
-                        if ((((NSString *)representativeValue).length > ckAssetThresholdBytes) && !fullyMaterializeRecords) {
+                        if ((((NSString *)representativeValue).length < ckAssetThresholdBytes) && !fullyMaterializeRecords) {
                             if ((record.size + ((NSString *)representativeValue).length) <= 0xaae60) {
                                 flag = YES;
                             }

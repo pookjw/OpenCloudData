@@ -1948,7 +1948,7 @@
                     }
                 }
                 
-                if (storeMetadataVersion.integerValue <= 0) {
+                if (storeMetadataVersion.integerValue <= 0x3d0) {
                     NSString *sqlString = [NSString stringWithFormat:@"UPDATE %@ SET Z_OPT = 1 WHERE Z_OPT IS NULL OR Z_OPT <= 0", [entity tableName]];
                     NSSQLiteStatement *statement = [[objc_lookUpClass("NSSQLiteStatement") alloc] initWithEntity:entity sqlString:sqlString];
                     OCCloudKitMetadataMigrationContext * _Nullable context = nil;

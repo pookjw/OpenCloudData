@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)cacheMetadataForObjectsWithIDs:(NSArray<NSManagedObjectID *> *)objectIDs andRecordsWithIDs:(NSArray *)recordsWithIDs inStore:(NSSQLCore *)store withManagedObjectContext:(NSManagedObjectContext *)managedObjectContext mirroringOptions:(OCCloudKitMirroringDelegateOptions * _Nullable)mirroringOptions error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 - (void)registerRecordMetadata:(OCCKRecordMetadata *)recordMetadata forObject:(NSManagedObject *)object __attribute__((objc_direct));
 - (void)cacheZoneMetadata:(OCCKRecordZoneMetadata *)zoneMetadata __attribute__((objc_direct));
+- (OCCKRecordMetadata * _Nullable)recordMetadataForRecordID:(CKRecordID *)recordID __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

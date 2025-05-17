@@ -17,6 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
     OCCloudKitImporterOptions *_options; // 0x8
     OCCloudKitMirroringImportRequest *_request; // 0x10
 }
+@property (retain, nonatomic, readonly, direct) OCCloudKitImporterOptions *options;
+@property (retain, nonatomic, readonly, direct) OCCloudKitMirroringImportRequest *request;
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithOptions:(OCCloudKitImporterOptions *)options request:(OCCloudKitMirroringImportRequest *)request;

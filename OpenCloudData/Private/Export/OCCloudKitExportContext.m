@@ -1222,6 +1222,7 @@
     NSMutableSet<NSManagedObjectID *> *deletedObjectIDsSet = [[NSMutableSet alloc] init];
     
     /*
+     __101-[PFCloudKitExportContext newOperationBySerializingDirtyObjectsInStore:inManagedObjectContext:error:]_block_invoke
      store = sp + 0x20 = x21 + 0x20
      self = sp + 0x28 = x21 + 0x28
      managedObjectContext = sp + 0x30 = x21 + 0x30

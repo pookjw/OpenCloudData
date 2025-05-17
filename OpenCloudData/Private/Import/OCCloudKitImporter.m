@@ -1060,7 +1060,7 @@
                 if (context.changedRecordZoneIDs.count == 0) {
                     // nop
                     // <+1580>
-                } else if (context.changedRecordZoneIDs.count <= 400) {
+                } else if (context.changedRecordZoneIDs.count < 400) {
                     // <+1500>
                     // x24
                     OCCloudKitImporterZoneChangedWorkItem *workItem = [[OCCloudKitImporterZoneChangedWorkItem alloc] initWithChangedRecordZoneIDs:context.changedRecordZoneIDs.allObjects options:self->_options request:self->_request];

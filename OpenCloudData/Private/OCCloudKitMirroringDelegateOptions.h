@@ -65,6 +65,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL preserveLegacyRecordMetadataBehavior;
 @property (retain, nonatomic) NSString *apsConnectionMachServiceName;
 @property (nonatomic) CKDatabaseScope databaseScope;
+@property (retain, nonatomic, readonly, direct) OCCloudKitArchivingUtilities *archivingUtilities;
 @property (retain, nonatomic, null_resettable) NSArray<OCPersistentCloudKitContainerActivityVoucher *> *activityVouchers;
 
 - (instancetype)initWithCloudKitContainerOptions:(OCPersistentCloudKitContainerOptions *)containerOptions;

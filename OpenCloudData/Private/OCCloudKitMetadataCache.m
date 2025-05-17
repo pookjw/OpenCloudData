@@ -21,4 +21,8 @@
     abort();
 }
 
+- (OCCKRecordMetadata *)recordMetadataForRecordID:(CKRecordID *)recordID {
+    abort();
+}
+
 @end
