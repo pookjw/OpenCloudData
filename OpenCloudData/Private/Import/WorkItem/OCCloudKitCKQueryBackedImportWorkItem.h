@@ -13,7 +13,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 #warning TODO
 
-@interface OCCloudKitCKQueryBackedImportWorkItem : OCCloudKitImportRecordsWorkItem
+@interface OCCloudKitCKQueryBackedImportWorkItem : OCCloudKitImportRecordsWorkItem {
+    CKRecordType _recordType; // 0x98
+    NSDate *_maxModificationDate; // 0xa0
+    CKQueryCursor *_queryCursor; // 0xa8
+    CKRecordZoneID *_zoneIDToQuery; // 0xb0
+}
+@property (retain, nonatomic, readonly, direct) CKRecordZoneID *zoneIDToQuery;
 - (instancetype)initForRecordType:(CKRecordType)recordType withOptions:(OCCloudKitImporterOptions *)options request:(OCCloudKitMirroringImportRequest *)request;
 @end
 
