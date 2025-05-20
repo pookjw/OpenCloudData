@@ -754,4 +754,312 @@ FOUNDATION_EXTERN void NSRequestConcreteImplementation(id self, SEL _cmd, Class 
     [fileManager release];
 }
 
+- (void)fetchOperationFinishedWithError:(NSError *)error completion:(void (^)(OCCloudKitMirroringResult * _Nonnull))completion {
+    /*
+     __78-[PFCloudKitImportRecordsWorkItem fetchOperationFinishedWithError:completion:]_block_invoke
+     self = sp + 0x28 = x20 + 0x20
+     error = sp + 0x30 = x20 + 0x28
+     completion = sp + 0x38 = x20 + 0x30
+     */
+    dispatch_async(self.options.workQueue, ^{
+        // self(block) = x20
+        // x19
+        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+        // x21
+        OCCloudKitImporterOptions *importerOptions = [self.options retain];
+        /*
+         self = x24
+         */
+        
+        // x22
+        NSError * _Nullable _error = error;
+        BOOL w25;
+        
+        if (_error != nil) {
+            // <+104>
+            w25 = [self handleImportError:error];
+            if (w25) {
+                _error = nil;
+            }
+            // fin
+        } else {
+            // <+340>
+            if (self->_encounteredErrors.count == 0) {
+                // <+420>
+                if (importerOptions.options.operationMemoryThresholdBytes != nil) {
+                    if (importerOptions.options.operationMemoryThresholdBytes.unsignedLongLongValue < self->_currentOperationBytes) {
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Importer didn't obey operation memory threshold, finished operation with more than the threshold worth of work to do (%@ bytes): %@\n", @(self->_currentOperationBytes), importerOptions.options);
+                        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Importer didn't obey operation memory threshold, finished operation with more than the threshold worth of work to do (%@ bytes): %@\n", @(self->_currentOperationBytes), importerOptions.options);
+                    }
+                }
+                
+                // <+324>
+                _error = nil;
+                w25 = YES;
+            } else if (self->_encounteredErrors.count == 1) {
+                // <+384>
+                _error = self->_encounteredErrors.lastObject;
+                w25 = NO;
+            } else {
+                // <+624>
+                _error = [NSError errorWithDomain:NSCocoaErrorDomain code:134404 userInfo:@{
+                    NSDetailedErrorsKey: self->_encounteredErrors
+                }];
+                w25 = NO;
+            }
+        }
+        
+        // <+744>
+        [importerOptions.options.metricsClient logMetric:self->_fetchedRecordBytesMetric];
+        // <+764>
+        [importerOptions.options.metricsClient logMetric:self->_fetchedAssetBytesMetric];
+        
+        // <+800>
+        // w23
+        BOOL madeChanges = NO;
+        for (OCCloudKitMirroringResult *result in self->_incrementalResults) {
+            if (result.madeChanges) {
+                madeChanges = YES;
+                break;
+            }
+        }
+        
+        /*
+         madeChanged w25   offset
+         0           0     <+956>
+         0           1     <+1216>
+         1           0     <+956>
+         1           1     <+1216>
+         */
+        // x24
+        OCCloudKitMirroringResult * _Nullable result;
+        if (!w25) {
+            // <+952>
+            os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@ - Fetch finished with error:\n%@", __func__, __LINE__, self, _error);
+            
+            if (completion != nil) {
+                // x23
+                result = [self createMirroringResultForRequest:self.request storeIdentifier:importerOptions.monitor.storeIdentifier success:NO madeChanges:madeChanges error:_error];
+                completion(result);
+            } else {
+                result = nil;
+            }
+            // <+1548>
+        } else {
+            // <+1216>
+            result = [self newMirroringResultByApplyingAccumulatedChanges];
+            
+            if (result != nil) {
+                // <+1380>
+                if ((!result.success) || (!madeChanges || result.madeChanges)) {
+                    // <+1516>
+                    // nop
+                } else {
+                    // <+1412>
+                    [result release];
+                    result = [self createMirroringResultForRequest:self.request storeIdentifier:self.options.monitor.storeIdentifier success:YES madeChanges:YES error:nil];
+                    // <+1516>
+                }
+            } else {
+                // <+1464>
+                result = [self createMirroringResultForRequest:self.request storeIdentifier:self.options.monitor.storeIdentifier success:NO madeChanges:NO error:_error];
+                // <+1516>
+            }
+            
+            // <+1516>
+            if (completion != nil) {
+                completion(result);
+            }
+        }
+        
+        [result release];
+        result = nil;
+        // <+1552>
+        [self removeDownloadedAssetFiles];
+        
+        [importerOptions release];
+        [pool drain];
+    });
+}
+
+- (BOOL)handleImportError:(NSError *)error {
+    // inlined from __78-[PFCloudKitImportRecordsWorkItem fetchOperationFinishedWithError:completion:]_block_invoke <+104>~<+336>
+    // sp, #0x40
+    __block BOOL flag = NO;
+    
+    // original : getCloudKitCKErrorDomain
+    if (([error.domain isEqualToString:CKErrorDomain]) && (error.code == CKErrorPartialFailure)) {
+        // original : getCloudKitCKPartialErrorsByItemIDKey
+        NSDictionary<CKRecordID *, NSError *> *errorsByItemID = error.userInfo[CKPartialErrorsByItemIDKey];
+        
+        flag = YES;
+        
+        /*
+         __53-[PFCloudKitImportRecordsWorkItem handleImportError:]_block_invoke
+         self = x29 - 0x80 = x20 + 0x20
+         flag = x29 - 0x78 = x20 + 0x28
+         */
+        [errorsByItemID enumerateKeysAndObjectsUsingBlock:^(CKRecordID * _Nonnull recordID, NSError * _Nonnull error, BOOL * _Nonnull stop) {
+            /*
+             self(block) = x20
+             recordID = x21
+             error = x22
+             stop = x19
+             */
+            
+            // original : getCloudKitCKRecordIDClass
+            if ([recordID isKindOfClass:[CKRecordID class]]) {
+                // <+92>
+                // original : getCloudKitCKErrorDomain
+                if (([error.domain isEqualToString:CKErrorDomain]) && (error.code == CKErrorUnknownItem)) {
+                    [self->_unknownItemRecordIDs addObject:recordID];
+                    [self->_allRecordIDs addObject:recordID];
+                } else {
+                    *stop = YES;
+                    flag = NO;
+                }
+            } else if ([recordID isKindOfClass:[CKRecordZoneID class]]) {
+                *stop = YES;
+                flag = NO;
+            } else {
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: CloudKit Import: Failed to handle item error for unknown itemID type: %@ - %@\n", recordID, error);
+                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: CloudKit Import: Failed to handle item error for unknown itemID type: %@ - %@\n", recordID, error);
+                *stop = YES;
+                flag = NO;
+            }
+        }];
+    }
+    
+    return flag;
+}
+
+- (OCCloudKitMirroringResult *)newMirroringResultByApplyingAccumulatedChanges {
+    // inlined from __78-[PFCloudKitImportRecordsWorkItem fetchOperationFinishedWithError:completion:]_block_invoke <+1216>~<+1372>
+    
+    // self = x25
+    // sp, #0x40
+    __block OCCloudKitMirroringResult * _Nullable result = nil;
+    // x24
+    OCCloudKitStoreMonitor *monitor = [self.options.monitor retain];
+    
+    /*
+     __81-[PFCloudKitImportRecordsWorkItem newMirroringResultByApplyingAccumulatedChanges]_block_invoke
+     monitor = x29 - 0x80 = x20 + 0x20
+     self = x29 - 0x78 = x20 + 0x28
+     result = x29 - 0x70 = x20 + 0x30
+     */
+    [monitor performBlock:^{
+        // self(block) = x20
+        // sp, #0xc0
+        __block NSError * _Nullable error = nil;
+        
+        // x19
+        NSSQLCore * _Nullable store = nil;
+        // x22
+        NSManagedObjectContext *managedObjectContext = nil;
+        // x21
+        NSPersistentStore * _Nullable monitoredStore = nil;
+        
+        @try {
+            // sp, #0x98
+            __block BOOL succeed = YES;
+            store = [monitor retainedMonitoredStore];
+            
+            if (store == nil) {
+                // <+436>
+                // x21
+                NSError *_error = [NSError errorWithDomain:NSCocoaErrorDomain code:134407 userInfo:@{
+                    NSLocalizedFailureErrorKey: [NSString stringWithFormat:@"Request '%@' was cancelled because the store was removed from the coordinator.", self.request.requestIdentifier]
+                }];
+                
+                result = [self createMirroringResultForRequest:self.request storeIdentifier:monitor.storeIdentifier success:NO madeChanges:NO error:_error];
+                return;
+            }
+            
+            // <+144>
+            // 안 쓰이는듯?
+            monitoredStore = monitor.monitoredStore;
+            managedObjectContext = [monitor newBackgroundContextForMonitoredCoordinator];
+            managedObjectContext.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateImportContextName];
+            
+            // sp, #0xbf
+            BOOL madeChanges;
+            succeed = [self applyAccumulatedChangesToStore:store inManagedObjectContext:managedObjectContext withStoreMonitor:monitor madeChanges:&madeChanges error:&error];
+            
+            if (!succeed) {
+                // <+632>
+                [error retain];
+                result = [self createMirroringResultForRequest:self.request storeIdentifier:store.identifier success:NO madeChanges:NO error:error];
+                [managedObjectContext release];
+                [store release];
+                [error release];
+                error = nil;
+                return;
+            }
+            
+            // <+236>
+            if (monitor.declaredDead) {
+                // <+252>
+                // x23
+                NSError *_error = [NSError errorWithDomain:NSCocoaErrorDomain code:134407 userInfo:@{
+                    NSLocalizedFailureErrorKey: [NSString stringWithFormat:@"Request '%@' was cancelled because the store was removed from the coordinator.", self.request.requestIdentifier]
+                }];
+                
+                result = [self createMirroringResultForRequest:self.request storeIdentifier:monitor.storeIdentifier success:NO madeChanges:NO error:_error];
+                
+                [managedObjectContext release];
+                [store release];
+                [error release];
+                error = nil;
+                return;
+            }
+            
+            // <+700>
+            /*
+             __81-[PFCloudKitImportRecordsWorkItem newMirroringResultByApplyingAccumulatedChanges]_block_invoke_2
+             store = sp + 0x70
+             managedObjectContext = sp + 0x78
+             self = sp + 0x80
+             error = sp + 0x88
+             succeed = sp + 0x90
+             */
+            [managedObjectContext performBlockAndWait:^{
+                abort();
+            }];
+            
+            if (succeed) {
+                // <+796>
+                os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Finished importing changes for request: %@", __func__, __LINE__, self.request);
+            }
+            
+            // <+964>
+            if (!madeChanges) {
+                // <+1160>
+                if (self->_incrementalResults.count != 0) {
+                    for (OCCloudKitMirroringResult *result in self->_incrementalResults) {
+                        if (result.madeChanges) {
+                            madeChanges = YES;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // <+972>
+            result = [self createMirroringResultForRequest:self.request storeIdentifier:monitor.storeIdentifier success:succeed madeChanges:madeChanges error:error];
+        } @catch (NSException *exception) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: %@ - Exception thrown during import: %@\n", self, exception);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: %@ - Exception thrown during import: %@\n", self, exception);
+        } @finally {
+            [managedObjectContext release];
+            [store release];
+            [error release];
+            error = nil;
+        }
+    }];
+    [monitor release];
+    
+    return result;
+}
+
 @end

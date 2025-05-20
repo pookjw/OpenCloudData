@@ -47,6 +47,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)checkAndApplyChangesIfNeeded:(CKServerChangeToken * _Nullable)token __attribute__((objc_direct));
 - (BOOL)checkForActiveImportOperationInStore:(NSSQLCore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 - (void)removeDownloadedAssetFiles __attribute__((objc_direct));
+- (void)fetchOperationFinishedWithError:(NSError * _Nullable)error completion:(void (^)(OCCloudKitMirroringResult * _Nonnull))completion __attribute__((objc_direct));
+- (BOOL)handleImportError:(NSError *)error __attribute__((objc_direct));
+- (OCCloudKitMirroringResult * _Nullable)newMirroringResultByApplyingAccumulatedChanges __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

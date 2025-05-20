@@ -66,6 +66,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (retain, nonatomic) NSString *apsConnectionMachServiceName;
 @property (nonatomic) CKDatabaseScope databaseScope;
 @property (retain, nonatomic, readonly, direct) OCCloudKitArchivingUtilities *archivingUtilities;
+@property (retain, nonatomic, readonly, direct) OCCloudKitMetricsClient *metricsClient;
 @property (retain, nonatomic, null_resettable) NSArray<OCPersistentCloudKitContainerActivityVoucher *> *activityVouchers;
 
 - (instancetype)initWithCloudKitContainerOptions:(OCPersistentCloudKitContainerOptions *)containerOptions;
