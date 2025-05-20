@@ -11,7 +11,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 #warning TODO
 
-@interface OCCloudKitImporterFetchRecordsWorkItem : OCCloudKitImportRecordsWorkItem
+@interface OCCloudKitImporterFetchRecordsWorkItem : OCCloudKitImportRecordsWorkItem {
+    NSMutableArray<CKRecordID *> *_updatedObjectIDs; // 0x98
+    NSMutableDictionary<NSManagedObjectID *, NSError *> *_failedObjectIDsToError; // 0xa0
+    NSMutableDictionary<CKRecordID *, NSManagedObjectID *> *_recordIDToObjectID; // 0xa8
+    NSMutableDictionary *_operationsToExecute; // 0xb0
+}
 
 @end
 
