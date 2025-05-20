@@ -919,6 +919,7 @@ FOUNDATION_EXTERN void NSRequestConcreteImplementation(id self, SEL _cmd, Class 
                     flag = NO;
                 }
             } else if ([recordID isKindOfClass:[CKRecordZoneID class]]) {
+                // original : getCloudKitCKRecordZoneIDClass
                 *stop = YES;
                 flag = NO;
             } else {
