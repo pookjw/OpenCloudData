@@ -57,9 +57,9 @@
     }
 }
 
-- (void)applyToOperation:(__kindof CKOperation *)option {
+- (void)applyToOperation:(__kindof CKOperation *)operation {
     CKOperationConfiguration * _Nullable operationConfiguration = (_vouchers.lastObject == nil) ? _operationConfiguration : _vouchers.lastObject.operationConfiguration;
-    option.configuration = operationConfiguration;
+    operation.configuration = operationConfiguration;
 }
 
 - (void)setAllowsCellularAccess:(BOOL)allowsCellularAccess {

@@ -109,6 +109,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)NSCloudKitMirroringDelegateEventAuthor;
 + (NSString *)PFCloudKitMirroringDelegateToManyPrefix;
 + (NSString *)NSPersistentCloudKitContainerEncryptedAttributeKey;
++ (NSString *)PFCloudKitFakeRecordNamePrefix;
 
 @end
 

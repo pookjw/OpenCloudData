@@ -460,7 +460,7 @@ static CKRecordZoneID *zoneID_2;
     return [copy autorelease];
 }
 
-+ (NSSet<NSString *> *)newSetOfRecordKeysForEntitiesInConfiguration:(NSString *)configurationName inManagedObjectModel:(NSManagedObjectModel *)managedObjectModel includeCKAssetsForFileBackedFutures:(BOOL)includeCKAssetsForFileBackedFutures {
++ (NSSet<CKRecordFieldKey> *)newSetOfRecordKeysForEntitiesInConfiguration:(NSString *)configurationName inManagedObjectModel:(NSManagedObjectModel *)managedObjectModel includeCKAssetsForFileBackedFutures:(BOOL)includeCKAssetsForFileBackedFutures {
     /*
      configurationName = x21
      managedObjectModel = x20
@@ -509,7 +509,7 @@ static CKRecordZoneID *zoneID_2;
     return set_1;
 }
 
-+ (NSSet<NSString *> *)newSetOfRecordKeysForAttribute:(NSAttributeDescription *)attribute includeCKAssetsForFileBackedFutures:(BOOL)includeCKAssetsForFileBackedFutures {
++ (NSSet<CKRecordFieldKey> *)newSetOfRecordKeysForAttribute:(NSAttributeDescription *)attribute includeCKAssetsForFileBackedFutures:(BOOL)includeCKAssetsForFileBackedFutures {
     /*
      attribute = x20
      includeCKAssetsForFileBackedFutures = x21

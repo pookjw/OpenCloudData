@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)copy;
 - (CKOperationConfiguration *)createDefaultOperationConfiguration NS_RETURNS_RETAINED;
-- (void)applyToOperation:(__kindof CKOperation *)option __attribute__((objc_direct));
+- (void)applyToOperation:(__kindof CKOperation *)operation __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

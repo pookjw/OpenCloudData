@@ -44,8 +44,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)applyCDPrefixToName:(NSString *)name __attribute__((objc_direct));
 + (BOOL)isPrivateAttribute:(NSAttributeDescription *)attribute __attribute__((objc_direct));
 + (NSArray<CKAsset *> *)assetsOnRecord:(CKRecord *)record withOptions:(OCCloudKitMirroringDelegateOptions *)options __attribute__((objc_direct));
-+ (NSSet<NSString *> *)newSetOfRecordKeysForEntitiesInConfiguration:(NSString *)configurationName inManagedObjectModel:(NSManagedObjectModel *)managedObjectModel includeCKAssetsForFileBackedFutures:(BOOL)includeCKAssetsForFileBackedFutures __attribute__((objc_direct));
-+ (NSSet<NSString *> *)newSetOfRecordKeysForAttribute:(NSAttributeDescription *)attribute includeCKAssetsForFileBackedFutures:(BOOL)includeCKAssetsForFileBackedFutures __attribute__((objc_direct));
++ (NSSet<CKRecordFieldKey> *)newSetOfRecordKeysForEntitiesInConfiguration:(NSString *)configurationName inManagedObjectModel:(NSManagedObjectModel *)managedObjectModel includeCKAssetsForFileBackedFutures:(BOOL)includeCKAssetsForFileBackedFutures __attribute__((objc_direct));
++ (NSSet<CKRecordFieldKey> *)newSetOfRecordKeysForAttribute:(NSAttributeDescription *)attribute includeCKAssetsForFileBackedFutures:(BOOL)includeCKAssetsForFileBackedFutures __attribute__((objc_direct));
 
 - (instancetype)initWithMirroringOptions:(OCCloudKitMirroringDelegateOptions * _Nullable)mirroringOptions metadataCache:(OCCloudKitMetadataCache *)metadataCache recordNamePrefix:(NSString * _Nullable)recordNamePrefix;
 

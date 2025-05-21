@@ -40,14 +40,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (OCCloudKitMirroringResult *)createMirroringResultForRequest:(OCCloudKitMirroringRequest *)request storeIdentifier:(NSString *)storeIdentifier success:(BOOL)success madeChanges:(BOOL)madeChanges error:(NSError * _Nullable)error NS_RETURNS_RETAINED;
 - (NSDictionary<NSString *, NSArray<NSAttributeDescription *> *> * _Nullable)entityNameToAttributesToUpdate;
 - (NSDictionary<NSString *, NSArray<NSRelationshipDescription *> *> * _Nullable)entityNameToRelationshipsToUpdate;
-- (void)executeImportOperationsAndAccumulateRecordsWithManagedObjectContext:(NSManagedObjectContext *)managedObjectContext completion:(void (^)(OCCloudKitMirroringResult * _Nonnull))completion;
+- (void)executeImportOperationsAndAccumulateRecordsWithManagedObjectContext:(NSManagedObjectContext *)managedObjectContext completion:(void (^ _Nullable)(OCCloudKitMirroringResult * _Nonnull))completion;
 
 - (BOOL)updateMetadataForAccumulatedChangesInContext:(NSManagedObjectContext *)managedObjectContext inStore:(NSSQLCore *)store error:(NSError * _Nullable * _Nullable)error;
 
 - (void)checkAndApplyChangesIfNeeded:(CKServerChangeToken * _Nullable)token __attribute__((objc_direct));
 - (BOOL)checkForActiveImportOperationInStore:(NSSQLCore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 - (void)removeDownloadedAssetFiles __attribute__((objc_direct));
-- (void)fetchOperationFinishedWithError:(NSError * _Nullable)error completion:(void (^)(OCCloudKitMirroringResult * _Nonnull))completion __attribute__((objc_direct));
+- (void)fetchOperationFinishedWithError:(NSError * _Nullable)error completion:(void (^ _Nullable)(OCCloudKitMirroringResult * _Nonnull))completion __attribute__((objc_direct));
 - (BOOL)handleImportError:(NSError *)error __attribute__((objc_direct));
 - (OCCloudKitMirroringResult * _Nullable)newMirroringResultByApplyingAccumulatedChanges __attribute__((objc_direct));
 @end

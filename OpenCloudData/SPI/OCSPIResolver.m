@@ -402,4 +402,9 @@ __attribute__((objc_direct_members))
     return *(id *)addr;
 }
 
++ (NSString *)PFCloudKitFakeRecordNamePrefix {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_PFCloudKitFakeRecordNamePrefix"];
+    return *(id *)addr;
+}
+
 @end

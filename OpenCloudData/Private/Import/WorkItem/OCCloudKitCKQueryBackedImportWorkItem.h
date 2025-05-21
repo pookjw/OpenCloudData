@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (retain, nonatomic, readonly, direct) CKRecordZoneID *zoneIDToQuery;
 - (instancetype)initForRecordType:(CKRecordType)recordType withOptions:(OCCloudKitImporterOptions *)options request:(OCCloudKitMirroringImportRequest *)request;
 - (CKQueryOperation * _Nullable)newCKQueryOperationFromMetadataInManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
-- (void)queryOperationFinishedWithCursor:(CKQueryCursor * _Nullable)cursor error:(NSError * _Nullable)error completion:(void (^)(OCCloudKitMirroringResult * _Nonnull))completion __attribute__((objc_direct));
+- (void)queryOperationFinishedWithCursor:(CKQueryCursor * _Nullable)cursor error:(NSError * _Nullable)error completion:(void (^ _Nullable)(OCCloudKitMirroringResult * _Nonnull))completion __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END
