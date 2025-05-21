@@ -98,8 +98,19 @@
              __121-[PFCloudKitImporterFetchRecordsWorkItem executeImportOperationsAndAccumulateRecordsWithManagedObjectContext:completion:]_block_invoke_2
              array_2 = sp + 0x80
              */
-            [request.entityNameToAttributesToFetch enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, NSArray * _Nonnull obj, BOOL * _Nonnull stop) {
-                abort();
+            [request.entityNameToAttributesToFetch enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, NSArray<NSAttributeDescription *> * _Nonnull attributes, BOOL * _Nonnull stop) {
+                // obj = x8
+                /*
+                 __121-[PFCloudKitImporterFetchRecordsWorkItem executeImportOperationsAndAccumulateRecordsWithManagedObjectContext:completion:]_block_invoke_3
+                 array_2 = sp + 0x28
+                 */
+                [attributes enumerateObjectsUsingBlock:^(NSAttributeDescription * _Nonnull attribute, NSUInteger idx, BOOL * _Nonnull stop) {
+                    // self(block) = x19
+                    // sp + 0x8
+                    NSSet<CKRecordFieldKey> *recordKeys = [OCCloudKitSerializer newSetOfRecordKeysForAttribute:attribute includeCKAssetsForFileBackedFutures:YES];
+                    [array_2 addObjectsFromArray:recordKeys.allObjects];
+                    [recordKeys release];
+                }];
             }];
             // <+412>
         } else {
@@ -116,16 +127,43 @@
         // <+412>
         /*
          __121-[PFCloudKitImporterFetchRecordsWorkItem executeImportOperationsAndAccumulateRecordsWithManagedObjectContext:completion:]_block_invoke_4
-         request = sp + 0x28
-         store = sp + 0x30
-         managedObjectContext = sp + 0x38
-         self = sp + 0x40
-         array_1 = sp + 0x48
-         error = sp + 0x50
-         succeed = sp + 0x58
+         request = sp + 0x28 = x19 + 0x20
+         store = sp + 0x30 = x19 + 0x28
+         managedObjectContext = sp + 0x38 = x19 + 0x30
+         self = sp + 0x40 = x19 + 0x38
+         array_1 = sp + 0x48 = x19 + 0x40
+         error = sp + 0x50 = x19 + 0x48
+         succeed = sp + 0x58 = x19 + 0x50
          */
         [managedObjectContext performBlockAndWait:^{
-            abort();
+            // self(block) = x19
+            // x20
+            @try {
+                NSArray<OCCKRecordMetadata *> * _Nullable metadataArray = [OCCKRecordMetadata metadataForObjectIDs:request.objectIDsToFetch inStore:store withManagedObjectContext:managedObjectContext error:&error];
+                if (metadataArray == nil) {
+                    succeed = NO;
+                    [error retain];
+                    return;
+                }
+                
+                // x23
+                for (OCCKRecordMetadata *metadata in metadataArray) {
+                    // x22
+                    CKRecordID *recordID = [metadata createRecordID];
+                    // x23
+                    NSManagedObjectID *objectID = [metadata createObjectIDForLinkedRow];
+                    [self->_recordIDToObjectID setObject:objectID forKey:recordID];
+                    [array_1 addObject:recordID];
+                    [recordID release];
+                    [objectID release];
+                }
+            } @catch (NSException *exception) {
+                succeed = NO;
+                error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{
+                    @"NSUnderlyingException": exception,
+                    NSLocalizedFailureErrorKey: @"Record fetch failed because fetching the record metadata hit an unhandled exception."
+                }];
+            }
         }];
         
         [store release];
