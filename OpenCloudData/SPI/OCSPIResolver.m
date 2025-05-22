@@ -407,4 +407,24 @@ __attribute__((objc_direct_members))
     return *(id *)addr;
 }
 
++ (NSString *)NSCloudKitMirroringDelegateWillResetSyncNotificationName {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateWillResetSyncNotificationName"];
+    return *(id *)addr;
+}
+
++ (NSString *)NSCloudKitMirroringDelegateDidResetSyncNotificationName {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateDidResetSyncNotificationName"];
+    return *(id *)addr;
+}
+
++ (NSString *)NSCloudKitMirroringDelegateResetSyncReasonKey {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateResetSyncReasonKey"];
+    return *(id *)addr;
+}
+
++ (NSArray *)NSArray_EmptyArray {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSArray_EmptyArray"];
+    return *(id *)addr;
+}
+
 @end

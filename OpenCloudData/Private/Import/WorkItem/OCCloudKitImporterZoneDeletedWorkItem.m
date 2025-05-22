@@ -7,6 +7,7 @@
 
 #import "OpenCloudData/Private/Import/WorkItem/OCCloudKitImporterZoneDeletedWorkItem.h"
 #import "OpenCloudData/Private/OCCloudKitMetadataPurger.h"
+#import "OpenCloudData/SPI/OCSPIResolver.h"
 
 @implementation OCCloudKitImporterZoneDeletedWorkItem
 
@@ -39,8 +40,25 @@
      monitor = x22
      completion = x19
      */
-    [OCCloudKitMetadataPurger purgeMetadataFromStore:store inMonitor:monitor withOptions:0];
-    abort();
+    // sp, #0x8
+    NSError * _Nullable error = nil;
+    // x23
+    CKDatabaseScope databaseScope = self.options.options.databaseScope;
+    // x23
+    BOOL succees = [self.options.options.metadataPurger purgeMetadataFromStore:store inMonitor:monitor withOptions:(databaseScope == CKDatabaseScopeShared) ? 0x12b : 0x12a forRecordZones:@[self->_deletedRecordZoneID] inDatabaseWithScope:databaseScope andTransactionAuthor:[OCSPIResolver NSCloudKitMirroringDelegateImportContextName] error:&error];
+    // x20
+    OCCloudKitMirroringResult *result;
+    if (succees) {
+        result = [[OCCloudKitMirroringResult alloc] initWithRequest:self.request storeIdentifier:store.identifier success:NO madeChanges:YES error:nil];
+    } else {
+        result = [[OCCloudKitMirroringResult alloc] initWithRequest:self.request storeIdentifier:store.identifier success:NO madeChanges:NO error:error];
+    }
+    
+    if (completion != nil) {
+        completion(result);
+    }
+    
+    [result release];
 }
 
 @end

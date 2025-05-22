@@ -5,7 +5,7 @@
 //  Created by Jinwoo Kim on 4/1/25.
 //
 
-#import "OpenCloudData/Private/Request/OCCloudKitMirroringResult.h"
+#import "OpenCloudData/Private/OCCloudKitMirroringResult.h"
 #import "OpenCloudData/Private/Request/OCCloudKitMirroringRequest.h"
 #import "OpenCloudData/Private/Log.h"
 

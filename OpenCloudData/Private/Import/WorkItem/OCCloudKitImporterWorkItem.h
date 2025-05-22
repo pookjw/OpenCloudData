@@ -8,7 +8,7 @@
 #import "OpenCloudData/Private/Import/OCCloudKitImporterOptions.h"
 #import "OpenCloudData/Private/Request/OCCloudKitMirroringImportRequest.h"
 #import "OpenCloudData/Private/OCCloudKitStoreMonitor.h"
-#import "OpenCloudData/Private/Request/OCCloudKitMirroringResult.h"
+#import "OpenCloudData/Private/OCCloudKitMirroringResult.h"
 #import "OpenCloudData/SPI/CoreData/NSSQLCore.h"
 
 NS_ASSUME_NONNULL_BEGIN

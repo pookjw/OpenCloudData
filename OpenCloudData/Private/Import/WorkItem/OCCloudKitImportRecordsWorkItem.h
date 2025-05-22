@@ -9,7 +9,7 @@
 #import "OpenCloudData/Private/Metric/OCCloudKitFetchedRecordBytesMetric.h"
 #import "OpenCloudData/Private/Metric/OCCloudKitFetchedAssetBytesMetric.h"
 #import "OpenCloudData/Private/OCCloudKitSerializer.h"
-#import "OpenCloudData/Private/Request/OCCloudKitMirroringResult.h"
+#import "OpenCloudData/Private/OCCloudKitMirroringResult.h"
 #import "OpenCloudData/Private/Request/OCCloudKitMirroringRequest.h"
 
 NS_ASSUME_NONNULL_BEGIN

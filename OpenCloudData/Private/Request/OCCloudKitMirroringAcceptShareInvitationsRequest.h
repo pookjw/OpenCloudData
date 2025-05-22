@@ -9,8 +9,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OCCloudKitMirroringAcceptShareInvitationsRequest : OCCloudKitMirroringRequest
-
+@interface OCCloudKitMirroringAcceptShareInvitationsRequest : OCCloudKitMirroringRequest {
+    NSArray<NSURL *> *_shareURLsToAccept; // 0x50
+    NSArray *_shareMetadatasToAccept; // 0x58
+}
 @end
 
 NS_ASSUME_NONNULL_END

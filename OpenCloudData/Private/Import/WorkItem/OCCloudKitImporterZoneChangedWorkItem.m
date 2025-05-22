@@ -52,7 +52,7 @@
     NSError * _Nullable _error = nil;
     // x20 / sp + 0x8
     NSMutableSet<CKRecordZoneID *> *allZoneIDs = [[NSMutableSet alloc] initWithArray:self->_fetchedZoneIDToChangeToken.allKeys];
-    [allZoneIDs addObject:self->_fetchedZoneIDToMoreComing.allKeys];
+    [allZoneIDs addObjectsFromArray:self->_fetchedZoneIDToMoreComing.allKeys];
     
     // x25
     for (CKRecordZoneID *zoneID in allZoneIDs) {
@@ -76,7 +76,7 @@
         // <+292>
         
         zoneMetadata.currentChangeToken = [self->_fetchedZoneIDToChangeToken objectForKey:zoneID];
-        zoneMetadata.needsImport = [self->_fetchedZoneIDToMoreComing objectForKey:zoneMetadata].boolValue;
+        zoneMetadata.needsImport = [self->_fetchedZoneIDToMoreComing objectForKey:zoneID].boolValue;
         zoneMetadata.lastFetchDate = [NSDate date];
     }
     
@@ -124,7 +124,6 @@
         }
         
         // <+1792>
-        [monitoredCoordinator release];
         [database release];
         [importerOptions release];
         return;
@@ -193,7 +192,7 @@
         // x21
         NSSet<CKRecordFieldKey> *recordKeys = [OCCloudKitSerializer newSetOfRecordKeysForEntitiesInConfiguration:store.configurationName inManagedObjectModel:monitoredCoordinator.managedObjectModel includeCKAssetsForFileBackedFutures:importerOptions.options.automaticallyDownloadFileBackedFutures];
         // x20
-        NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:recordKeys];
+        NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:recordKeys.count];
         for (CKRecordFieldKey key in recordKeys) {
             [array addObject:key];
         }
@@ -216,7 +215,6 @@
         }
         
         [error release];
-        [monitoredCoordinator release];
         [dictionary release];
         [store release];
         [importerOptions release];
@@ -320,14 +318,13 @@
         
         OCCloudKitImporterZoneChangedWorkItem *loaded = weakSelf;
         if (loaded == nil) return;
-        [loaded fetchOperationFinishedWithError:operation completion:completion];
+        [loaded fetchOperationFinishedWithError:operationError completion:completion];
     };
     
     // <+1596>
     [database addOperation:operation];
     
     [error release];
-    [monitoredCoordinator release];
     [dictionary release];
     [store release];
     [importerOptions release];

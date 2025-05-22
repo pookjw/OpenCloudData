@@ -10,7 +10,7 @@
 #import "OpenCloudData/Private/Export/OCCloudKitExporterOptions.h"
 #import "OpenCloudData/Private/OCCloudKitStoreMonitor.h"
 #import "OpenCloudData/Private/Export/OCCloudKitExportContext.h"
-#import "OpenCloudData/Private/Request/OCCloudKitMirroringResult.h"
+#import "OpenCloudData/Private/OCCloudKitMirroringResult.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -7,7 +7,7 @@
 
 #import <CoreData/CoreData.h>
 #import "OpenCloudData/Private/Request/OCCloudKitMirroringRequestOptions.h"
-#import "OpenCloudData/Private/Request/OCCloudKitMirroringResult.h"
+#import "OpenCloudData/Private/OCCloudKitMirroringResult.h"
 #import "OpenCloudData/SPI/CloudKit/CKSchedulerActivity.h"
 #import "OpenCloudData/Private/OCPersistentCloudKitContainerEventActivity.h"
 

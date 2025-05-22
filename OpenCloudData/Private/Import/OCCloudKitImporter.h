@@ -8,7 +8,7 @@
 #import "OpenCloudData/Private/Import/OCCloudKitImporterOptions.h"
 #import "OpenCloudData/Private/Request/OCCloudKitMirroringRequest.h"
 #import "OpenCloudData/Private/Request/OCCloudKitMirroringImportRequest.h"
-#import "OpenCloudData/Private/Request/OCCloudKitMirroringResult.h"
+#import "OpenCloudData/Private/OCCloudKitMirroringResult.h"
 #import "OpenCloudData/Private/Import/WorkItem/OCCloudKitImporterWorkItem.h"
 #import "OpenCloudData/Private/Import/OCCloudKitImportDatabaseContext.h"
 

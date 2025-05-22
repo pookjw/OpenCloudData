@@ -609,6 +609,10 @@ CK_EXTERN NSString * const CKIdentityUpdateNotification;
     }];
 }
 
+- (void)logResetSyncNotification:(NSNotification *)notification {
+    abort();
+}
+
 - (void)_performFetchRecordsRequest:(OCCloudKitMirroringFetchRecordsRequest *)request __attribute__((objc_direct)) {
     // inlined from __57-[NSCloudKitMirroringDelegate checkAndExecuteNextRequest]_block_invoke <+884>~<+948>
     /*

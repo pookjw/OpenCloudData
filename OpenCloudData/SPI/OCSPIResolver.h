@@ -110,6 +110,11 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)PFCloudKitMirroringDelegateToManyPrefix;
 + (NSString *)NSPersistentCloudKitContainerEncryptedAttributeKey;
 + (NSString *)PFCloudKitFakeRecordNamePrefix;
++ (NSString *)NSCloudKitMirroringDelegateWillResetSyncNotificationName;
++ (NSString *)NSCloudKitMirroringDelegateDidResetSyncNotificationName;
++ (NSString *)NSCloudKitMirroringDelegateResetSyncReasonKey;
+
++ (NSArray *)NSArray_EmptyArray;
 
 @end
 

@@ -88,6 +88,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)addActivityVoucher:(OCPersistentCloudKitContainerActivityVoucher *)activityVoucher;
 - (void)expireActivityVoucher:(OCPersistentCloudKitContainerActivityVoucher *)activityVoucher;
+- (void)logResetSyncNotification:(NSNotification *)notification;
 
 - (void)removeNotificationRegistrations __attribute__((objc_direct));
 - (void)beginActivitiesForRequest:(__kindof OCCloudKitMirroringRequest *)request __attribute__((objc_direct));

@@ -11,7 +11,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OCCloudKitImporterZonePurgedWorkItem : OCCloudKitImporterWorkItem
+@interface OCCloudKitImporterZonePurgedWorkItem : OCCloudKitImporterWorkItem {
+    CKRecordZoneID *_purgedRecordZoneID; // 0x18
+}
 - (instancetype)initWithPurgedRecordZoneID:(CKRecordZoneID *)recordZoneID options:(OCCloudKitImporterOptions *)options request:(OCCloudKitMirroringImportRequest *)request;
 @end
 
