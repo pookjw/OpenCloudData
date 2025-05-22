@@ -6,22 +6,22 @@
 //
 
 #import "OpenCloudData/Private/Request/OCCloudKitMirroringImportRequest.h"
+#import "OpenCloudData/SPI/CoreData/NSSQLCore.h"
 
 NS_ASSUME_NONNULL_BEGIN
-
-#warning TODO
 
 @interface OCCloudKitMirroringFetchRecordsRequest : OCCloudKitMirroringImportRequest {
     NSArray<NSManagedObjectID *> *_objectIDsToFetch; // 0x50
     NSDictionary<NSString *, NSArray<NSAttributeDescription *> *> *_entityNameToAttributesToFetch; // 0x58
-    NSDictionary *_entityNameToAttributeNamesToFetch; // 0x60
+    NSDictionary<NSString *, NSArray<NSString *> *> *_entityNameToAttributeNamesToFetch; // 0x60
     BOOL _editable; // 0x68
     NSUInteger _perOperationObjectThreshold; // 0x70
 }
 @property (copy, nonatomic, readonly) NSDictionary<NSString *, NSArray<NSAttributeDescription *> *>* entityNameToAttributesToFetch;
-// copy인지 검증
-@property (retain, nonatomic, readonly, direct) NSArray<NSManagedObjectID *> *objectIDsToFetch;
-@property (assign, nonatomic, readonly, direct) NSUInteger perOperationObjectThreshold;
+@property (copy, nonatomic) NSArray<NSManagedObjectID *> *objectIDsToFetch;
+@property (assign, nonatomic, direct) NSUInteger perOperationObjectThreshold;
+- (void)throwNotEditable:(SEL)aSEL __attribute__((objc_direct));
+- (BOOL)validateForUseWithStore:(NSSQLCore *)store error:(NSError * _Nullable * _Nullable)error;
 @end
 
 NS_ASSUME_NONNULL_END

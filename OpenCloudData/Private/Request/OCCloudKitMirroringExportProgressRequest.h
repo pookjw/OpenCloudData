@@ -9,8 +9,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OCCloudKitMirroringExportProgressRequest : OCCloudKitMirroringRequest
-
+@interface OCCloudKitMirroringExportProgressRequest : OCCloudKitMirroringRequest {
+    NSSet<NSManagedObjectID *> *_objectIDsToFetch; // 0x50
+}
+@property (copy, nonatomic, null_resettable) NSSet<NSManagedObjectID *> *objectIDsToFetch;
 @end
 
 NS_ASSUME_NONNULL_END

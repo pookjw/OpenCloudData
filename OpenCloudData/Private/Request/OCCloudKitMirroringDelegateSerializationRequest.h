@@ -9,8 +9,18 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OCCloudKitMirroringDelegateSerializationRequest : OCCloudKitMirroringRequest
+typedef NS_ENUM(NSUInteger, OCCloudKitMirroringDelegateSerializationRequestResultType) {
+    OCCloudKitMirroringDelegateSerializationRequestResultTypeRecordIDs = 0,
+    OCCloudKitMirroringDelegateSerializationRequestResultTypeRecords = 1
+};
 
+@interface OCCloudKitMirroringDelegateSerializationRequest : OCCloudKitMirroringRequest {
+    OCCloudKitMirroringDelegateSerializationRequestResultType _resultType; // 0x50
+    NSSet<NSManagedObjectID *> *_objectIDsToSerialize; // 0x58
+}
+@property (assign, nonatomic) OCCloudKitMirroringDelegateSerializationRequestResultType resultType;
+@property (copy, nonatomic, null_resettable) NSSet<NSManagedObjectID *> *objectIDsToSerialize;
++ (NSString * _Nullable)stringForResultType:(OCCloudKitMirroringDelegateSerializationRequestResultType)resultType __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

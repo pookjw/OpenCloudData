@@ -9,8 +9,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-
+// base class
 @interface OCCloudKitMirroringImportRequest : OCCloudKitMirroringRequest
 
 @end

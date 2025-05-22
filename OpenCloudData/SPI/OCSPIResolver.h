@@ -115,6 +115,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)NSCloudKitMirroringDelegateResetSyncReasonKey;
 
 + (NSArray *)NSArray_EmptyArray;
++ (NSSet *)NSSet_EmptySet;
 
 @end
 

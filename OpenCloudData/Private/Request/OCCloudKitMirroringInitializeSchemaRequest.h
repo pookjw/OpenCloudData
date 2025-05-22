@@ -10,8 +10,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OCCloudKitMirroringInitializeSchemaRequest : OCCloudKitMirroringRequest
-@property (nonatomic) OCPersistentCloudKitContainerSchemaInitializationOptions schemaInitializationOptions;
+@interface OCCloudKitMirroringInitializeSchemaRequest : OCCloudKitMirroringRequest {
+    OCPersistentCloudKitContainerSchemaInitializationOptions _schemaInitializationOptions; // 0x50
+}
+@property (assign, nonatomic) OCPersistentCloudKitContainerSchemaInitializationOptions schemaInitializationOptions;
 @end
 
 NS_ASSUME_NONNULL_END

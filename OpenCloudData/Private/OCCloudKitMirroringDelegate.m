@@ -504,6 +504,10 @@ CK_EXTERN NSString * const CKIdentityUpdateNotification;
     [progressProvider release];
 }
 
+- (BOOL)validateManagedObjectModel:(NSManagedObjectModel *)managedObjectModel forUseWithStoreWithDescription:(NSPersistentStoreDescription *)storeDescription error:(NSError * _Nullable *)error {
+    abort();
+}
+
 - (void)checkAndExecuteNextRequest {
     /*
      self = x19

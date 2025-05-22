@@ -427,4 +427,9 @@ __attribute__((objc_direct_members))
     return *(id *)addr;
 }
 
++ (NSSet *)NSSet_EmptySet {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSSet_EmptySet"];
+    return *(id *)addr;
+}
+
 @end

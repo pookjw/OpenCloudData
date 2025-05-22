@@ -9,8 +9,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OCCloudKitMirroringResetZoneRequest : OCCloudKitMirroringRequest
-
+@interface OCCloudKitMirroringResetZoneRequest : OCCloudKitMirroringRequest {
+    NSArray<CKRecordZoneID *> *_recordZoneIDsToReset; // 0x50
+}
 @end
 
 NS_ASSUME_NONNULL_END
