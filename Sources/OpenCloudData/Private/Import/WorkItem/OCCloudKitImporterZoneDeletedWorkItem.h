@@ -11,7 +11,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OCCloudKitImporterZoneDeletedWorkItem : OCCloudKitImporterWorkItem
+@interface OCCloudKitImporterZoneDeletedWorkItem : OCCloudKitImporterWorkItem {
+    CKRecordZoneID *_deletedRecordZoneID; // 0x18
+}
 - (instancetype)initWithDeletedRecordZoneID:(CKRecordZoneID *)recordZoneID options:(OCCloudKitImporterOptions *)options request:(OCCloudKitMirroringImportRequest *)request;
 @end
 

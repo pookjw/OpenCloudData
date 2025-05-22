@@ -165,6 +165,26 @@ FOUNDATION_EXTERN void NSRequestConcreteImplementation(id self, SEL _cmd, Class 
     [self checkAndApplyChangesIfNeeded:NO];
 }
 
+- (void)addDeletedRecordID:(CKRecordID *)recordID ofType:(CKRecordType)recordType {
+    /*
+     self = x19
+     recordID = x20
+     recordType = x21
+     */
+    if (self->_encounteredErrors.count != 0) return;
+    
+    // x22
+    NSMutableArray<CKRecordID *> *array = [[self->_recordTypeToDeletedRecordID objectForKey:recordType] retain];
+    if (array == nil) {
+        array = [[NSMutableArray alloc] init];
+        [self->_recordTypeToDeletedRecordID setObject:array forKey:recordType];
+    }
+    [array addObject:recordID];
+    [array release];
+    
+    [self checkAndApplyChangesIfNeeded:NO];
+}
+
 - (BOOL)applyAccumulatedChangesToStore:(NSSQLCore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext withStoreMonitor:(OCCloudKitStoreMonitor *)monitor madeChanges:(BOOL *)madeChanges error:(NSError * _Nullable *)error {
     /*
      self = x21

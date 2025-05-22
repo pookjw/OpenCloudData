@@ -35,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (retain, nonatomic, readonly, direct) NSUUID *importOperationIdentifier;
 
 - (void)addUpdatedRecord:(CKRecord *)record;
+- (void)addDeletedRecordID:(CKRecordID *)recordID ofType:(CKRecordType)recordType  __attribute__((objc_direct));
 - (BOOL)applyAccumulatedChangesToStore:(NSSQLCore *)store inManagedObjectContext:(NSManagedObjectContext *)managedObjectContext withStoreMonitor:(OCCloudKitStoreMonitor *)monitor madeChanges:(BOOL *)madeChanges error:(NSError * _Nullable * _Nullable)error;
 - (BOOL)commitMetadataChangesWithContext:(NSManagedObjectContext *)managedObjectContext forStore:(NSSQLCore *)store error:(NSError * _Nullable * _Nullable)error;
 - (OCCloudKitMirroringResult *)createMirroringResultForRequest:(OCCloudKitMirroringRequest *)request storeIdentifier:(NSString *)storeIdentifier success:(BOOL)success madeChanges:(BOOL)madeChanges error:(NSError * _Nullable)error NS_RETURNS_RETAINED;
