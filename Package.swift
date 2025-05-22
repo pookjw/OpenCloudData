@@ -23,6 +23,7 @@ let package = Package(
             dependencies: [
                 .product(name: "ellekit", package: "ellekit")
             ],
+            path: "OpenCloudData",
             publicHeadersPath: "Public",
             cSettings: [
               .headerSearchPath("../"),
@@ -36,8 +37,9 @@ let package = Package(
         .testTarget(
             name: "OpenCloudDataTests",
             dependencies: ["OpenCloudData"],
+            path: "OpenCloudDataTests",
             cSettings: [
-                .headerSearchPath("../../Sources"),
+                .headerSearchPath("../"),
                 .unsafeFlags(["-fobjc-weak", "-fno-objc-arc"])
             ]
         )

@@ -15,8 +15,8 @@ FOUNDATION_EXPORT const unsigned char OpenCloudDataVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import "OpenCloudData/PublicHeader.h"
 
-#import "OCPersistentCloudKitContainer.h"
-#import "OCPersistentCloudKitContainerOptions.h"
-#import "OpenCloudDataDefines.h"
-#import "NSPersistentStoreDescription+OpenCloudData.h"
-#import "OCPersistentCloudKitContainerEvent.h"
+#import <OpenCloudData/OCPersistentCloudKitContainer.h>
+#import <OpenCloudData/OCPersistentCloudKitContainerOptions.h>
+#import <OpenCloudData/OpenCloudDataDefines.h>
+#import <OpenCloudData/NSPersistentStoreDescription+OpenCloudData.h>
+#import <OpenCloudData/OCPersistentCloudKitContainerEvent.h>

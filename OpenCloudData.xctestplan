@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "11509A68-FBA7-45BE-98FD-15FBA70808F9",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:OpenCloudData.xcodeproj",
+        "identifier" : "4F8E8F492DDEF5FD00DE18FE",
+        "name" : "OpenCloudDataTests"
+      }
+    }
+  ],
+  "version" : 1
+}

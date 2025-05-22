@@ -7,16 +7,247 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4F695ACA2DDEC01C0014FC25 /* OpenCloudData in Frameworks */ = {isa = PBXBuildFile; productRef = 4F695AC92DDEC01C0014FC25 /* OpenCloudData */; };
+		4F8E8F4B2DDEF5FD00DE18FE /* OpenCloudData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F8E8F422DDEF5FD00DE18FE /* OpenCloudData.framework */; };
+		4F8E91A82DDEF66200DE18FE /* ellekit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F8E91A72DDEF66200DE18FE /* ellekit */; };
+		4F8E94112DDEF87300DE18FE /* OpenCloudData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F8E8F422DDEF5FD00DE18FE /* OpenCloudData.framework */; };
+		4F8E94122DDEF87300DE18FE /* OpenCloudData.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4F8E8F422DDEF5FD00DE18FE /* OpenCloudData.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4F8E94282DDEF96900DE18FE /* OpenCloudData in Frameworks */ = {isa = PBXBuildFile; productRef = 4F8E94272DDEF96900DE18FE /* OpenCloudData */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4F8E8F4C2DDEF5FD00DE18FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4F2422CF2D99522D005BA6EA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4F8E8F412DDEF5FD00DE18FE;
+			remoteInfo = OpenCloudData;
+		};
+		4F8E8F4E2DDEF5FD00DE18FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4F2422CF2D99522D005BA6EA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4FB2FAE72D99668A0065C5B3;
+			remoteInfo = SampleApp;
+		};
+		4F8E94132DDEF87300DE18FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4F2422CF2D99522D005BA6EA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4F8E8F412DDEF5FD00DE18FE;
+			remoteInfo = OpenCloudData;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4F8E94152DDEF87300DE18FE /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				4F8E94122DDEF87300DE18FE /* OpenCloudData.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		4F88D3E02DA2789A00355E29 /* LICENSE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = LICENSE.md; sourceTree = "<group>"; };
+		4F8E8F422DDEF5FD00DE18FE /* OpenCloudData.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OpenCloudData.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F8E8F4A2DDEF5FD00DE18FE /* OpenCloudDataTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OpenCloudDataTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F8E94172DDEF8F800DE18FE /* OpenCloudData.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = OpenCloudData.xctestplan; sourceTree = "<group>"; };
+		4F8E94242DDEF94F00DE18FE /* SampleApp (SwiftPM).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SampleApp (SwiftPM).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FB2FAE82D99668A0065C5B3 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FB2FB442D998B4C0065C5B3 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		4F8E91A92DDEF6F400DE18FE /* Exceptions for "OpenCloudData" folder in "OpenCloudData" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			privateHeaders = (
+				Helper/_OCDirectMethodResolver.h,
+				"Helper/NSObject+Foundation_IvarDescription.h",
+				Private/_OCCKInsertedMetadataLink.h,
+				Private/Analyzer/OCCloudKitHistoryAnalyzer.h,
+				Private/Analyzer/OCCloudKitHistoryAnalyzerContext.h,
+				Private/Analyzer/OCCloudKitHistoryAnalyzerOptions.h,
+				Private/Export/OCCloudKitExportContext.h,
+				Private/Export/OCCloudKitExporter.h,
+				Private/Export/OCCloudKitExporterOptions.h,
+				Private/Import/OCCloudKitImportDatabaseContext.h,
+				Private/Import/OCCloudKitImporter.h,
+				Private/Import/OCCloudKitImporterOptions.h,
+				Private/Import/OCCloudKitImportZoneContext.h,
+				Private/Import/WorkItem/OCCloudKitCKQueryBackedImportWorkItem.h,
+				Private/Import/WorkItem/OCCloudKitImporterFetchRecordsWorkItem.h,
+				Private/Import/WorkItem/OCCloudKitImporterWorkItem.h,
+				Private/Import/WorkItem/OCCloudKitImporterZoneChangedWorkItem.h,
+				Private/Import/WorkItem/OCCloudKitImporterZoneDeletedWorkItem.h,
+				Private/Import/WorkItem/OCCloudKitImporterZonePurgedWorkItem.h,
+				Private/Import/WorkItem/OCCloudKitImportRecordsWorkItem.h,
+				Private/Log.h,
+				Private/Metric/OCCloudKitBaseMetric.h,
+				Private/Metric/OCCloudKitExportedRecordBytesMetric.h,
+				Private/Metric/OCCloudKitFetchedAssetBytesMetric.h,
+				Private/Metric/OCCloudKitFetchedRecordBytesMetric.h,
+				Private/Metric/OCCloudKitImportedRecordBytesMetric.h,
+				Private/Metric/OCCloudKitSizeMetric.h,
+				Private/Migration/OCCloudKitMetadataMigrationContext.h,
+				Private/Migration/OCCloudKitMetadataModelMigrator.h,
+				Private/MirroredRelationship/OCMirroredManyToManyRelationship.h,
+				Private/MirroredRelationship/OCMirroredManyToManyRelationshipV2.h,
+				Private/MirroredRelationship/OCMirroredOneToManyRelationship.h,
+				Private/MirroredRelationship/OCMirroredRelationship.h,
+				Private/Model/OCCKDatabaseMetadata.h,
+				Private/Model/OCCKEvent.h,
+				Private/Model/OCCKHistoryAnalyzerState.h,
+				Private/Model/OCCKImportOperation.h,
+				Private/Model/OCCKImportPendingRelationship.h,
+				Private/Model/OCCKMetadataEntry.h,
+				Private/Model/OCCKMirroredRelationship.h,
+				Private/Model/OCCKRecordMetadata.h,
+				Private/Model/OCCKRecordZoneMetadata.h,
+				Private/Model/OCCKRecordZoneMoveReceipt.h,
+				Private/Model/OCCKRecordZoneQuery.h,
+				"Private/NSPersistentStore+OpenCloudData_Private.h",
+				Private/OCCKRecordMetadataReceiptArchive.h,
+				Private/OCCloudKitArchivingUtilities.h,
+				Private/OCCloudKitLogging.h,
+				Private/OCCloudKitMetadataCache.h,
+				Private/OCCloudKitMetadataModel.h,
+				Private/OCCloudKitMetadataPurger.h,
+				Private/OCCloudKitMetricsClient.h,
+				Private/OCCloudKitMirroringActivityVoucherManager.h,
+				Private/OCCloudKitMirroringDelegate.h,
+				Private/OCCloudKitMirroringDelegateOptions.h,
+				Private/OCCloudKitMirroringDelegatePreJazzkonMetadata.h,
+				Private/OCCloudKitMirroringDelegateProgressProvider.h,
+				Private/OCCloudKitMirroringDelegateWorkBlockContext.h,
+				Private/OCCloudKitMirroringRequestManager.h,
+				Private/OCCloudKitOperationBatch.h,
+				Private/OCCloudKitSchemaGenerator.h,
+				Private/OCCloudKitSerializer.h,
+				Private/OCCloudKitStoreComparer.h,
+				Private/OCCloudKitStoreMonitor.h,
+				Private/OCCloudKitThrottledNotificationObserver.h,
+				Private/OCDCloudKitClient.h,
+				"Private/OCPersistentCloudKitContainer+OpenCloudData_Private.h",
+				Private/OCPersistentCloudKitContainerActivity.h,
+				Private/OCPersistentCloudKitContainerActivityVoucher.h,
+				"Private/OCPersistentCloudKitContainerEvent+OpenCloudData_Private.h",
+				Private/OCPersistentCloudKitContainerEventActivity.h,
+				"Private/OCPersistentCloudKitContainerOptions+OpenCloudData_Private.h",
+				Private/OCPersistentCloudKitContainerSetupPhaseActivity.h,
+				Private/Provider/OCCloudKitContainerProvider.h,
+				Private/Provider/OCCloudKitStoreMonitorProvider.h,
+				Private/Provider/OCStaticCloudKitContainerProvider.h,
+				Private/Request/OCCloudKitMirroringAcceptShareInvitationsRequest.h,
+				Private/Request/OCCloudKitMirroringDelegateResetRequest.h,
+				Private/Request/OCCloudKitMirroringDelegateSerializationRequest.h,
+				Private/Request/OCCloudKitMirroringDelegateSetupRequest.h,
+				Private/Request/OCCloudKitMirroringDelegateSetupRequestOptions.h,
+				Private/Request/OCCloudKitMirroringExportProgressRequest.h,
+				Private/Request/OCCloudKitMirroringExportRequest.h,
+				Private/Request/OCCloudKitMirroringFetchRecordsRequest.h,
+				Private/Request/OCCloudKitMirroringImportRequest.h,
+				Private/Request/OCCloudKitMirroringInitializeSchemaRequest.h,
+				Private/Request/OCCloudKitMirroringRequest.h,
+				Private/Request/OCCloudKitMirroringRequestOptions.h,
+				Private/Request/OCCloudKitMirroringResetMetadataRequest.h,
+				Private/Request/OCCloudKitMirroringResetZoneRequest.h,
+				Private/Request/OCCloudKitMirroringResult.h,
+				Private/ValueTransformers/OCCKRecordZoneQueryCursorTransformer.h,
+				Private/ValueTransformers/OCCKRecordZoneQueryPredicateTransformer.h,
+				Private/ValueTransformers/OCCloudKitMetadataValueTransformer.h,
+				"SPI/CloudKit/CKContainer+Private.h",
+				SPI/CloudKit/CKContainerID.h,
+				SPI/CloudKit/CKContainerOptions.h,
+				SPI/CloudKit/CKEncryptable.h,
+				SPI/CloudKit/CKEncryptedData.h,
+				SPI/CloudKit/CKEncryptedRecordValueStore.h,
+				SPI/CloudKit/CKNotificationListener.h,
+				"SPI/CloudKit/CKRecord+Private.h",
+				SPI/CloudKit/CKRecordValueStore.h,
+				SPI/CloudKit/CKScheduler.h,
+				SPI/CloudKit/CKSchedulerActivity.h,
+				SPI/CoreData/_NSCloudKitDataFileBackedFuture.h,
+				SPI/CoreData/_NSDataFileBackedFuture.h,
+				SPI/CoreData/_NSFileBackedFuture.h,
+				SPI/CoreData/_NSPersistentHistoryToken.h,
+				SPI/CoreData/_PFAncillaryModelFactory.h,
+				SPI/CoreData/_PFBackgroundRuntimeVoucher.h,
+				SPI/CoreData/_PFClassicBackgroundRuntimeVoucher.h,
+				SPI/CoreData/_PFEvanescentData.h,
+				SPI/CoreData/_PFExternalReferenceData.h,
+				SPI/CoreData/_PFModelMap.h,
+				SPI/CoreData/_PFRoutines.h,
+				SPI/CoreData/MirroredRelationship/PFMirroredManyToManyRelationship.h,
+				SPI/CoreData/MirroredRelationship/PFMirroredManyToManyRelationshipV2.h,
+				SPI/CoreData/MirroredRelationship/PFMirroredOneToManyRelationship.h,
+				SPI/CoreData/MirroredRelationship/PFMirroredRelationship.h,
+				SPI/CoreData/Model/NSCKRecordMetadata.h,
+				"SPI/CoreData/NSAttributeDescription+Private.h",
+				SPI/CoreData/NSCloudKitMirroringDelegate.h,
+				SPI/CoreData/NSKnownKeysDictionary.h,
+				"SPI/CoreData/NSManagedObjectContext+Private.h",
+				"SPI/CoreData/NSManagedObjectID+Private.h",
+				SPI/CoreData/NSMergeableTransformableAttributeValue.h,
+				SPI/CoreData/NSMergeableTransformableStringAttributeValue.h,
+				SPI/CoreData/NSPersistentCloudKitContainerActivity.h,
+				"SPI/CoreData/NSPersistentContainer+Private.h",
+				"SPI/CoreData/NSPersistentHistoryToken+Private.h",
+				"SPI/CoreData/NSPersistentStore+Private.h",
+				"SPI/CoreData/NSPersistentStoreCoordinator+Private.h",
+				"SPI/CoreData/NSPersistentStoreDescription+Private.h",
+				SPI/CoreData/NSPersistentStoreMirroringDelegate.h,
+				"SPI/CoreData/NSPropertyDescription+Private.h",
+				SPI/CoreData/NSSQLBlockRequestContext.h,
+				SPI/CoreData/NSSQLCore.h,
+				SPI/CoreData/NSSQLEntity.h,
+				SPI/CoreData/NSSQLiteAdapter.h,
+				SPI/CoreData/NSSQLiteConnection.h,
+				SPI/CoreData/NSSQLiteStatement.h,
+				SPI/CoreData/NSSQLModel.h,
+				SPI/CoreData/NSSQLModelProvider.h,
+				SPI/CoreData/NSSQLStoreRequestContext.h,
+				SPI/CoreData/NSStoreMapping.h,
+				SPI/CoreData/PFApplicationStateMonitor.h,
+				SPI/CoreData/PFApplicationStateMonitorDelegate.h,
+				SPI/CoreData/PFCloudKitImportZoneContext.h,
+				SPI/CoreData/PFCloudKitSerializer.h,
+				SPI/CoreData/PFHistoryAnalyzer.h,
+				SPI/CoreData/PFHistoryAnalyzerContext.h,
+				SPI/CoreData/PFHistoryAnalyzerDefaultObjectState.h,
+				SPI/CoreData/PFHistoryAnalyzerObjectState.h,
+				SPI/CoreData/PFHistoryAnalyzerOptions.h,
+				SPI/CoreData/SQLProperty/NSSQLAttribute.h,
+				SPI/CoreData/SQLProperty/NSSQLColumn.h,
+				SPI/CoreData/SQLProperty/NSSQLPrimaryKey.h,
+				SPI/CoreData/SQLProperty/NSSQLProperty.h,
+				SPI/CoreData/ValueTransformers/NSCKRecordZoneQueryCursorTransformer.h,
+				SPI/CoreData/ValueTransformers/NSCKRecordZoneQueryPredicateTransformer.h,
+				SPI/CoreData/ValueTransformers/PFCloudKitMetadataValueTransformer.h,
+				"SPI/Foundation/NSObject+NSKindOfAdditions.h",
+				SPI/OCSPIResolver.h,
+			);
+			publicHeaders = (
+				"Public/NSPersistentStoreDescription+OpenCloudData.h",
+				Public/OCPersistentCloudKitContainer.h,
+				Public/OCPersistentCloudKitContainerEvent.h,
+				Public/OCPersistentCloudKitContainerOptions.h,
+				Public/OpenCloudData.h,
+				Public/OpenCloudDataDefines.h,
+			);
+			target = 4F8E8F412DDEF5FD00DE18FE /* OpenCloudData */;
+		};
+		4F8E94252DDEF94F00DE18FE /* Exceptions for "SampleApp" folder in "SampleApp (SwiftPM)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				App/Info.plist,
+			);
+			target = 4F8E94182DDEF94F00DE18FE /* SampleApp (SwiftPM) */;
+		};
 		4FB2FB2A2D9968C00065C5B3 /* Exceptions for "SampleApp" folder in "SampleApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -27,10 +258,24 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		4F8E8F432DDEF5FD00DE18FE /* OpenCloudData */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4F8E91A92DDEF6F400DE18FE /* Exceptions for "OpenCloudData" folder in "OpenCloudData" target */,
+			);
+			path = OpenCloudData;
+			sourceTree = "<group>";
+		};
+		4F8E8F502DDEF5FD00DE18FE /* OpenCloudDataTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = OpenCloudDataTests;
+			sourceTree = "<group>";
+		};
 		4FB2FAE92D99668A0065C5B3 /* SampleApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				4FB2FB2A2D9968C00065C5B3 /* Exceptions for "SampleApp" folder in "SampleApp" target */,
+				4F8E94252DDEF94F00DE18FE /* Exceptions for "SampleApp" folder in "SampleApp (SwiftPM)" target */,
 			);
 			path = SampleApp;
 			sourceTree = "<group>";
@@ -38,11 +283,35 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		4F8E8F3F2DDEF5FD00DE18FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4F8E91A82DDEF66200DE18FE /* ellekit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F8E8F472DDEF5FD00DE18FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4F8E8F4B2DDEF5FD00DE18FE /* OpenCloudData.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F8E941C2DDEF94F00DE18FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4F8E94282DDEF96900DE18FE /* OpenCloudData in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4FB2FAE52D99668A0065C5B3 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4F695ACA2DDEC01C0014FC25 /* OpenCloudData in Frameworks */,
+				4F8E94112DDEF87300DE18FE /* OpenCloudData.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -52,7 +321,10 @@
 		4F2422CE2D99522D005BA6EA = {
 			isa = PBXGroup;
 			children = (
+				4F8E94172DDEF8F800DE18FE /* OpenCloudData.xctestplan */,
 				4FB2FAE92D99668A0065C5B3 /* SampleApp */,
+				4F8E8F432DDEF5FD00DE18FE /* OpenCloudData */,
+				4F8E8F502DDEF5FD00DE18FE /* OpenCloudDataTests */,
 				4F2422D92D99522D005BA6EA /* Products */,
 				4FB2FB442D998B4C0065C5B3 /* README.md */,
 				4F88D3E02DA2789A00355E29 /* LICENSE.md */,
@@ -64,6 +336,9 @@
 			isa = PBXGroup;
 			children = (
 				4FB2FAE82D99668A0065C5B3 /* SampleApp.app */,
+				4F8E8F422DDEF5FD00DE18FE /* OpenCloudData.framework */,
+				4F8E8F4A2DDEF5FD00DE18FE /* OpenCloudDataTests.xctest */,
+				4F8E94242DDEF94F00DE18FE /* SampleApp (SwiftPM).app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -77,14 +352,72 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		4F8E8F3D2DDEF5FD00DE18FE /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
-		4FB2FAE72D99668A0065C5B3 /* SampleApp */ = {
+		4F8E8F412DDEF5FD00DE18FE /* OpenCloudData */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4FB2FAF02D99668B0065C5B3 /* Build configuration list for PBXNativeTarget "SampleApp" */;
+			buildConfigurationList = 4F8E8F5C2DDEF5FD00DE18FE /* Build configuration list for PBXNativeTarget "OpenCloudData" */;
 			buildPhases = (
-				4FB2FAE42D99668A0065C5B3 /* Sources */,
-				4FB2FAE52D99668A0065C5B3 /* Frameworks */,
-				4FB2FAE62D99668A0065C5B3 /* Resources */,
+				4F8E8F3D2DDEF5FD00DE18FE /* Headers */,
+				4F8E8F3E2DDEF5FD00DE18FE /* Sources */,
+				4F8E8F3F2DDEF5FD00DE18FE /* Frameworks */,
+				4F8E8F402DDEF5FD00DE18FE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				4F8E8F432DDEF5FD00DE18FE /* OpenCloudData */,
+			);
+			name = OpenCloudData;
+			packageProductDependencies = (
+				4F8E91A72DDEF66200DE18FE /* ellekit */,
+			);
+			productName = OpenCloudData;
+			productReference = 4F8E8F422DDEF5FD00DE18FE /* OpenCloudData.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		4F8E8F492DDEF5FD00DE18FE /* OpenCloudDataTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4F8E8F5E2DDEF5FD00DE18FE /* Build configuration list for PBXNativeTarget "OpenCloudDataTests" */;
+			buildPhases = (
+				4F8E8F462DDEF5FD00DE18FE /* Sources */,
+				4F8E8F472DDEF5FD00DE18FE /* Frameworks */,
+				4F8E8F482DDEF5FD00DE18FE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4F8E8F4D2DDEF5FD00DE18FE /* PBXTargetDependency */,
+				4F8E8F4F2DDEF5FD00DE18FE /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4F8E8F502DDEF5FD00DE18FE /* OpenCloudDataTests */,
+			);
+			name = OpenCloudDataTests;
+			packageProductDependencies = (
+			);
+			productName = OpenCloudDataTests;
+			productReference = 4F8E8F4A2DDEF5FD00DE18FE /* OpenCloudDataTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		4F8E94182DDEF94F00DE18FE /* SampleApp (SwiftPM) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4F8E94212DDEF94F00DE18FE /* Build configuration list for PBXNativeTarget "SampleApp (SwiftPM)" */;
+			buildPhases = (
+				4F8E941B2DDEF94F00DE18FE /* Sources */,
+				4F8E941C2DDEF94F00DE18FE /* Frameworks */,
+				4F8E941E2DDEF94F00DE18FE /* Resources */,
 			);
 			buildRules = (
 			);
@@ -93,9 +426,33 @@
 			fileSystemSynchronizedGroups = (
 				4FB2FAE92D99668A0065C5B3 /* SampleApp */,
 			);
+			name = "SampleApp (SwiftPM)";
+			packageProductDependencies = (
+				4F8E94272DDEF96900DE18FE /* OpenCloudData */,
+			);
+			productName = SampleApp;
+			productReference = 4F8E94242DDEF94F00DE18FE /* SampleApp (SwiftPM).app */;
+			productType = "com.apple.product-type.application";
+		};
+		4FB2FAE72D99668A0065C5B3 /* SampleApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4FB2FAF02D99668B0065C5B3 /* Build configuration list for PBXNativeTarget "SampleApp" */;
+			buildPhases = (
+				4FB2FAE42D99668A0065C5B3 /* Sources */,
+				4FB2FAE52D99668A0065C5B3 /* Frameworks */,
+				4FB2FAE62D99668A0065C5B3 /* Resources */,
+				4F8E94152DDEF87300DE18FE /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4F8E94142DDEF87300DE18FE /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4FB2FAE92D99668A0065C5B3 /* SampleApp */,
+			);
 			name = SampleApp;
 			packageProductDependencies = (
-				4F695AC92DDEC01C0014FC25 /* OpenCloudData */,
 			);
 			productName = SampleApp;
 			productReference = 4FB2FAE82D99668A0065C5B3 /* SampleApp.app */;
@@ -111,6 +468,13 @@
 				LastSwiftUpdateCheck = 1630;
 				LastUpgradeCheck = 1630;
 				TargetAttributes = {
+					4F8E8F412DDEF5FD00DE18FE = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					4F8E8F492DDEF5FD00DE18FE = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 4FB2FAE72D99668A0065C5B3;
+					};
 					4FB2FAE72D99668A0065C5B3 = {
 						CreatedOnToolsVersion = 16.3;
 						LastSwiftMigration = 1630;
@@ -127,7 +491,8 @@
 			mainGroup = 4F2422CE2D99522D005BA6EA;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				4F695AC72DDEC0170014FC25 /* XCLocalSwiftPackageReference "../OpenCloudData" */,
+				4F8E91A62DDEF66200DE18FE /* XCRemoteSwiftPackageReference "ellekit" */,
+				4F8E94162DDEF87700DE18FE /* XCLocalSwiftPackageReference "../OpenCloudData" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4F2422D92D99522D005BA6EA /* Products */;
@@ -135,11 +500,35 @@
 			projectRoot = "";
 			targets = (
 				4FB2FAE72D99668A0065C5B3 /* SampleApp */,
+				4F8E94182DDEF94F00DE18FE /* SampleApp (SwiftPM) */,
+				4F8E8F412DDEF5FD00DE18FE /* OpenCloudData */,
+				4F8E8F492DDEF5FD00DE18FE /* OpenCloudDataTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		4F8E8F402DDEF5FD00DE18FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F8E8F482DDEF5FD00DE18FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F8E941E2DDEF94F00DE18FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4FB2FAE62D99668A0065C5B3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -150,6 +539,27 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		4F8E8F3E2DDEF5FD00DE18FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F8E8F462DDEF5FD00DE18FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F8E941B2DDEF94F00DE18FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4FB2FAE42D99668A0065C5B3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -158,6 +568,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		4F8E8F4D2DDEF5FD00DE18FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4F8E8F412DDEF5FD00DE18FE /* OpenCloudData */;
+			targetProxy = 4F8E8F4C2DDEF5FD00DE18FE /* PBXContainerItemProxy */;
+		};
+		4F8E8F4F2DDEF5FD00DE18FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4FB2FAE72D99668A0065C5B3 /* SampleApp */;
+			targetProxy = 4F8E8F4E2DDEF5FD00DE18FE /* PBXContainerItemProxy */;
+		};
+		4F8E94142DDEF87300DE18FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4F8E8F412DDEF5FD00DE18FE /* OpenCloudData */;
+			targetProxy = 4F8E94132DDEF87300DE18FE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		4F2422E12D99522D005BA6EA /* Debug */ = {
@@ -284,6 +712,183 @@
 			};
 			name = Release;
 		};
+		4F8E8F582DDEF5FD00DE18FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = P53D29U9LJ;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.pookjw.OpenCloudData;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4F8E8F592DDEF5FD00DE18FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = P53D29U9LJ;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.pookjw.OpenCloudData;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		4F8E8F5A2DDEF5FD00DE18FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P53D29U9LJ;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pookjw.OpenCloudDataTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SampleApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SampleApp";
+			};
+			name = Debug;
+		};
+		4F8E8F5B2DDEF5FD00DE18FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P53D29U9LJ;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pookjw.OpenCloudDataTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SampleApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SampleApp";
+			};
+			name = Release;
+		};
+		4F8E94222DDEF94F00DE18FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = SampleApp/App/CoreDataSync.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P53D29U9LJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SampleApp/App/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pookjw.OpenCloudData.SampleApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "SampleApp/App/SampleApp-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4F8E94232DDEF94F00DE18FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = SampleApp/App/CoreDataSync.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P53D29U9LJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SampleApp/App/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pookjw.OpenCloudData.SampleApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "SampleApp/App/SampleApp-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		4FB2FAF12D99668B0065C5B3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -365,6 +970,33 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		4F8E8F5C2DDEF5FD00DE18FE /* Build configuration list for PBXNativeTarget "OpenCloudData" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4F8E8F582DDEF5FD00DE18FE /* Debug */,
+				4F8E8F592DDEF5FD00DE18FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4F8E8F5E2DDEF5FD00DE18FE /* Build configuration list for PBXNativeTarget "OpenCloudDataTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4F8E8F5A2DDEF5FD00DE18FE /* Debug */,
+				4F8E8F5B2DDEF5FD00DE18FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4F8E94212DDEF94F00DE18FE /* Build configuration list for PBXNativeTarget "SampleApp (SwiftPM)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4F8E94222DDEF94F00DE18FE /* Debug */,
+				4F8E94232DDEF94F00DE18FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		4FB2FAF02D99668B0065C5B3 /* Build configuration list for PBXNativeTarget "SampleApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -377,16 +1009,32 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		4F695AC72DDEC0170014FC25 /* XCLocalSwiftPackageReference "../OpenCloudData" */ = {
+		4F8E94162DDEF87700DE18FE /* XCLocalSwiftPackageReference "../OpenCloudData" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../OpenCloudData;
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		4F8E91A62DDEF66200DE18FE /* XCRemoteSwiftPackageReference "ellekit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pookjw/ellekit";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
-		4F695AC92DDEC01C0014FC25 /* OpenCloudData */ = {
+		4F8E91A72DDEF66200DE18FE /* ellekit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4F695AC72DDEC0170014FC25 /* XCLocalSwiftPackageReference "../OpenCloudData" */;
+			package = 4F8E91A62DDEF66200DE18FE /* XCRemoteSwiftPackageReference "ellekit" */;
+			productName = ellekit;
+		};
+		4F8E94272DDEF96900DE18FE /* OpenCloudData */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4F8E94162DDEF87700DE18FE /* XCLocalSwiftPackageReference "../OpenCloudData" */;
 			productName = OpenCloudData;
 		};
 /* End XCSwiftPackageProductDependency section */

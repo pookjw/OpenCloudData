@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1630"
+   LastUpgradeVersion = "1640"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4FB2FAE72D99668A0065C5B3"
-               BuildableName = "SampleApp.app"
-               BlueprintName = "SampleApp"
+               BlueprintIdentifier = "4F8E94182DDEF94F00DE18FE"
+               BuildableName = "SampleApp (SwiftPM).app"
+               BlueprintName = "SampleApp (SwiftPM)"
                ReferencedContainer = "container:OpenCloudData.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -29,19 +29,6 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES"
       shouldAutocreateTestPlan = "YES">
-      <Testables>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4F8E8F492DDEF5FD00DE18FE"
-               BuildableName = "OpenCloudDataTests.xctest"
-               BlueprintName = "OpenCloudDataTests"
-               ReferencedContainer = "container:OpenCloudData.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-      </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -57,31 +44,12 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "4FB2FAE72D99668A0065C5B3"
-            BuildableName = "SampleApp.app"
-            BlueprintName = "SampleApp"
+            BlueprintIdentifier = "4F8E94182DDEF94F00DE18FE"
+            BuildableName = "SampleApp (SwiftPM).app"
+            BlueprintName = "SampleApp (SwiftPM)"
             ReferencedContainer = "container:OpenCloudData.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "USE_OPEN_CLOUD_DATA"
-            value = "1"
-            isEnabled = "NO">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
-      <AdditionalOptions>
-         <AdditionalOption
-            key = "MallocStackLogging"
-            value = ""
-            isEnabled = "YES">
-         </AdditionalOption>
-         <AdditionalOption
-            key = "PrefersMallocStackLoggingLite"
-            value = ""
-            isEnabled = "YES">
-         </AdditionalOption>
-      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -93,9 +61,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "4FB2FAE72D99668A0065C5B3"
-            BuildableName = "SampleApp.app"
-            BlueprintName = "SampleApp"
+            BlueprintIdentifier = "4F8E94182DDEF94F00DE18FE"
+            BuildableName = "SampleApp (SwiftPM).app"
+            BlueprintName = "SampleApp (SwiftPM)"
             ReferencedContainer = "container:OpenCloudData.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
