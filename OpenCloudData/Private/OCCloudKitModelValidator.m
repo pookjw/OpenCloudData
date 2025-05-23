@@ -7,6 +7,7 @@
 
 #import "OpenCloudData/Private/OCCloudKitModelValidator.h"
 #import "OpenCloudData/Private/Log.h"
+#import "OpenCloudData/Private/OCCloudKitSerializer.h"
 #import "OpenCloudData/SPI/OCSPIResolver.h"
 
 @implementation OCCloudKitModelValidator
@@ -97,45 +98,47 @@
     }
     
     // <+100>
+    // self = sp, #0x68
+    
     // sp + 0x18
     @autoreleasepool {
         // x19
         NSSet<NSEntityDescription *> *entitiesSet = [[NSSet alloc] initWithArray:entities];
-        // sp + 0x10
+        // sp, #0x10
         NSMutableArray *array_1 = [[NSMutableArray alloc] init];
-        // sp + 0xb0
+        // sp, #0xb0
         NSMutableArray *array_2 = [[NSMutableArray alloc] init];
         // x25
         NSMutableArray *array_3 = [[NSMutableArray alloc] init];
         // x28
         NSMutableArray *array_4 = [[NSMutableArray alloc] init];
-        // sp + 0xa8
+        // sp, #0xa8
         NSMutableArray *array_5 = [[NSMutableArray alloc] init];
-        // sp + 0xa0
+        // sp, #0xa0
         NSMutableArray *array_6 = [[NSMutableArray alloc] init];
         // x20
         NSMutableArray *array_7 = [[NSMutableArray alloc] init];
         // x21
         NSMutableArray *array_8 = [[NSMutableArray alloc] init];
-        // sp + 0xe0
+        // sp, #0xe0
         NSMutableArray *array_9 = [[NSMutableArray alloc] init];
-        // sp + 0x30
+        // sp, #0x30
         NSMutableArray *array_10 = [[NSMutableArray alloc] init];
         // x23
         NSMutableArray *array_11 = [[NSMutableArray alloc] init];
-        // sp + 0xb8
+        // sp, #0xb8
         NSMutableArray *array_12 = [[NSMutableArray alloc] init];
-        // sp + 0x78
+        // sp, #0x78
         NSMutableArray *array_13 = [[NSMutableArray alloc] init];
-        // sp + 0x88
+        // sp, #0x88
         NSMutableArray *array_14 = [[NSMutableArray alloc] init];
-        // sp + 0x38
-        NSMutableArray *array_15 = [[NSMutableArray alloc] init];
-        // sp + 0x90
+        // sp, #0x38
+        NSMutableArray<NSString *> *array_15 = [[NSMutableArray alloc] init];
+        // sp, #0x90
         NSMutableArray *array_16 = [[NSMutableArray alloc] init];
-        // sp + 0x70
+        // sp, #0x70
         NSMutableArray *array_17 = [[NSMutableArray alloc] init];
-        // sp + 0x28
+        // sp, #0x28
         NSMutableArray *array_18 = [[NSMutableArray alloc] init];
         
         /*
@@ -151,7 +154,65 @@
             NSMutableSet *set_2 = [[NSMutableSet alloc] init];
             
             // <+560>
-            id _Nullable value = [entity.userInfo objectForKey:[OCSPIResolver NSPersistentCloudKitContainerEncryptedAttributeKey]];
+            if ([entity.userInfo objectForKey:[OCSPIResolver NSPersistentCloudKitContainerEncryptedAttributeKey]] != nil) {
+                // <+580>
+                [array_15 addObject:[NSString stringWithFormat:@"%@: %@ cannot be applied to an entity type'", entity.name, [OCSPIResolver NSPersistentCloudKitContainerEncryptedAttributeKey]]];
+            }
+            
+            // <+632>
+            /*
+             __51-[PFCloudKitModelValidator validateEntities:error:]_block_invoke
+             self = sp + 0x488 = x20 + 0x20
+             array_7 = sp + 0x490 = x20 + 0x28
+             entity = sp + 0x498 = x20 + 0x30
+             array_6 = sp + 0x4a0 = x20 + 0x38
+             array_11 = sp + 0x4a8 = x20 + 0x40
+             array_12 = sp + 0x4b0 = x20 + 0x48
+             set_1 = sp + 0x4b8 = x20 + 0x50
+             array_2 = sp + 0x4c0 = x20 + 0x58
+             array_16 = sp + 0x4c8 = x20 + 0x60
+             */
+            [entity.attributesByName enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull name, NSAttributeDescription * _Nonnull attribute, BOOL * _Nonnull stop) {
+                /*
+                 self(block) = x20
+                 name = x21
+                 attribute = x19
+                 */
+                if (self->_validateLegacyMetadataAttributes) {
+                    if ([OCCloudKitSerializer isPrivateAttribute:attribute]) {
+                        // <+1240>
+                        return;
+                    }
+                }
+                
+                NSAttributeType attributeType = attribute.attributeType;
+                switch (attributeType) {
+                    case NSDecimalAttributeType:
+                    case NSDoubleAttributeType:
+                    case NSUUIDAttributeType:
+                    case NSURIAttributeType:
+                    case NSInteger16AttributeType:
+                    case NSInteger32AttributeType:
+                    case NSInteger64AttributeType:
+                    case NSBooleanAttributeType:
+                    case NSDateAttributeType:
+                    case NSBinaryDataAttributeType:
+                    case NSFloatAttributeType:
+                    case NSStringAttributeType:
+                    case NSCompositeAttributeType:
+                        // <+440>
+                        break;
+                    case NSTransformableAttributeType:
+                        // <+264>
+                        break;
+                    default:
+                        // <+368>
+                        break;
+                }
+                // <+80>
+                abort();
+            }];
+            // <+740>
             abort();
         }
     }
