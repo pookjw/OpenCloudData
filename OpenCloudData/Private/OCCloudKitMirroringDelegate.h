@@ -60,6 +60,7 @@ NS_ASSUME_NONNULL_BEGIN
     CKSystemSharingUIObserver *_sharingUIObserver; // 0xd8
     OCCloudKitMirroringActivityVoucherManager *_voucherManager; // 0xe0
 }
+@property (retain, nonatomic, readonly, direct) OCCloudKitMirroringDelegateOptions *options;
 @property (class, readonly, nonatomic) NSString *cloudKitMachServiceName;
 @property (class, readonly, nonatomic) NSString *cloudKitMetadataTransformerName;
 

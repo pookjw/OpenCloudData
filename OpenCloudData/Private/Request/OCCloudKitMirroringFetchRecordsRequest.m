@@ -100,7 +100,7 @@
 }
 
 - (void)throwNotEditable:(SEL)aSEL {
-    NSString *reason = [NSString stringWithFormat:@"%@ called after the request was sent to %@\\nRequest: %@", NSStringFromSelector(aSEL), NSStringFromSelector(@selector(entitiesByName)), self];
+    NSString *reason = [NSString stringWithFormat:@"%@ called after the request was sent to %@\\nRequest: %@", NSStringFromSelector(aSEL), NSStringFromSelector(@selector(executeRequest:error:)), self];
     @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:reason userInfo:nil];
 }
 

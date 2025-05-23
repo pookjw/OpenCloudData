@@ -17,6 +17,8 @@
 #import "OpenCloudData/Private/Import/OCCloudKitImporterOptions.h"
 #import "OpenCloudData/Private/OCCloudKitSerializer.h"
 #import "OpenCloudData/Private/Import/OCCloudKitImporter.h"
+#import "OpenCloudData/Private/OCCloudKitModelValidator.h"
+#import "OpenCloudData/Private/OCCloudKitOptionsValidator.h"
 #import <objc/runtime.h>
 
 CK_EXTERN NSString * const CKIdentityUpdateNotification;
@@ -505,7 +507,109 @@ CK_EXTERN NSString * const CKIdentityUpdateNotification;
 }
 
 - (BOOL)validateManagedObjectModel:(NSManagedObjectModel *)managedObjectModel forUseWithStoreWithDescription:(NSPersistentStoreDescription *)storeDescription error:(NSError * _Nullable *)error {
-    abort();
+    /*
+     error = x19
+     */
+    // sp, #0x8
+    NSError * _Nullable _error = nil;
+    
+    if (_hadObservedStore) {
+        // <+56>
+        _error = [NSError errorWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
+            NSLocalizedFailureReasonErrorKey: @"Instances of NSCloudKitMirroringDelegate are not reusable and should have a lifecycle tied to a given instance of NSPersistentStore."
+        }];
+        
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) *error = _error;
+        }
+        
+        return NO;
+    }
+    
+    // <+176>
+    /*
+     self = x22
+     managedObjectModel = x20
+     storeDescription = x21
+     */
+    BOOL readOnly = ((NSNumber *)[storeDescription.options objectForKey:@"NSCloudKitMirroringDelegateReadOnlyOptionKey"]).boolValue;
+    if (readOnly) {
+        return YES;
+    }
+    
+    // <+224>
+    // x20
+    OCCloudKitModelValidator *validator = [[OCCloudKitModelValidator alloc] initWithManagedObjectModel:managedObjectModel configuration:storeDescription.configuration mirroringDelegateOptions:self->_options];
+    validator->_skipValueTransformerValidation = self.options.skipCloudKitSetup;
+    BOOL result = [validator _validateManagedObjectModel:validator->_model error:&_error];
+    
+    if (!result) {
+        // <+636>
+        [validator release];
+        
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) *error = _error;
+        }
+        
+        return NO;
+    }
+    
+    if (storeDescription == nil) {
+        _error = [NSError errorWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
+            NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Cannot be used without an instance of %@.", NSStringFromClass([NSPersistentStoreDescription class])]
+        }];
+        
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) *error = _error;
+        }
+        
+        return NO;
+    }
+    
+    if (![storeDescription.type isEqualToString:NSSQLiteStoreType]) {
+        // <+520>
+        _error = [NSError errorWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
+            NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"CloudKit integration is only supported for %@ stores.", NSSQLiteStoreType]
+        }];
+        
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) *error = _error;
+        }
+        
+        return NO;
+    }
+    
+    // <+352>
+    // x23
+    OCCloudKitOptionsValidator *optionsValidator = [[OCCloudKitOptionsValidator alloc] init];
+    result = [optionsValidator validateOptions:self.options andStoreOptions:storeDescription.options error:&_error];
+    [optionsValidator release];
+    [validator release];
+    
+    if (!result) {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) *error = _error;
+        }
+        
+        return NO;
+    }
+    
+    return YES;
 }
 
 - (void)checkAndExecuteNextRequest {
