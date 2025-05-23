@@ -11,6 +11,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NSObject (NSKindOfAdditions)
 - (BOOL)isNSData__;
+- (BOOL)isNSNumber__;
+- (BOOL)isNSString__;
 @end
 
 NS_ASSUME_NONNULL_END

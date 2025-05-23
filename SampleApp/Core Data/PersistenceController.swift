@@ -31,11 +31,28 @@ struct PersistenceController {
     }()
 
     let container: NSPersistentContainer = {
+        let managedObjectModel: NSManagedObjectModel = {
+            let modelURL = Bundle.main.url(forResource: "CoreDataSync", withExtension: "momd")!
+            return NSManagedObjectModel(contentsOf: modelURL)!
+        }()
+        
+//        for entity in managedObjectModel.entities {
+//            if entity.name == "Entity" {
+//                for (name, attribute) in entity.attributesByName {
+//                    if name == "string" {
+//                        attribute.userInfo = ["NSCloudKitMirroringDelegateIgnoredPropertyKey": true]
+//                        break
+//                    }
+//                }
+//                break
+//            }
+//        }
+        
         let container: NSPersistentContainer
         if ProcessInfo.processInfo.environment["USE_OPEN_CLOUD_DATA"] == "1" {
-            container = OCPersistentCloudKitContainer(name: "CoreDataSync")
+            container = OCPersistentCloudKitContainer(name: "Container", managedObjectModel: managedObjectModel)
         } else {
-            container = NSPersistentCloudKitContainer(name: "CoreDataSync")
+            container = NSPersistentCloudKitContainer(name: "Container", managedObjectModel: managedObjectModel)
         }
         
         container.viewContext.automaticallyMergesChangesFromParent = true

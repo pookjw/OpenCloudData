@@ -10,6 +10,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSAttributeDescription (Private)
++ (NSString *)stringForAttributeType:(NSAttributeType)attributeType;
 @property (nonatomic) BOOL isFileBackedFuture;
 @property (nonatomic, readonly) BOOL usesMergeableStorage;
 @end

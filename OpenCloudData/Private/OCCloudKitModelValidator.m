@@ -9,6 +9,8 @@
 #import "OpenCloudData/Private/Log.h"
 #import "OpenCloudData/Private/OCCloudKitSerializer.h"
 #import "OpenCloudData/SPI/OCSPIResolver.h"
+#import "OpenCloudData/SPI/CoreData/NSAttributeDescription+Private.h"
+#import "OpenCloudData/SPI/Foundation/NSObject+NSKindOfAdditions.h"
 
 @implementation OCCloudKitModelValidator
 
@@ -115,9 +117,9 @@
         // sp, #0xa8
         NSMutableArray *array_5 = [[NSMutableArray alloc] init];
         // sp, #0xa0
-        NSMutableArray *array_6 = [[NSMutableArray alloc] init];
+        NSMutableArray<NSString *> *array_6 = [[NSMutableArray alloc] init];
         // x20
-        NSMutableArray *array_7 = [[NSMutableArray alloc] init];
+        NSMutableArray<NSString *> *array_7 = [[NSMutableArray alloc] init];
         // x21
         NSMutableArray *array_8 = [[NSMutableArray alloc] init];
         // sp, #0xe0
@@ -125,9 +127,9 @@
         // sp, #0x30
         NSMutableArray *array_10 = [[NSMutableArray alloc] init];
         // x23
-        NSMutableArray *array_11 = [[NSMutableArray alloc] init];
+        NSMutableArray<NSString *> *array_11 = [[NSMutableArray alloc] init];
         // sp, #0xb8
-        NSMutableArray *array_12 = [[NSMutableArray alloc] init];
+        NSMutableArray<NSString *> *array_12 = [[NSMutableArray alloc] init];
         // sp, #0x78
         NSMutableArray *array_13 = [[NSMutableArray alloc] init];
         // sp, #0x88
@@ -146,10 +148,11 @@
          NSPersistentCloudKitContainerEncryptedAttributeKey = x22
          @"%@:%@ - preservesValueInHistoryOnDeletion should be YES" = x26
          */
+        // <+364>
         // x27
         for (NSEntityDescription *entity in entitiesSet) {
             // x21
-            NSMutableSet *set_1 = [[NSMutableSet alloc] init];
+            NSMutableSet<NSString *> *set_1 = [[NSMutableSet alloc] init];
             // x24
             NSMutableSet *set_2 = [[NSMutableSet alloc] init];
             
@@ -200,19 +203,114 @@
                     case NSFloatAttributeType:
                     case NSStringAttributeType:
                     case NSCompositeAttributeType:
-                        // <+440>
+                        // nop
                         break;
-                    case NSTransformableAttributeType:
+                    case NSTransformableAttributeType: {
                         // <+264>
+                        if (attribute.valueTransformerName.length == 0) {
+                            break;
+                        }
+                        
+                        if (self->_skipValueTransformerValidation) {
+                            break;
+                        }
+                        
+                        NSValueTransformer * _Nullable valueTransformer = [NSValueTransformer valueTransformerForName:attribute.valueTransformerName];
+                        if (valueTransformer == nil) {
+                            // <+1364>
+                            [array_7 addObject:[NSString stringWithFormat:@"%@: %@ - Cannot locate value transformer with name '%@'", entity.name, name, attribute.valueTransformerName]];
+                            break;
+                        }
+                        
+                        if (![[valueTransformer class] allowsReverseTransformation]) {
+                            [array_7 addObject:[NSString stringWithFormat:@"%@: %@ - Doesn't allow reverse transformation", entity.name, name]];
+                            break;
+                        }
                         break;
+                    }
                     default:
                         // <+368>
+                        [array_6 addObject:[NSString stringWithFormat:@"%@: %@ - Unsupported attribute type (%@)", entity.name, name, [NSAttributeDescription stringForAttributeType:attributeType]]];
                         break;
                 }
-                // <+80>
+                
+                // <+440>
+                NSObject * _Nullable ignoredProperty = [attribute.userInfo objectForKey:[OCSPIResolver NSCloudKitMirroringDelegateIgnoredPropertyKey]];
+                if (ignoredProperty == nil) {
+                    // nop
+                } else {
+                    BOOL boolValue;
+                    if ([ignoredProperty isNSNumber__]) {
+                        boolValue = ((NSNumber *)ignoredProperty).boolValue;
+                    } else if ([ignoredProperty isNSString__]) {
+                        boolValue = ((NSString *)ignoredProperty).boolValue;
+                    } else {
+                        // <+552>
+                        [array_11 addObject:[NSString stringWithFormat:@"%@: %@ - Value must be an instance of '%@' or '%@' that evalutes to YES or NO using '%@'", entity.name, attribute.name, NSStringFromClass([NSNumber class]), NSStringFromClass([NSString class]), NSStringFromSelector(@selector(boolValue))]];
+                        boolValue = NO;
+                    }
+                    
+                    if (boolValue) {
+                        // <+504>
+                        if (!attribute.optional) {
+                            [array_11 addObject:[NSString stringWithFormat:@"%@: %@ - attribute is not optional", entity.name, name]];
+                        }
+                    }
+                }
+                
+                // <+676>
+                // x23
+                NSObject * _Nullable encryptedAttribute = [attribute.userInfo objectForKey:[OCSPIResolver NSPersistentCloudKitContainerEncryptedAttributeKey]];
+                if (encryptedAttribute == nil) {
+                    // nop
+                    // <+1012>
+                } else {
+                    if (!([encryptedAttribute isNSNumber__]) && !([encryptedAttribute isNSString__])) {
+                        // <+732>
+                        [array_12 addObject:[NSString stringWithFormat:@"%@: %@ - Value for %@ must be an instance of '%@' or '%@' that evalutes to YES or NO using '%@'", entity.name, attribute.name, [OCSPIResolver NSPersistentCloudKitContainerEncryptedAttributeKey], NSStringFromClass([NSNumber class]), NSStringFromClass([NSString class]), NSStringFromSelector(@selector(boolValue))]];
+                    }
+                    
+                    // <+856>
+                    if (attribute.allowsCloudEncryption) {
+                        // <+868>
+                        [array_12 addObject:[NSString stringWithFormat:@"%@:%@ - Encryption value should be set via -[NSAttributeDescription allowsCloudEncryption], please remove usage of 'NSPersistentCloudKitContainerEncryptedAttributeKey'", entity.name, attribute.name]];
+                    }
+                    
+                    if (self->_options.useDeviceToDeviceEncryption) {
+                        // <+948>
+                        [array_12 addObject:[NSString stringWithFormat:@"%@:%@ - Partial encryption cannot be used with device-to-device encryption", entity.name, attribute.name]];
+                    }
+                }
+                
+                // <+1012>
+                if (self->_options.useDeviceToDeviceEncryption && attribute.allowsCloudEncryption) {
+                    [array_12 addObject:[NSString stringWithFormat:@"%@:%@ - Device-to-Device encryption cannot be used with partial encryption", entity.name, attribute.name]];
+                }
+                
+                // <+1104>
+                if (attribute.preservesValueInHistoryOnDeletion) {
+                    [set_1 addObject:name];
+                }
+                
+                if (!attribute.optional && (attribute.defaultValue == nil)) {
+                    // <+1152>
+                    [array_2 addObject:[NSString stringWithFormat:@"%@: %@", entity.name, attribute.name]];
+                }
+                
+                if (attribute.usesMergeableStorage) {
+                    [array_16 addObject:[NSString stringWithFormat:@"Attributes that use mergeable storage (%@: %@) are unsupported in CloudKit. Please file a radar to Core Data to request support.", entity.name, attribute.name]];
+                }
+            }];
+            
+            // <+740>
+            /*
+             __51-[PFCloudKitModelValidator validateEntities:error:]_block_invoke_2
+             */
+            [entity.relationshipsByName enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull name, NSRelationshipDescription * _Nonnull relationship, BOOL * _Nonnull stop) {
                 abort();
             }];
-            // <+740>
+            
+            // <+844>
             abort();
         }
     }
