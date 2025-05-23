@@ -422,6 +422,11 @@ __attribute__((objc_direct_members))
     return *(id *)addr;
 }
 
++ (NSString *)NSPersistentCloudKitContainerEncryptedAttributeKey {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSPersistentCloudKitContainerEncryptedAttributeKey"];
+    return *(id *)addr;
+}
+
 + (NSArray *)NSArray_EmptyArray {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSArray_EmptyArray"];
     return *(id *)addr;
