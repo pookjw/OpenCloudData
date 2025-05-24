@@ -18,7 +18,7 @@
 @implementation OCCloudKitModelValidator
 
 + (BOOL)enforceUniqueConstraintChecks {
-    //inlined from -[PFCloudKitModelValidator _validateManagedObjectModel:error:] <+856>~<+876>, <+1508>~<+1528>
+    // inlined from -[PFCloudKitModelValidator _validateManagedObjectModel:error:] <+856>~<+876>, <+1508>~<+1528>
     
     // __57+[PFCloudKitModelValidator enforceUniqueConstraintChecks]_block_invoke
     static BOOL enforceUniqueConstraintChecks = NO;
