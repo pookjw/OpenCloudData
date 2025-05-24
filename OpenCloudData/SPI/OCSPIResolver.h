@@ -83,6 +83,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (CKRecordType)PFMirroredManyToManyRelationship_ckRecordTypeForOrderedRelationships_:(Class)x0 x1:(NSArray<NSRelationshipDescription *> *)orderedRelationships;
 + (CKRecordType)PFMirroredManyToManyRelationship_ckRecordNameForOrderedRecordNames_:(Class)x0 x1:(NSArray<NSString *> *)orderedRecordNames;
 
++ (CKRecord *)PFCloudKitSchemaGenerator_newRepresentativeRecordForStaticFieldsInEntity_inZoneWithID_:(Class)x0 x1:(NSEntityDescription *)x1 x2:(CKRecordZoneID *)x2 NS_RETURNS_RETAINED;
+
 + (NSString *)NSCloudKitMirroringDelegateExportContextName;
 + (NSString *)NSCloudKitMirroringDelegateImportContextName;
 + (NSString *)PFCloudKitMetadataNeedsZoneFetchAfterClientMigrationKey;
@@ -112,10 +114,11 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)PFCloudKitFakeRecordNamePrefix;
 + (NSString *)NSCloudKitMirroringDelegateWillResetSyncNotificationName;
 + (NSString *)NSCloudKitMirroringDelegateDidResetSyncNotificationName;
-+ (NSString *)NSCloudKitMirroringDelegateResetSyncReasonKey;
++ (NSString *)NSPersistentHistoryTombstoneAttributes;
 
 + (NSArray *)NSArray_EmptyArray;
 + (NSSet *)NSSet_EmptySet;
++ (BOOL)z9dsptsiQ80etb9782fsrs98bfdle88;
 
 @end
 

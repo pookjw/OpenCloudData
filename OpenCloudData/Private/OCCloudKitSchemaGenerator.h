@@ -5,7 +5,8 @@
 //  Created by Jinwoo Kim on 5/7/25.
 //
 
-#import <Foundation/Foundation.h>
+#import <CloudKit/CloudKit.h>
+#import <CoreData/CoreData.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -13,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface OCCloudKitSchemaGenerator : NSObject
 + (id)representativeValueFor:(id)value __attribute__((objc_direct));
++ (CKRecord *)newRepresentativeRecordForStaticFieldsInEntity:(NSEntityDescription *)entity inZoneWithID:(CKRecordZoneID *)zoneID __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

@@ -19,10 +19,12 @@ NS_ASSUME_NONNULL_BEGIN
     OCCloudKitMirroringDelegateOptions *_options; // 0x20
     BOOL _supportsMergeableTransformable; // 0x28
 }
++ (BOOL)enforceUniqueConstraintChecks __attribute__((objc_direct));
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithManagedObjectModel:(NSManagedObjectModel *)managedObjectModel configuration:(NSString *)configuration mirroringDelegateOptions:(OCCloudKitMirroringDelegateOptions *)delegateOptions;
 - (BOOL)_validateManagedObjectModel:(NSManagedObjectModel *)managedObjectModel error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
+- (BOOL)validateEntities:(NSArray<NSEntityDescription *> *)entities error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

@@ -272,6 +272,11 @@ __attribute__((objc_direct_members))
     return ((id (*)(id))addr)(x0);
 }
 
++ (CKRecord *)PFCloudKitSchemaGenerator_newRepresentativeRecordForStaticFieldsInEntity_inZoneWithID_:(Class)x0 x1:(NSEntityDescription *)x1 x2:(CKRecordZoneID *)x2 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[PFCloudKitSchemaGenerator newRepresentativeRecordForStaticFieldsInEntity:inZoneWithID:]"];
+    return ((id (*)(Class, id, id))addr)(x0, x1, x2);
+}
+
 + (NSString *)NSCloudKitMirroringDelegateExportContextName {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateExportContextName"];
     return *(id *)addr;
@@ -422,6 +427,11 @@ __attribute__((objc_direct_members))
     return *(id *)addr;
 }
 
++ (NSString *)NSPersistentHistoryTombstoneAttributes {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSPersistentHistoryTombstoneAttributes"];
+    return *(id *)addr;
+}
+
 + (NSArray *)NSArray_EmptyArray {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSArray_EmptyArray"];
     return *(id *)addr;
@@ -430,6 +440,11 @@ __attribute__((objc_direct_members))
 + (NSSet *)NSSet_EmptySet {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSSet_EmptySet"];
     return *(id *)addr;
+}
+
++ (BOOL)z9dsptsiQ80etb9782fsrs98bfdle88 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_z9dsptsiQ80etb9782fsrs98bfdle88"];
+    return *(BOOL *)addr;
 }
 
 @end
