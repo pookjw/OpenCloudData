@@ -19,7 +19,6 @@
         _setupRequest = [setupRequest retain];
         _cloudKitSemaphore = dispatch_semaphore_create(0);
         _mirroringOptions = [mirroringOptions retain];
-        
         _storeMonitor = [_mirroringOptions.storeMonitorProvider createMonitorForObservedStore:observedStore inTransactionWithLabel:nil];
     }
     
