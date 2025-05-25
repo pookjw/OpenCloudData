@@ -9,8 +9,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-
 @interface OCCloudKitModelValidator : NSObject {
     @package NSManagedObjectModel *_model; // 0x8
     NSString *_configurationName; // 0x10

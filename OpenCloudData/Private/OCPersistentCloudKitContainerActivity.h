@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
-- (NSMutableDictionary *)createDictionaryRepresentation;
+- (NSMutableDictionary *)createDictionaryRepresentation NS_RETURNS_RETAINED;
 - (instancetype)_initWithIdentifier:(NSUUID *)identifier forStore:(NSString * _Nullable)storeIdentifier activityType:(NSUInteger)activityType;
 - (void)finishWithError:(NSError * _Nullable)error;
 @end

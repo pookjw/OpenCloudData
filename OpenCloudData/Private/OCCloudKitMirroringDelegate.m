@@ -19,7 +19,8 @@
 #import "OpenCloudData/Private/Import/OCCloudKitImporter.h"
 #import "OpenCloudData/Private/OCCloudKitModelValidator.h"
 #import "OpenCloudData/Private/OCCloudKitOptionsValidator.h"
-#import <objc/runtime.h>
+#import "OpenCloudData/Private/Request/OCCloudKitMirroringDelegateSetupRequestOptions.h"
+#include <objc/runtime.h>
 
 CK_EXTERN NSString * const CKIdentityUpdateNotification;
 
@@ -267,7 +268,7 @@ CK_EXTERN NSString * const CKIdentityUpdateNotification;
             {
                 // x8
                 OCCloudKitMirroringDelegateOptions *options = self->_options;
-                if (options == nil) {
+                if (options != nil) {
                     scheduler = options->_scheduler;
                     if (scheduler == nil) {
                         scheduler = [CKScheduler sharedScheduler];
@@ -448,7 +449,6 @@ CK_EXTERN NSString * const CKIdentityUpdateNotification;
     }];
 }
 
-// -[NSCloudKitMirroringDelegate _openTransactionWithLabel:assertionLabel:andExecuteWorkBlock:]
 - (void)_openTransactionWithLabel:(NSString *)label assertionLabel:(NSString *)assertionLabel andExecuteWorkBlock:(void (^)(OCCloudKitMirroringDelegateWorkBlockContext *context))executeWorkBlock __attribute__((objc_direct)) {
     /*
      self = x20
@@ -610,6 +610,228 @@ CK_EXTERN NSString * const CKIdentityUpdateNotification;
     }
     
     return YES;
+}
+
+- (void)persistentStoreCoordinator:(NSPersistentStoreCoordinator *)persistentStoreCoordinator didSuccessfullyAddPersistentStore:(__kindof NSPersistentStore *)persistentStore withDescription:(NSPersistentStoreDescription *)storeDescription {
+    // original : @"com.apple.coredata.cloudkit.store.added", @"CoreData: CloudKit Add Persistent Store"
+    /*
+     __108-[NSCloudKitMirroringDelegate persistentStoreCoordinator:didSuccessfullyAddPersistentStore:withDescription:]_block_invoke
+     self = sp + 0x28
+     persistentStore = sp + 0x30
+     persistentStoreCoordinator = sp + 0x38
+     */
+    [self _openTransactionWithLabel:@"com.pookjw.openclouddata.cloudkit.store.added" assertionLabel:@"OpenCloudData: CloudKit Add Persistent Store" andExecuteWorkBlock:^(OCCloudKitMirroringDelegateWorkBlockContext *context) {
+        [self observeChangesForStore:persistentStore inPersistentStoreCoordinator:persistentStoreCoordinator];
+    }];
+}
+
+- (void)observeChangesForStore:(NSSQLCore *)persistentStore inPersistentStoreCoordinator:(NSPersistentStoreCoordinator *)persistentStoreCoordinator {
+    // inlined from __108-[NSCloudKitMirroringDelegate persistentStoreCoordinator:didSuccessfullyAddPersistentStore:withDescription:]_block_invoke
+    /*
+     self = x19
+     persistentStore = x21
+     persistentStoreCoordinator = x22
+     */
+    // x20
+    NSSQLCore * _Nullable observedStore = self->_observedStore;
+    os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: Observing store: %@", __func__, __LINE__, self, persistentStore);
+    if (observedStore != nil) return;
+    
+    @autoreleasepool {
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(coordinatorWillRemoveStore:) name:NSPersistentStoreCoordinatorWillRemoveStoreNotification object:nil];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(storesDidChange:) name:NSPersistentStoreCoordinatorStoresDidChangeNotification object:nil];
+        
+        NSString *identifier = persistentStore.identifier;
+        // 기존값 release 없음
+        _observedStoreIdentifier = [identifier retain];
+        // x23 = x23 + 0xa8 (offset of _observedStoreIdentifier)
+        
+        // original : @"com.apple.coredata.cloudkit.activity.import"
+        _importActivityIdentifier = [[NSString stringWithFormat:@"%@.%@", @"com.pookjw.openclouddata.cloudkit.activity.import", identifier] retain];
+        // original : @"com.apple.coredata.cloudkit.activity.export"
+        _exportActivityIdentifier = [[NSString stringWithFormat:@"%@.%@", @"com.pookjw.openclouddata.cloudkit.activity.export", _observedStoreIdentifier] retain];
+        // original : @"com.apple.coredata.cloudkit.activity.setup"
+        _setupActivityIdentifier = [[NSString stringWithFormat:@"%@.%@", @"com.pookjw.openclouddata.cloudkit.activity.setup", _observedStoreIdentifier] retain];
+        // original : @"com.apple.coredata.cloudkit.%@.%@"
+        _activityGroupName = [[NSString stringWithFormat:@"com.pookjw.openclouddata.cloudkit.%@.%@", NSProcessInfo.processInfo.processName, _observedStoreIdentifier] retain];
+        
+        // <+588>
+        if (self.options.automaticallyScheduleImportAndExportOperations) {
+            // sp + 0x38
+            __weak OCCloudKitMirroringDelegate *weakSelf = self;
+            
+            @try {
+                /*
+                 __83-[NSCloudKitMirroringDelegate observeChangesForStore:inPersistentStoreCoordinator:]_block_invoke
+                 weakSelf = sp + 0x30
+                 */
+                [_scheduler registerActivityIdentifier:_exportActivityIdentifier handler:^(CKSchedulerActivity * _Nonnull activity, void (^ _Nonnull completionHandler)(long long)) {
+                    /*
+                     activity = x21
+                     completionHandler = x20
+                     */
+                    
+                    OCCloudKitMirroringDelegate *loaded = weakSelf;
+                    if (loaded == nil) {
+                        os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Got called back for an export activity but the mirroring delegate is gone.", __func__, __LINE__);
+                        return;
+                    }
+                    
+                    [loaded _scheduleAutomatedExportWithLabel:@"ExportActivity" activity:activity completionHandler:completionHandler];
+                }];
+            } @catch (NSException *exception) {
+                // <+1368>
+                NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:134422 userInfo:@{
+                    NSLocalizedFailureReasonErrorKey: @"CloudKit setup failed because it couldn't register a handler for the export activity. There is another instance of this persistent store actively syncing with CloudKit in this process.",
+                    NSURLErrorKey: persistentStore.URL,
+                    @"NSUnderlyingException": exception,
+                    @"activityIdentifier": _exportActivityIdentifier
+                }];
+                [self resetAfterError:error andKeepContainer:NULL];
+                [self tearDown:[NSString stringWithFormat:@"Error %@:%ld", error.domain, error.code]];
+                return;
+            }
+            
+            @try {
+                /*
+                 __83-[NSCloudKitMirroringDelegate observeChangesForStore:inPersistentStoreCoordinator:]_block_invoke.131
+                 weakSelf = x19 - 0x70
+                 */
+                [_scheduler registerActivityIdentifier:_importActivityIdentifier handler:^(CKSchedulerActivity * _Nonnull activity, void (^ _Nonnull completionHandler)(long long)) {
+                    /*
+                     activity = x20
+                     completionHandler = x21
+                     */
+                    
+                    OCCloudKitMirroringDelegate *loaded = weakSelf;
+                    if (loaded == nil) {
+                        os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Got called back for activity: %@, but the mirroring delegate is gone.", __func__, __LINE__, activity);
+                        return;
+                    }
+                    
+                    [loaded _scheduleAutomatedExportWithLabel:@"ImportActivity" activity:activity completionHandler:completionHandler];
+                }];
+            } @catch (NSException *exception) {
+                // <+1180>
+                NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:134422 userInfo:@{
+                    NSLocalizedFailureReasonErrorKey: @"CloudKit setup failed because it couldn't register a handler for the import activity. There is another instance of this persistent store actively syncing with CloudKit in this process.",
+                    NSURLErrorKey: persistentStore.URL,
+                    @"NSUnderlyingException": exception,
+                    @"activityIdentifier": _exportActivityIdentifier
+                }];
+                [self resetAfterError:error andKeepContainer:NULL];
+                [self tearDown:[NSString stringWithFormat:@"Error %@:%ld", error.domain, error.code]];
+                return;
+            }
+            
+            @try {
+                /*
+                 __83-[NSCloudKitMirroringDelegate observeChangesForStore:inPersistentStoreCoordinator:]_block_invoke.136
+                 self = sp + 0x80
+                 weakSelf = sp + 0x88
+                 */
+                [_scheduler registerActivityIdentifier:_setupActivityIdentifier handler:^(CKSchedulerActivity * _Nonnull activity, void (^ _Nonnull completionHandler)(long long)) {
+                    /*
+                     self(block) = x22
+                     activity = x20
+                     completionHandler = x21
+                     */
+                    
+                    // x19
+                    OCCloudKitMirroringDelegate *loaded = weakSelf;
+                    if (loaded == nil) {
+                        os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Got called back for activity: %@, but the mirroring delegate is gone.", __func__, __LINE__, activity);
+                        return;
+                    }
+                    
+                    /*
+                     __83-[NSCloudKitMirroringDelegate observeChangesForStore:inPersistentStoreCoordinator:]_block_invoke_2
+                     self = sp + 0x28
+                     activity = sp + 0x30
+                     completionHandler = sp + 0x38
+                     */
+                    dispatch_async(loaded->_cloudKitQueue, ^{
+                        [self _setUpCloudKitIntegration:activity];
+                        completionHandler(1);
+                    });
+                }];
+            } @catch (NSException *exception) {
+                // <+992>
+                NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:134422 userInfo:@{
+                    NSLocalizedFailureReasonErrorKey: @"CloudKit setup failed because it couldn't register a handler for the setup activity. There is another instance of this persistent store actively syncing with CloudKit in this process.",
+                    NSURLErrorKey: persistentStore.URL,
+                    @"NSUnderlyingException": exception,
+                    @"activityIdentifier": _exportActivityIdentifier
+                }];
+                [self resetAfterError:error andKeepContainer:NULL];
+                [self tearDown:[NSString stringWithFormat:@"Error %@:%ld", error.domain, error.code]];
+                return;
+            }
+        }
+        
+        // <+884>
+        [self _setUpCloudKitIntegration:nil];
+    }
+}
+
+- (void)coordinatorWillRemoveStore:(NSNotification *)notification {
+    abort();
+}
+
+- (void)storesDidChange:(NSNotification *)notification {
+    abort();
+}
+
+- (void)_setUpCloudKitIntegration:(CKSchedulerActivity *)activity {
+    /*
+     self = x20
+     activity = x21
+     */
+    // x19
+    OCCloudKitMirroringDelegateSetupRequestOptions *setupRequestOptions = [[OCCloudKitMirroringDelegateSetupRequestOptions alloc] init];
+    if (self.options.defaultOperationConfiguration != nil) {
+        setupRequestOptions.operationConfiguration = self.options.defaultOperationConfiguration;
+    }
+    // x21
+    OCCloudKitMirroringDelegateSetupRequest *request = [[OCCloudKitMirroringDelegateSetupRequest alloc] initWithActivity:activity options:setupRequestOptions completionBlock:nil];
+    [self beginActivitiesForRequest:request];
+    // sp + 0x8
+    NSError * _Nullable error = nil;
+    // x24
+    BOOL result = [_requestManager enqueueRequest:request error:&error];
+    
+    if (result) {
+        // <+200>
+        os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: Successfully enqueued setup request: %@", __func__, __LINE__, self, request);
+        [self checkAndExecuteNextRequest];
+    } else {
+        // <+360>
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Failed to enqueue setup request, this likely means one is already scheduled and this has collided: %@", __func__, __LINE__, self, error);
+    }
+    
+    // <+496>
+    [setupRequestOptions release];
+    [request release];
+}
+
+- (void)resetAfterError:(NSError *)error andKeepContainer:(const void *)keepContainer {
+    abort();
+}
+
+- (void)tearDown:(NSString *)string {
+    abort();
+}
+
+- (void)_scheduleAutomatedExportWithLabel:(NSString *)label activity:(CKSchedulerActivity *)activity completionHandler:(void (^)(long long))completionHandler {
+    abort();
+}
+
+- (void)addActivityVoucher:(OCPersistentCloudKitContainerActivityVoucher *)activityVoucher {
+    abort();
+}
+
+- (void)expireActivityVoucher:(OCPersistentCloudKitContainerActivityVoucher *)activityVoucher {
+    abort();
 }
 
 - (void)checkAndExecuteNextRequest {
@@ -913,6 +1135,30 @@ CK_EXTERN NSString * const CKIdentityUpdateNotification;
 }
 
 - (void)_importFinishedWithResult:(OCCloudKitMirroringResult *)result importer:(OCCloudKitImporter * _Nullable)importer __attribute__((objc_direct)) {
+    abort();
+}
+
+- (void)exporter:(nonnull OCCloudKitExporter *)exporter willScheduleOperations:(nonnull NSArray<__kindof CKOperation *> *)operations { 
+    abort();
+}
+
+- (void)applicationStateMonitorEnteredBackground:(nonnull PFApplicationStateMonitor *)applicationStateMonitor { 
+    abort();
+}
+
+- (void)applicationStateMonitorEnteredForeground:(nonnull PFApplicationStateMonitor *)applicationStateMonitor { 
+    abort();
+}
+
+- (void)applicationStateMonitorExpiredBackgroundActivityTimeout:(nonnull PFApplicationStateMonitor *)applicationStateMonitor { 
+    abort();
+}
+
+- (void)eventUpdated:(nonnull OCPersistentCloudKitContainerEvent *)event { 
+    abort();
+}
+
+- (void)publishActivity:(nonnull __kindof OCPersistentCloudKitContainerActivity *)activity { 
     abort();
 }
 

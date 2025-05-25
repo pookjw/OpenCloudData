@@ -14,9 +14,12 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface OCCloudKitMirroringRequest : NSPersistentStoreRequest {
+    NSUUID *_requestIdentifier; // 0x10
+    OCCloudKitMirroringRequestOptions *_options; // 0x18
+    id _requestCompletionBlock; // 0x20
     @package BOOL _deferredByBackgroundTimeout; // 0x28
-    NSMutableArray *_containerBlocks;
-    BOOL _isContainerRequest;
+    NSMutableArray *_containerBlocks; // 0x30
+    BOOL _isContainerRequest; // 0x38
     @package CKSchedulerActivity *_schedulerActivity; // 0x40
     @package OCPersistentCloudKitContainerActivity *_activity; // 0x48
 }
@@ -28,6 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (copy, nonatomic, readonly, nullable) OCCloudKitMirroringRequestOptions *options;
 @property (copy, nonatomic, readonly) void (^ requestCompletionBlock)(OCCloudKitMirroringResult * result);
 @property (assign, nonatomic, readonly, direct) BOOL deferredByBackgroundTimeout;
+@property (assign, nonatomic, readonly, direct) BOOL isContainerRequest;
 @property (retain, nonatomic, nullable, direct) CKSchedulerActivity *schedulerActivity;
 @property (retain, nonatomic, nullable, direct) OCPersistentCloudKitContainerActivity *activity;
 

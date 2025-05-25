@@ -52,11 +52,11 @@ NS_ASSUME_NONNULL_BEGIN
     NSArray<OCPersistentCloudKitContainerActivityVoucher *> *_activityVouchers; // 0x90
 }
 @property (weak, nonatomic) NSObject<OCCloudKitMirroringDelegateProgressProvider> *progressProvider;
-@property (retain, nonatomic) CKOperationConfiguration *defaultOperationConfiguration;
-@property (retain, nonatomic) NSString *containerIdentifier;
-@property (retain, nonatomic) NSNumber *ckAssetThresholdBytes;
+@property (retain, nonatomic, nullable) CKOperationConfiguration *defaultOperationConfiguration;
+@property (retain, nonatomic, nullable) NSString *containerIdentifier;
+@property (retain, nonatomic, nullable) NSNumber *ckAssetThresholdBytes;
 @property (nonatomic) BOOL initializeSchema;
-@property (retain, nonatomic) CKContainerOptions *containerOptions;
+@property (retain, nonatomic, nullable) CKContainerOptions *containerOptions;
 @property (nonatomic) BOOL useEncryptedStorage;
 @property (nonatomic) BOOL useDeviceToDeviceEncryption;
 @property (retain, nonatomic) NSNumber *operationMemoryThresholdBytes;

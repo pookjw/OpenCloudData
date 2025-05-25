@@ -19,6 +19,7 @@
 #import "OpenCloudData/Private/Request/OCCloudKitMirroringInitializeSchemaRequest.h"
 #import "OpenCloudData/Private/Log.h"
 #import "OpenCloudData/SPI/CoreData/NSCloudKitMirroringDelegate.h"
+#import "OpenCloudData/SPI/OCSPIResolver.h"
 #import <xpc/xpc.h>
 #import <CoreFoundation/CoreFoundation.h>
 #import <objc/runtime.h>
@@ -556,7 +557,21 @@ CF_EXPORT CF_RETURNS_RETAINED CFTypeRef _CFXPCCreateCFObjectFromXPCObject(xpc_ob
 }
 
 - (void)publishActivity:(__kindof OCPersistentCloudKitContainerActivity *)activity {
-    // TODO
+    /*
+     self = self
+     activity = x19
+     */
+    @autoreleasepool {
+        // x22
+        NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
+        // x19
+        NSMutableDictionary *rep = [activity createDictionaryRepresentation];
+        [dictionary setObject:rep forKey:@"activityDictionary"];
+        
+        [NSNotificationCenter.defaultCenter postNotificationName:[OCSPIResolver NSPersistentCloudKitContainerActivityChangedNotificationName] object:self userInfo:dictionary];
+        [dictionary release];
+        [rep release];
+    }
 }
 
 @end

@@ -219,7 +219,7 @@ NSArray<Class> * _oc_PFModelMap_ancillaryModelFactoryClasses_custom(Class self, 
      connection = sp + 0x28
      */
     
-    NSManagedObjectModel * _Nullable result = NO;
+    NSManagedObjectModel * _Nullable result = nil;
     // sp + 0x8
     @autoreleasepool {
         // x19 / sp + 0x10

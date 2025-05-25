@@ -115,6 +115,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)NSCloudKitMirroringDelegateWillResetSyncNotificationName;
 + (NSString *)NSCloudKitMirroringDelegateDidResetSyncNotificationName;
 + (NSString *)NSPersistentHistoryTombstoneAttributes;
++ (NSString *)NSPersistentCloudKitContainerActivityChangedNotificationName;
 
 + (NSArray *)NSArray_EmptyArray;
 + (NSSet *)NSSet_EmptySet;

@@ -432,6 +432,11 @@ __attribute__((objc_direct_members))
     return *(id *)addr;
 }
 
++ (NSString *)NSPersistentCloudKitContainerActivityChangedNotificationName {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSPersistentCloudKitContainerActivityChangedNotificationName"];
+    return *(id *)addr;
+}
+
 + (NSArray *)NSArray_EmptyArray {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSArray_EmptyArray"];
     return *(id *)addr;

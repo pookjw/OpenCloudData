@@ -5,16 +5,14 @@
 //  Created by Jinwoo Kim on 4/26/25.
 //
 
-#import <Foundation/Foundation.h>
-
-#warning TODO
+#import "OpenCloudData/SPI/CoreData/_PFClassicBackgroundRuntimeVoucher.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface OCCloudKitMirroringDelegateWorkBlockContext : NSObject {
     @package NSString *_transactionLabel; // 0x8
     @package NSString *_powerAssertionLabel; // 0x10
-    id _runtimeVoucher; // 0x18
+    _PFClassicBackgroundRuntimeVoucher *_runtimeVoucher; // 0x18
     NSUInteger _powerAssertionID; // 0x20
 }
 - (instancetype)initWithTransactionLabel:(NSString *)transactionLabel powerAssertionLabel:(NSString *)powerAssertionLabel;

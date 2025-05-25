@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 #warning TODO
 
 @interface OCCloudKitMirroringRequestManager : NSObject {
-    OCCloudKitMirroringImportRequest *_pendingImportRequest; // 0x08
+    OCCloudKitMirroringImportRequest *_pendingImportRequest; // 0x8
     OCCloudKitMirroringExportRequest *_pendingExportRequest; // 0x10
     OCCloudKitMirroringDelegateSetupRequest *_pendingSetupRequest; // 0x18
     OCCloudKitMirroringDelegateResetRequest *_pendingDelegateResetRequest; // 0x20

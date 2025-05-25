@@ -13,6 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
     NSArray<NSURL *> *_shareURLsToAccept; // 0x50
     NSArray *_shareMetadatasToAccept; // 0x58
 }
+@property (copy, nonatomic, direct) NSArray<NSURL *> *shareURLsToAccept;
+@property (copy, nonatomic, direct) NSArray *shareMetadatasToAccept;
 @end
 
 NS_ASSUME_NONNULL_END

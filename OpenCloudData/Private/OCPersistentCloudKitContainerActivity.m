@@ -81,7 +81,7 @@
     
     dictionary[@"finished"] = @(_endDate != nil);
     
-    return [dictionary autorelease];
+    return dictionary;
 }
 
 - (void)finishWithError:(NSError *)error {

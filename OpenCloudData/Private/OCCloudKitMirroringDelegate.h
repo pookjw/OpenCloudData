@@ -19,6 +19,7 @@
 #import "OpenCloudData/Private/OCCloudKitMirroringRequestManager.h"
 #import "OpenCloudData/Private/OCCloudKitMirroringActivityVoucherManager.h"
 #import "OpenCloudData/Public/OCPersistentCloudKitContainerOptions.h"
+#import "OpenCloudData/SPI/CloudKit/CKSchedulerActivity.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -94,6 +95,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)removeNotificationRegistrations __attribute__((objc_direct));
 - (void)beginActivitiesForRequest:(__kindof OCCloudKitMirroringRequest *)request __attribute__((objc_direct));
 - (void)checkAndExecuteNextRequest __attribute__((objc_direct));
+- (void)observeChangesForStore:(NSSQLCore *)persistentStore inPersistentStoreCoordinator:(NSPersistentStoreCoordinator *)persistentStoreCoordinator __attribute__((objc_direct));
+- (void)_setUpCloudKitIntegration:(CKSchedulerActivity * _Nullable)activity __attribute__((objc_direct));
+
+- (void)resetAfterError:(NSError *)error andKeepContainer:(const void * _Nullable /* unused */)keepContainer __attribute__((objc_direct));
+- (void)tearDown:(NSString *)string __attribute__((objc_direct));
+- (void)_scheduleAutomatedExportWithLabel:(NSString *)label activity:(CKSchedulerActivity *)activity completionHandler:(void (^)(long long))completionHandler __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END
