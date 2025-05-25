@@ -5,7 +5,6 @@
 //  Created by Jinwoo Kim on 4/27/25.
 //
 
-#import <CoreData/CoreData.h>
 #import "OpenCloudData/SPI/CloudKit/CKContainerOptions.h"
 #import "OpenCloudData/SPI/CloudKit/CKContainerID.h"
 

@@ -20,6 +20,7 @@
 #import "OpenCloudData/Private/OCCloudKitModelValidator.h"
 #import "OpenCloudData/Private/OCCloudKitOptionsValidator.h"
 #import "OpenCloudData/Private/Request/OCCloudKitMirroringDelegateSetupRequestOptions.h"
+#import "OpenCloudData/Private/OCCloudKitSetupAssistant.h"
 #include <objc/runtime.h>
 
 CK_EXTERN NSString * const CKIdentityUpdateNotification;
@@ -1107,7 +1108,78 @@ CK_EXTERN NSString * const CKIdentityUpdateNotification;
 }
 
 - (void)_performSetupRequest:(OCCloudKitMirroringDelegateSetupRequest *)request __attribute__((objc_direct)) {
-    abort();
+    /*
+     self = x19
+     request = x20
+     */
+    if (request.requestCompletionBlock != nil) {
+        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Setup request executed with a completion block that will never be called: %@\n", request);
+        os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Setup request executed with a completion block that will never be called: %@\n", request);
+    }
+    
+    // <+104>
+    // original : @"com.apple.coredata.cloudkit.setup", @"CoreData: CloudKit Setup"
+    /*
+     __52-[NSCloudKitMirroringDelegate _performSetupRequest:]_block_invoke
+     self = sp + 0x20
+     request = sp + 0x28
+     */
+    [self _openTransactionWithLabel:@"com.pookjw.openclouddata.cloudkit.setup" assertionLabel:@"OpenCloudData: CloudKit Setup" andExecuteWorkBlock:^(OCCloudKitMirroringDelegateWorkBlockContext *context) {
+        /*
+         self(block) = x22
+         context = x21
+         */
+        // x19
+        NSSQLCore * _Nullable observedStore = [self->_observedStore retain];
+        // x20
+        NSObject<OCCloudKitMirroringDelegateProgressProvider> *progressProvider = [self.options.progressProvider retain];
+        
+        if (self->_successfullyInitialized) {
+            os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: Asked to set up but already successfully initialized: %@", __func__, __LINE__, self, request);
+            
+            // <+288>
+            // sp, #0x88
+            NSError * _Nullable error = nil;
+            // x24
+            OCCloudKitStoreMonitor *monitor = [self.options.storeMonitorProvider createMonitorForObservedStore:observedStore inTransactionWithLabel:context->_transactionLabel];
+            // x23
+            OCPersistentCloudKitContainerEvent * _Nullable event = [OCCKEvent beginEventForRequest:request withMonitor:monitor error:&error];
+            if (event == nil) {
+                // <+1940>
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Failed to create setup event: %@", __func__, __LINE__, self, error);
+            } else {
+                // <+364>
+                [progressProvider eventUpdated:event];
+            }
+            
+            [monitor release];
+            // <+3112>
+            // x24
+            OCCloudKitMirroringResult *result = [[OCCloudKitMirroringResult alloc] initWithRequest:request storeIdentifier:self->_observedStoreIdentifier success:self->_successfullyInitialized madeChanges:NO error:self->_lastInitializationError];
+            [self _finishedRequest:request withResult:result];
+            // <+3436>
+            [result release];
+            [observedStore release];
+            [progressProvider release];
+            return;
+        }
+        
+        // <+380>
+        OCPersistentCloudKitContainerActivityVoucher * _Nullable voucher = [_voucherManager usableVoucherForEventType:0];
+        if (voucher != nil) {
+            request.options.vouchers = @[voucher];
+        }
+        
+        // <+440>
+        // x24
+        OCCloudKitSetupAssistant *setupAssistant = [[OCCloudKitSetupAssistant alloc] initWithSetupRequest:request mirroringOptions:self.options observedStore:observedStore];
+        
+        // sp + 0x68
+        NSSQLCore * _Nullable observedStore_2 = nil;
+        BOOL result = [setupAssistant _initializeCloudKitForObservedStore:&observedStore_2 andNoteMetadataInitialization:&_setupFinishedMetadataInitialization];
+        
+        abort();
+    }];
 }
 
 - (void)_performDelegateResetRequest:(OCCloudKitMirroringDelegateResetRequest *)request __attribute__((objc_direct)) {
@@ -1159,6 +1231,10 @@ CK_EXTERN NSString * const CKIdentityUpdateNotification;
 }
 
 - (void)publishActivity:(nonnull __kindof OCPersistentCloudKitContainerActivity *)activity { 
+    abort();
+}
+
+- (void)_finishedRequest:(OCCloudKitMirroringRequest *)request withResult:(OCCloudKitMirroringResult *)result {
     abort();
 }
 

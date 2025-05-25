@@ -11,7 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface OCCloudKitStoreMonitorProvider : NSObject
-- (OCCloudKitStoreMonitor *)createMonitorForObservedStore:(NSSQLCore *)observedStore inTransactionWithLabel:(NSString *)transactionWithLabel __attribute__((objc_direct)) NS_RETURNS_RETAINED;
+- (OCCloudKitStoreMonitor *)createMonitorForObservedStore:(NSSQLCore *)observedStore inTransactionWithLabel:(NSString * _Nullable)transactionWithLabel __attribute__((objc_direct)) NS_RETURNS_RETAINED;
 @end
 
 NS_ASSUME_NONNULL_END

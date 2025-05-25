@@ -101,6 +101,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)resetAfterError:(NSError *)error andKeepContainer:(const void * _Nullable /* unused */)keepContainer __attribute__((objc_direct));
 - (void)tearDown:(NSString *)string __attribute__((objc_direct));
 - (void)_scheduleAutomatedExportWithLabel:(NSString *)label activity:(CKSchedulerActivity *)activity completionHandler:(void (^)(long long))completionHandler __attribute__((objc_direct));
+- (void)_finishedRequest:(OCCloudKitMirroringRequest *)request withResult:(OCCloudKitMirroringResult *)result __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END
