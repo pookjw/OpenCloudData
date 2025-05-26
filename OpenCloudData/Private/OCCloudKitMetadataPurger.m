@@ -999,10 +999,11 @@
             os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
             if (error != NULL) {
-                *error = [_error autorelease];
+                *error = [[_error retain] autorelease];
             }
         }
         
+        [_error release];
         [dictionary release];
         return _succeed;
     }

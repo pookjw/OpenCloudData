@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithSetupRequest:(OCCloudKitMirroringDelegateSetupRequest *)setupRequest mirroringOptions:(OCCloudKitMirroringDelegateOptions *)mirroringOptions observedStore:(NSSQLCore *)observedStore;
-- (BOOL)_initializeCloudKitForObservedStore:(NSSQLCore * _Nullable * _Nonnull)observedStorePtr andNoteMetadataInitialization:(BOOL *)metadataInitializationPtr __attribute__((objc_direct));
+- (BOOL)_initializeCloudKitForObservedStore:(NSError * _Nullable * _Nonnull)observedStorePtr andNoteMetadataInitialization:(BOOL *)metadataInitializationPtr __attribute__((objc_direct));
 - (void)beginActivityForPhase:(NSUInteger)phase __attribute__((objc_direct));
 - (void)endActivityForPhase:(NSUInteger)phase withError:(NSError * _Nullable)error __attribute__((objc_direct));
 @end
