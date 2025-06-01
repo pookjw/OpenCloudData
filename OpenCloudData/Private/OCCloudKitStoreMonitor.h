@@ -22,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
     @package NSString *_storeIdentifier; // 0x30
 }
 @property (assign, nonatomic, readonly, direct) BOOL declaredDead;
+@property (retain, nonatomic, readonly, direct) dispatch_group_t monitorGroup;
 @property (weak, nonatomic, readonly, direct) NSPersistentStoreCoordinator *monitoredCoordinator;
 @property (weak, nonatomic, readonly, direct) NSPersistentStore *monitoredStore;
 @property (retain, nonatomic, readonly, direct) NSString *storeIdentifier;

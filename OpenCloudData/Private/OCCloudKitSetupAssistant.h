@@ -25,12 +25,18 @@ NS_ASSUME_NONNULL_BEGIN
     OCCloudKitMirroringDelegateSetupRequest *_setupRequest; // 0x48
     CKRecordID *_currentUserRecordID; // 0x50
 }
+@property (retain, nonatomic, readonly, direct) dispatch_semaphore_t cloudKitSemaphore;
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithSetupRequest:(OCCloudKitMirroringDelegateSetupRequest *)setupRequest mirroringOptions:(OCCloudKitMirroringDelegateOptions *)mirroringOptions observedStore:(NSSQLCore *)observedStore;
 - (BOOL)_initializeCloudKitForObservedStore:(NSError * _Nullable * _Nonnull)observedStorePtr andNoteMetadataInitialization:(BOOL *)metadataInitializationPtr __attribute__((objc_direct));
 - (void)beginActivityForPhase:(NSUInteger)phase __attribute__((objc_direct));
 - (void)endActivityForPhase:(NSUInteger)phase withError:(NSError * _Nullable)error __attribute__((objc_direct));
+- (BOOL)_initializeAssetStorageURLError:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
+- (BOOL)_checkAccountStatus:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
+- (BOOL)_checkUserIdentity:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
+- (BOOL)_recoverFromManateeIdentityLossIfNecessary:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
+- (BOOL)_createZoneIfNecessary:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END
