@@ -395,7 +395,7 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
     // sp, #0xe0
     __block NSError * _Nullable _error = nil;
     // sp + 0x20
-    NSURL * _Nullable largeBlobDirectoryURL = nil;
+    __block NSURL * _Nullable largeBlobDirectoryURL = nil;
     // x25
     OCCloudKitStoreMonitor *storeMonitor = _storeMonitor;
     
@@ -408,14 +408,105 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
      */
     [_storeMonitor performBlock:^{
         // self(block) = x20
+        // sp + 0x88
+        NSError * _Nullable __error_1 = nil;
         // x23
         NSPersistentStore *store = [storeMonitor retainedMonitoredStore];
         
-#warning TODO
         if (store == nil) {
-            
+            _succeed = NO;
+            _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134403 userInfo:@{
+                NSLocalizedFailureErrorKey: @"Failed to initialize the asset storage url because the store was removed from the coordinator."
+            }];
+            return;
         }
-        abort();
+        
+        // <+68>
+        // x24
+        NSPersistentStoreCoordinator *monitoredCoordinator = [storeMonitor.monitoredCoordinator retain];
+        largeBlobDirectoryURL = [[OCCloudKitSerializer assetStorageDirectoryURLForStore:store] retain];
+        
+        if (largeBlobDirectoryURL == nil) {
+            // <+788>
+            _succeed = NO;
+            _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134403 userInfo:@{
+                NSLocalizedFailureErrorKey: [NSString stringWithFormat:@"Failed to create largeBlobDirectoryURL with observed store: %@", store]
+            }];
+            return;
+        }
+        
+        // <+140>
+        // x22
+        NSFileManager *fileManager = [NSFileManager.defaultManager retain];
+        BOOL isDirectory = NO;
+        BOOL exists = [fileManager fileExistsAtPath:largeBlobDirectoryURL.path isDirectory:&isDirectory];
+        
+        if (!exists) {
+            // <+960>
+            _succeed = [fileManager createDirectoryAtURL:largeBlobDirectoryURL withIntermediateDirectories:YES attributes:nil error:&__error_1];
+            
+            if (!_succeed) {
+                _error = [__error_1 retain];
+                [fileManager release];
+                [monitoredCoordinator release];
+                [store release];
+                return;
+            }
+            
+            // <+1048>
+            _succeed = [largeBlobDirectoryURL setResourceValues:@{NSURLIsExcludedFromBackupKey: @YES} error:&__error_1];
+            if (!_succeed) {
+                [__error_1 retain];
+                [fileManager release];
+                [monitoredCoordinator release];
+                [store release];
+                return;
+            }
+            
+            // <+1156>
+        } else {
+            // <+228>
+            // x23
+            NSArray<NSString *> *subpaths = [fileManager subpathsAtPath:largeBlobDirectoryURL.path];
+            // sp, #0x78
+            NSError * _Nullable __error_2 = nil;
+            
+            for (NSString *subpath in subpaths) {
+                // x27
+                NSURL *appendedURL = [largeBlobDirectoryURL URLByAppendingPathComponent:subpath];
+                BOOL result = [fileManager removeItemAtURL:appendedURL error:&__error_2];
+                if (result) continue;
+                
+                int ulResult = unlink(appendedURL.path.fileSystemRepresentation);
+                if (ulResult != 0) {
+                    // <+408>
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to asset file (and unlink:%d) at url: %@\n%@", __func__, __LINE__, *__error(), appendedURL, __error_2);
+                }
+            }
+            
+            // <+624>
+            if (!_succeed) {
+                // 불릴 일은 없을듯? __error_2는 for-loop 안에서만 쓰임
+                [__error_1 retain];
+                [fileManager release];
+                [monitoredCoordinator release];
+                [store release];
+                return;
+            }
+            // <+1156>
+        }
+        
+        // <+1156>
+        // x19
+        NSURL *oldURL = [OCCloudKitSerializer oldAssetStorageDirectoryURLForStore:store];
+        if ([fileManager fileExistsAtPath:oldURL.path]) {
+            _succeed = [fileManager removeItemAtURL:oldURL error:&__error_1];
+        }
+        
+        [__error_1 retain];
+        [fileManager release];
+        [monitoredCoordinator release];
+        [store release];
     }];
     
     [self endActivityForPhase:6 withError:_error];
@@ -462,13 +553,42 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
     // <+744>
     /*
      __48-[PFCloudKitSetupAssistant _checkAccountStatus:]_block_invoke
-     storeMonitor = sp + 0x100
-     _error = sp + 0x108
-     userIdentity = sp + 0x110
-     _succeed = sp + 0x118
+     storeMonitor = sp + 0x100 = x20 + 0x20
+     _error = sp + 0x108 = x20 + x28
+     userIdentity = sp + 0x110 = x20 + 0x30
+     _succeed = sp + 0x118 = x20 + 0x38
      */
     [storeMonitor performBlock:^{
-        abort();
+        // self(block) = x20
+        // x19
+        NSPersistentStore *store = [storeMonitor retainedMonitoredStore];
+        
+        if (store == nil) {
+            _succeed = NO;
+            _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
+                NSLocalizedFailureErrorKey: @"The mirroring delegate could not initialize because it's store was removed from the coordinator."
+            }];
+            return;
+        }
+        
+        // x21
+        NSManagedObjectContext *managedObjectContext = [storeMonitor newBackgroundContextForMonitoredCoordinator];
+        managedObjectContext.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateSetupAuthor];
+        
+        /*
+         __48-[PFCloudKitSetupAssistant _checkAccountStatus:]_block_invoke_2
+         store = sp + 0x20
+         managedObjectContext = sp + 0x28
+         userIdentity = sp + 0x30
+         _error = sp + 0x38
+         _succeed = sp + 0x40
+         */
+        [managedObjectContext performBlockAndWait:^{
+            abort();
+        }];
+        
+        [managedObjectContext release];
+        [store release];
     }];
     
     if (!_succeed) {
