@@ -13,8 +13,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#warning TODO
-
 @interface OCCloudKitMetadataModelMigrator : NSObject {
     NSSQLCore *_store; // 0x8
     NSManagedObjectContext *_metadataContext; // 0x10

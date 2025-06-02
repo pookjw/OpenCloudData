@@ -11,6 +11,10 @@
 #import "OpenCloudData/SPI/CloudKit/CKModifyRecordsOperation+Private.h"
 #import "OpenCloudData/Private/OCCloudKitSerializer.h"
 #import "OpenCloudData/SPI/OCSPIResolver.h"
+#import "OpenCloudData/Private/OCCloudKitMetadataModel.h"
+#import "OpenCloudData/Private/Model/OCCKEvent.h"
+#import "OpenCloudData/SPI/CoreData/_PFRoutines.h"
+#include <objc/runtime.h>
 
 CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
 
@@ -61,45 +65,25 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
      */
     // w23
     BOOL skipCloudKitSetup = self->_mirroringOptions.skipCloudKitSetup;
-    // sp, #0x20
-    __block BOOL _succeed = YES;
-    // sp, #0xe0
-    __block NSError * _Nullable _error = nil;
     
-    [self beginActivityForPhase:1];
+    BOOL _succeed = YES;
+    NSError * _Nullable _error = nil;
     
-    OCCloudKitStoreMonitor *storeMonitor = _storeMonitor;
-    /*
-     __56-[PFCloudKitSetupAssistant _checkAndInitializeMetadata:]_block_invoke
-     storeMonitor = sp + 0x170
-     self = sp + 0x178
-     _succeed = sp + 0x180
-     _error = sp + 0x188
-     */
-    [storeMonitor performBlock:^{
-        abort();
-    }];
-    
-    [self endActivityForPhase:1 withError:_error];
+    // <+96>
+    _succeed = [self _checkAndInitializeMetadata:&_error];
+    // <+348>
     
     if (!_succeed) {
-        // <+276>
-        NSError * _Nullable __error = [[_error retain] autorelease];
-        
-        if (__error == nil) {
+        if (_error == nil) {
             // <+900>
             os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
             os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
         } else {
-            if (error != NULL) *error = __error;
+            if (error != NULL) *error = _error;
         }
         
         return NO;
     }
-    
-    // <+300>
-    [_error release];
-    _error = nil;
     
     if (skipCloudKitSetup) {
         // <+372>
@@ -119,7 +103,7 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
     
     // <+556>
     _succeed = [self _checkAccountStatus:&_error];
-    // <+1936>
+    // <+193<+796>6>
     if (!_succeed) {
         if (_error == nil) {
             os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
@@ -190,6 +174,218 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
     [activity release];
 }
 
+- (BOOL)_checkAndInitializeMetadata:(NSError * _Nullable *)error {
+    // inlined from -[PFCloudKitSetupAssistant _initializeCloudKitForObservedStore:andNoteMetadataInitialization:] <+96>~<+348>
+    // sp, #0x20
+    __block BOOL _succeed = YES;
+    // sp, #0xe0
+    __block NSError * _Nullable _error = nil;
+    
+    [self beginActivityForPhase:1];
+    
+    OCCloudKitStoreMonitor *storeMonitor = _storeMonitor;
+    /*
+     __56-[PFCloudKitSetupAssistant _checkAndInitializeMetadata:]_block_invoke
+     storeMonitor = sp + 0x170 = x20 + 0x20
+     self = sp + 0x178 = x20 + 0x28
+     _succeed = sp + 0x180 = x20 + 0x30
+     _error = sp + 0x188 = x20 + 0x38
+     */
+    [storeMonitor performBlock:^{
+        // self = x20
+        // x19
+        NSSQLCore *store = [storeMonitor retainedMonitoredStore];
+        if (store == nil) {
+            // <+432>
+            _succeed = NO;
+            _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
+                NSLocalizedFailureReasonErrorKey: @"The mirroring delegate could not initialize because it's store was removed from the coordinator."
+            }];
+            return;
+        }
+        
+        // <+72>
+        // x21
+        NSPersistentStore *monitoredStore = [storeMonitor.monitoredStore retain];
+        // x22
+        NSManagedObjectContext *managedObjectContext = [storeMonitor newBackgroundContextForMonitoredCoordinator];
+        managedObjectContext.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateSetupAuthor];
+        
+        /*
+         __56-[PFCloudKitSetupAssistant _checkAndInitializeMetadata:]_block_invoke_2
+         store = sp + 0x28 = x19 + 0x20
+         managedObjectContext = sp + 0x30 = x19 + 0x28
+         self = sp + 0x38 = x19 + 0x30
+         */
+        [managedObjectContext performBlockAndWait:^{
+            // self(block) = x19
+            if ([OCSPIResolver _PFRoutines__isInMemoryStore_:objc_lookUpClass("_PFRoutines") x1:store]) {
+                return;
+            }
+            
+            // sp, #0x8
+            __block NSError * _Nullable __error = nil;
+            BOOL result = [managedObjectContext setQueryGenerationFromToken:NSQueryGenerationToken.currentQueryGenerationToken error:&__error];
+            
+            if (!result) {
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Unable to set query generation on moc: %@", __func__, __LINE__, self, __error);
+            }
+        }];
+        
+        _succeed = [OCCloudKitMetadataModel checkAndRepairSchemaOfStore:store withManagedObjectContext:managedObjectContext error:&_error];
+        
+        if (!_succeed) {
+            [_error retain];
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to initialize CloudKit metadata: %@", __func__, __LINE__, _error);
+            [managedObjectContext release];
+            [monitoredStore release];
+            [store release];
+            return;
+        }
+        
+        // <+256>
+        _succeed = [self _checkAndTruncateEventHistoryIfNeededWithManagedObjectContext:managedObjectContext error:&_error];
+        
+        // <+656>
+        if (!_succeed) {
+            _succeed = NO;
+            [_error retain];
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to initialize CloudKit metadata: %@", __func__, __LINE__, _error);
+            [managedObjectContext release];
+            [monitoredStore release];
+            [store release];
+            return;
+        }
+        
+        // x23
+        OCPersistentCloudKitContainerEvent *event = [OCCKEvent beginEventForRequest:_setupRequest withMonitor:storeMonitor error:&_error];
+        
+        if (event == nil) {
+            _succeed = NO;
+            [_error retain];
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Failed to initialize CloudKit metadata: %@", __func__, __LINE__, _error);
+            [managedObjectContext release];
+            [monitoredStore release];
+            [store release];
+            return;
+        }
+        
+        _setupEvent = [event retain];
+        [_mirroringOptions.progressProvider eventUpdated:event];
+        [event release];
+        
+        [managedObjectContext release];
+        [monitoredStore release];
+        [store release];
+    }];
+    
+    [self endActivityForPhase:1 withError:_error];
+    
+    if (!_succeed) {
+        // <+276>
+        if (_error == nil) {
+            // <+900>
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            *error = [[_error retain] autorelease];
+        }
+        
+        // <+300>
+        [_error release];
+        _error = nil;
+        return NO;
+    }
+    
+    // <+300>
+    [_error release];
+    _error = nil;
+    return YES;
+}
+
+- (BOOL)_checkAndTruncateEventHistoryIfNeededWithManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable *)error {
+    // inlined from __56-[PFCloudKitSetupAssistant _checkAndInitializeMetadata:]_block_invoke <+256>~<+652>
+    // managedObjectContext = x22
+    // sp, #0x60
+    __block NSError * _Nullable _error = nil;
+    // sp, #0x40
+    __block BOOL _succeed = YES;
+    
+    /*
+     __96-[PFCloudKitSetupAssistant _checkAndTruncateEventHistoryIfNeededWithManagedObjectContext:error:]_block_invoke
+     managedObjectContext = x29 - 0x80 = x19 + 0x20
+     _error = x29 - 0x78 = x19 + 0x28
+     _succeed = x29 - 0x70 = x19 + 0x30
+     */
+    [managedObjectContext performBlockAndWait:^{
+        // self(block) = x19
+        @try {
+            // x20
+            NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:OCCKEvent.entityPath];
+            
+            if (managedObjectContext == nil) return;
+            
+            NSInteger count = [OCSPIResolver NSManagedObjectContext__countForFetchRequest__error_:managedObjectContext x1:fetchRequest x2:&_error];
+            
+            if (count == NSNotFound) {
+                _succeed = NO;
+                [_error retain];
+                return;
+            }
+            
+            // <+148>
+            if (count <= 20000L) {
+                return;
+            }
+            
+            // <+160>
+            fetchRequest.fetchLimit = (count - 10000L);
+            fetchRequest.resultType = NSManagedObjectIDResultType;
+            fetchRequest.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"SELF" ascending:YES]];
+            // x20
+            NSArray<NSManagedObjectID *> *objectIDs = [managedObjectContext executeFetchRequest:fetchRequest error:&_error];
+            
+            if (objectIDs == nil) {
+                // <+388>
+                _succeed = NO;
+                [_error retain];
+                return;
+            }
+            
+            // x20
+            NSBatchDeleteRequest *deleteRequest = [[NSBatchDeleteRequest alloc] initWithObjectIDs:objectIDs];
+            deleteRequest.resultType = NSBatchDeleteResultTypeStatusOnly;
+            
+            _succeed = ((NSNumber *)((NSBatchDeleteResult *)[managedObjectContext executeRequest:deleteRequest error:&_error])).boolValue;
+            if (!_succeed) {
+                [_error retain];
+            }
+            
+            [deleteRequest release];
+        } @catch (NSException *exception) {
+            _succeed = NO;
+            _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{
+                @"NSUnderlyingException": exception,
+                NSLocalizedFailureErrorKey: @"Setup failed because an unhandled exception was caught during event history truncation."
+            }];
+        }
+    }];
+    
+    if (_succeed) {
+        if (_error == nil) {
+            // <+900>
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            *error = [[_error retain] autorelease];
+        }
+    }
+    
+    [_error release];
+    _error = nil;
+    return _succeed;
+}
+
 - (BOOL)_initializeAssetStorageURLError:(NSError * _Nullable * _Nullable)error {
     // inlined from -[PFCloudKitSetupAssistant _initializeCloudKitForObservedStore:andNoteMetadataInitialization:] <+372>~<+1196>
     [self beginActivityForPhase:6];
@@ -200,15 +396,25 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
     __block NSError * _Nullable _error = nil;
     // sp + 0x20
     NSURL * _Nullable largeBlobDirectoryURL = nil;
+    // x25
+    OCCloudKitStoreMonitor *storeMonitor = _storeMonitor;
     
     /*
      __60-[PFCloudKitSetupAssistant _initializeAssetStorageURLError:]_block_invoke
-     _storeMonitor = sp + 0x170
-     largeBlobDirectoryURL = sp + 0x178
-     _succeed = sp + 0x180
-     _error = sp + 0x188
+     storeMonitor = sp + 0x170 = x20 + 0x20
+     largeBlobDirectoryURL = sp + 0x178 = x20 + 0x28
+     _succeed = sp + 0x180 = x20 + 0x30
+     _error = sp + 0x188 = x20 + 0x38
      */
     [_storeMonitor performBlock:^{
+        // self(block) = x20
+        // x23
+        NSPersistentStore *store = [storeMonitor retainedMonitoredStore];
+        
+#warning TODO
+        if (store == nil) {
+            
+        }
         abort();
     }];
     

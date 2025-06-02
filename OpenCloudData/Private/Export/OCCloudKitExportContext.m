@@ -17,7 +17,7 @@
 #import "OpenCloudData/SPI/CoreData/NSManagedObjectID+Private.h"
 #import "OpenCloudData/SPI/CoreData/NSSQLBlockRequestContext.h"
 #import "OpenCloudData/Private/Log.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 #import "OpenCloudData/Private/OCCloudKitSerializer.h"
 #import "OpenCloudData/Private/OCCloudKitMetadataCache.h"
 #import "OpenCloudData/Private/MirroredRelationship/OCMirroredManyToManyRelationshipV2.h"

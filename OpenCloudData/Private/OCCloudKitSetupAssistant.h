@@ -33,6 +33,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)beginActivityForPhase:(NSUInteger)phase __attribute__((objc_direct));
 - (void)endActivityForPhase:(NSUInteger)phase withError:(NSError * _Nullable)error __attribute__((objc_direct));
 - (BOOL)_initializeAssetStorageURLError:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
+- (BOOL)_checkAndInitializeMetadata:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
+- (BOOL)_checkAndTruncateEventHistoryIfNeededWithManagedObjectContext:(NSManagedObjectContext *)managedObjectContext error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 - (BOOL)_checkAccountStatus:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 - (BOOL)_checkUserIdentity:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 - (BOOL)_recoverFromManateeIdentityLossIfNecessary:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
