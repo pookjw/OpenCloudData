@@ -9,6 +9,8 @@
 #import "OpenCloudData/Private/Log.h"
 #import "OpenCloudData/SPI/CloudKit/CKContainer+Private.h"
 #import "OpenCloudData/SPI/CloudKit/CKModifyRecordsOperation+Private.h"
+#import "OpenCloudData/Private/OCCloudKitSerializer.h"
+#import "OpenCloudData/SPI/OCSPIResolver.h"
 
 CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
 
@@ -157,16 +159,35 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
         return NO;
     }
     
+    // <+5284>
+    _succeed = [self _setupDatabaseSubscriptionIfNecessary:&_error];
+    if (!_succeed) {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) *error = _error;
+        }
+        
+        return NO;
+    }
     
-    abort();
+    // <+7936>
+    return YES;
 }
 
 - (void)beginActivityForPhase:(NSUInteger)phase {
-    abort();
+    // self = x19
+    __kindof OCPersistentCloudKitContainerActivity *activity = [_setupRequest.activity beginActivityForPhase:phase];
+    [_mirroringOptions.progressProvider publishActivity:activity];
+    [activity release];
 }
 
 - (void)endActivityForPhase:(NSUInteger)phase withError:(NSError *)error {
-    abort();
+    // self = x19
+    __kindof OCPersistentCloudKitContainerActivity *activity = [_setupRequest.activity endActivityForPhase:phase withError:error];
+    [_mirroringOptions.progressProvider publishActivity:activity];
+    [activity release];
 }
 
 - (BOOL)_initializeAssetStorageURLError:(NSError * _Nullable * _Nullable)error {
@@ -419,7 +440,32 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
         // original : getCloudKitCKErrorDomain
         if (([_error.domain isEqualToString:CKErrorDomain]) && (_error.code == CKErrorNotAuthenticated)) {
             // <+2324>
-            abort();
+            // sp, #0x90
+            __block id _Nullable value = nil;
+            
+            /*
+             __47-[PFCloudKitSetupAssistant _checkUserIdentity:]_block_invoke.82
+             storeMonitor = sp + 0x100
+             self = sp + 0x108
+             _succeed = sp + 0x110
+             value = sp + 0x118
+             _error = sp + 0x120
+             */
+            [storeMonitor performBlock:^{
+                abort();
+            }];
+            
+            // 아무것도 안하는듯?
+            [value release];
+            
+            if (_error == nil) {
+                [self endActivityForPhase:3 withError:nil];
+                return YES;
+            } else {
+                [self endActivityForPhase:3 withError:_error];
+                if (error != NULL) *error = [[_error retain] autorelease];
+                return NO;
+            }
         } else {
             // <+2432>
             os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Identity fetch failed with unknown error: %@", __func__, __LINE__, self, _error);
@@ -655,7 +701,6 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
         // <+4824>
         *error = [[_error retain] autorelease];
         [_error release];
-        
         return NO;
     }
     
@@ -664,16 +709,22 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
      -endActivityForPhase:withError:를 -_createZoneIfNecessary: 이후에 하는 것을 보아, 여기에 inline된 것 같음
      */
     _succeed = [self _createZoneIfNecessary:&_error];
-    
-    // TODO: Error Handling
-    
     // <+5008>
-//    [self endActivityForPhase:4 withError:<#(NSError * _Nullable)#>]
+    [self endActivityForPhase:4 withError:_error];
+    if (!_succeed) {
+        // <+5048>
+        *error = [[_error retain] autorelease];
+        [_error release];
+        return NO;
+    }
+    
+    
+    
     abort();
 }
 
 - (BOOL)_createZoneIfNecessary:(NSError * _Nullable *)error {
-    // inlined from -[PFCloudKitSetupAssistant _initializeCloudKitForObservedStore:andNoteMetadataInitialization:] <+4880>~
+    // inlined from -[PFCloudKitSetupAssistant _initializeCloudKitForObservedStore:andNoteMetadataInitialization:] <+4880>~<+5008>
     
     // sp, #0x1b0
     __block BOOL _succeed = YES;
@@ -712,12 +763,346 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
     }
     
     if (flag_1) {
+        [storeMonitor release];
         return YES;
     }
     
     // <+5080>
     _succeed = NO;
     
+    switch (databaseScope) {
+        case CKDatabaseScopeShared: {
+            // <+5816>
+            _succeed = YES;
+            // <+5008>
+            break;
+        }
+        case CKDatabaseScopePrivate: {
+            // <+5104>
+            // x23
+            CKRecordZoneID *recordZoneID = [OCCloudKitSerializer defaultRecordZoneIDForDatabaseScope:CKDatabaseScopePrivate];
+            // original : getCloudKitCKRecordZoneClass
+            // x24
+            CKRecordZone *recordZone = [[CKRecordZone alloc] initWithZoneID:recordZoneID];
+            _succeed = [self _saveZone:recordZone error:&_error];
+            
+            if (!_succeed) {
+                // <+6476>
+                // original : getCloudKitCKErrorDomain
+                if ([_error.domain isEqualToString:CKErrorDomain]) {
+                    if (_error.code == 112) {
+                        // <+6540>
+                        // sp, #0xe0
+                        NSError * _Nullable __error = nil;
+                        _succeed = [self _deleteZone:recordZone error:&__error];
+                        if (!_succeed) {
+                            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@ unable to recover from error: %@\nEncountered subsequent error: %@", __func__, __LINE__, self, _error, __error);
+                            *error = [[_error retain] autorelease];
+                        } else {
+                            _succeed = [self _saveZone:recordZone error:&__error];
+                            if (!_succeed) {
+                                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@ unable to recover from error: %@\nEncountered subsequent error: %@", __func__, __LINE__, self, _error, __error);
+                                *error = [[_error retain] autorelease];
+                            }
+                        }
+                    } else {
+                        // <+8300>
+                        if (_error.code == CKErrorPartialFailure) {
+                            // x25
+                            NSDictionary<NSErrorUserInfoKey, id> *userInfo = _error.userInfo;
+                            // original : getCloudKitCKPartialErrorsByItemIDKey
+                            // x25
+                            NSDictionary<CKRecordZoneID *, NSError *> *partialErrorsByItemID = [userInfo objectForKey:CKPartialErrorsByItemIDKey];
+                            // x25
+                            NSError * _Nullable partialError = [partialErrorsByItemID objectForKey:recordZone.zoneID];
+                            
+                            // original : getCloudKitCKErrorDomain
+                            if (([partialError.domain isEqualToString:CKErrorDomain]) && (partialError.code == CKErrorServerRecordChanged)) {
+                                // sp, #0xe0
+                                NSError * _Nullable __error = nil;
+                                _succeed = [self _deleteZone:recordZone error:&__error];
+                                if (!_succeed) {
+                                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@ unable to recover from error: %@\nEncountered subsequent error: %@", __func__, __LINE__, self, _error, __error);
+                                    *error = [[_error retain] autorelease];
+                                }
+                            } else {
+                                *error = [[_error retain] autorelease];
+                            }
+                        } else {
+                            *error = [[_error retain] autorelease];
+                        }
+                    }
+                } else {
+                    // <+8456>
+                    _succeed = NO;
+                    *error = [[_error retain] autorelease];
+                }
+            }
+            
+            [recordZone release];
+            [recordZoneID release];
+            break;
+        }
+        default: {
+            // <+5828>
+            // x22
+            CKRecordZoneID *recordZoneID = [OCCloudKitSerializer defaultRecordZoneIDForDatabaseScope:databaseScope];
+            // original : getCloudKitCKRecordZoneClass
+            // x24
+            CKRecordZone *recordZone = [[CKRecordZone alloc] initWithZoneID:recordZoneID];
+            // <+5872>
+            _succeed = [self _checkIfZoneExists:recordZone error:&_error];
+            // <+5008>
+            [recordZone release];
+            if (_error != nil) {
+                *error = _error;
+            }
+            break;
+        }
+    }
+    
+    [storeMonitor release];
+    return _succeed;
+}
+
+- (BOOL)_checkIfZoneExists:(CKRecordZone *)recordZone error:(NSError * _Nullable *)error {
+    // inlined from -[PFCloudKitSetupAssistant _initializeCloudKitForObservedStore:andNoteMetadataInitialization:] <+5872>~<+7936>
+    /*
+     recordZone = x24
+     */
+    // x29 - 0xb0
+    __block BOOL _succeed = NO; // 나중에 0x1 넣어주는듯?
+    // x29 - 0xe0
+    __block NSError * _Nullable _error = nil;
+    // x26
+    CKDatabaseScope databaseScope = _mirroringOptions.databaseScope;
+    // x23
+    dispatch_semaphore_t cloudKitSemaphore = _cloudKitSemaphore;
+    
+    // original : getCloudKitCKFetchRecordZonesOperationClass
+    // x25
+    CKFetchRecordZonesOperation *operation = [[CKFetchRecordZonesOperation alloc] initWithRecordZoneIDs:@[recordZone.zoneID]];
+    [_setupRequest.options applyToOperation:operation];
+    
+    // x29 - 0x100
+    __block NSDictionary<CKRecordZoneID *,CKRecordZone *> * _Nullable recordZonesByZoneID = nil;
+    
+    /*
+     __53-[PFCloudKitSetupAssistant _checkIfZoneExists:error:]_block_invoke
+     recordZone = sp + 0x170
+     cloudKitSemaphore = sp + 0x178
+     recordZonesByZoneID = sp + 0x180
+     databaseScope = sp + 0x188
+     _error = sp + 0x190
+     _succeed = sp + 0x198
+     */
+    operation.fetchRecordZonesCompletionBlock = ^(NSDictionary<CKRecordZoneID *,CKRecordZone *> * _Nullable recordZonesByZoneID, NSError * _Nullable operationError) {
+        abort();
+    };
+    
+    [_database addOperation:operation];
+    dispatch_semaphore_wait(cloudKitSemaphore, DISPATCH_TIME_FOREVER);
+    
+    if (!_succeed) {
+        // original : getCloudKitCKErrorDomain
+        if ((databaseScope == CKDatabaseScopePublic) && (_error.code == CKErrorNotAuthenticated) && ([_error.domain isEqualToString:CKErrorDomain])) {
+            // <+6924>
+            // original : getCloudKitCKRecordZoneDefaultName
+            if (![recordZone.zoneID.zoneName isEqualToString:CKRecordZoneDefaultName]) {
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Custom zones aren't supported yet with the public database.\n");
+                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Custom zones aren't supported yet with the public database.\n");
+            }
+            // <+7088>
+            _succeed = YES;
+            [_error release];
+            _error = nil;
+            // x26
+            OCCloudKitStoreMonitor *storeMonitor = [_storeMonitor retain];
+            
+            /*
+             __53-[PFCloudKitSetupAssistant _checkIfZoneExists:error:]_block_invoke.67
+             storeMonitor = sp + 0x100
+             recordZone = sp + 0x108
+             _succeed = sp + 0x110
+             _error = sp + 0x118
+             1 = sp + 0x120
+             */
+            [storeMonitor performBlock:^{
+                abort();
+            }];
+            
+            [storeMonitor release];
+            [operation release];
+            [_error release];
+            _error = nil;
+            return YES;
+        } else {
+            // <+7204>
+            [operation release];
+            
+            if (_error == nil) {
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            } else {
+                if (error != NULL) *error = [[_error retain] autorelease];
+            }
+            
+            [_error release];
+            return NO;
+        }
+    }
+    
+    // <+6144>
+    // x22
+    OCCloudKitStoreMonitor *storeMonitor = [_storeMonitor retain];
+    
+    /*
+     __53-[PFCloudKitSetupAssistant _checkIfZoneExists:error:]_block_invoke.66
+     storeMonitor = sp + 0x100
+     recordZone = sp + 0x108
+     recordZonesByZoneID = sp + 0x110
+     _succeed = sp + 0x118
+     _error = sp + 0x120
+     */
+    [storeMonitor performBlock:^{
+        abort();
+    }];
+    
+    [storeMonitor release];
+    [operation release];
+    [_error release];
+    _error = nil;
+    return YES;
+}
+
+- (BOOL)_setupDatabaseSubscriptionIfNecessary:(NSError * _Nullable *)error {
+    // inlined from -[PFCloudKitSetupAssistant _initializeCloudKitForObservedStore:andNoteMetadataInitialization:] <+5284>~<+7936>
+    // sp, #0x90
+    __block BOOL _succeed = YES;
+    // x29 - 0xe0
+    __block NSError * _Nullable _error = nil;
+    // x29 - 0x100
+    __block BOOL databaseHasSubscription = NO;
+    // sp + 0x1b0
+    __block BOOL metadataHasSubscription = NO;
+    // x21
+    CKDatabaseScope databaseScope = _mirroringOptions.databaseScope;
+    
+    if (databaseScope == CKDatabaseScopePublic) {
+        // <+7876>
+        return YES;
+    }
+    
+    [self beginActivityForPhase:5];
+    // <+5392>
+    // x22
+    OCCloudKitStoreMonitor *storeMonitor = [_storeMonitor retain];
+    
+    if (databaseScope == CKDatabaseScopeShared) {
+        // <+5676>
+        /*
+         __66-[PFCloudKitSetupAssistant _setupDatabaseSubscriptionIfNecessary:]_block_invoke_3
+         storeMonitor = sp + 0x170
+         databaseHasSubscription = sp + 0x178
+         _succeed = sp + 0x180
+         _error = sp + 0x188
+         3 = sp + 0x190
+         */
+        [storeMonitor performBlock:^{
+            abort();
+        }];
+        // <+5752>
+    } else if (databaseScope == CKDatabaseScopePrivate) {
+        // <+5432>
+        // x24
+        CKRecordZoneID *recordZoneID = [OCCloudKitSerializer defaultRecordZoneIDForDatabaseScope:CKDatabaseScopePrivate];
+        
+        /*
+         __66-[PFCloudKitSetupAssistant _setupDatabaseSubscriptionIfNecessary:]_block_invoke
+         storeMonitor = sp + 0x170
+         recordZoneID = sp + 0x178
+         metadataHasSubscription (sp + 0x1b0) DatabaseWithScope
+         databaseHasSubscription = sp + 0x188
+         _succeed = sp + 0x190
+         _error = sp + 0x198
+         2 = sp + 0x1a0
+         */
+        [storeMonitor performBlock:^{
+            abort();
+        }];
+        
+        [recordZoneID release];
+    } else {
+        // <+5752>
+    }
+    
+    // <+5752>
+    [storeMonitor release];
+    
+    if (!_succeed) {
+        // <+7780>
+        [self endActivityForPhase:5 withError:_error];
+        
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) *error = [[_error retain] autorelease];
+        }
+        
+        [_error release];
+        _error = nil;
+        
+        return NO;
+    }
+    
+    // <+5772>
+    // x22
+    CKSubscriptionID subscriptionID;
+    switch (_mirroringOptions.databaseScope) {
+        case CKDatabaseScopePublic:
+            // <+6612>
+            subscriptionID = [OCSPIResolver PFPublicDatabaseSubscriptionID];
+            break;
+        case CKDatabaseScopePrivate:
+            // <+6600>
+            subscriptionID = [OCSPIResolver PFPrivateDatabaseSubscriptionID];
+            break;
+        case CKDatabaseScopeShared:
+            // <+5804>
+            subscriptionID = [OCSPIResolver PFSharedDatabaseSubscriptionID];
+            break;
+        default:
+            // <+6628>
+            _succeed = NO;
+            _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134400 userInfo:@{
+                NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"CloudKit integration does not support the '%@' database scope.", CKDatabaseScopeString(_mirroringOptions.databaseScope)]
+            }];
+            *error = [_error autorelease];
+            [self endActivityForPhase:5 withError:_error];
+            return NO;
+    }
+    
+    // <+6792>
+    // original : getCloudKitCKDatabaseSubscriptionClass
+    _databaseSubscription = [[CKDatabaseSubscription alloc] initWithSubscriptionID:subscriptionID];
+    // x22
+    CKNotificationInfo *notificationInfo = [[CKNotificationInfo alloc] init];
+    notificationInfo.shouldSendContentAvailable = YES;
+    _databaseSubscription.notificationInfo = notificationInfo;
+    [notificationInfo release];
+    
+    [self endActivityForPhase:5 withError:_error];
+    [_error release];
+    _error = nil;
+    return YES;
+}
+
+- (BOOL)_saveZone:(CKRecordZone *)recordZone error:(NSError * _Nullable *)error {
+    abort();
+}
+
+- (BOOL)_deleteZone:(CKRecordZone *)recordZone error:(NSError * _Nullable *)error {
     abort();
 }
 

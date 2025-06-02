@@ -37,6 +37,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)_checkUserIdentity:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 - (BOOL)_recoverFromManateeIdentityLossIfNecessary:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 - (BOOL)_createZoneIfNecessary:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
+- (BOOL)_checkIfZoneExists:(CKRecordZone *)recordZone error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
+- (BOOL)_saveZone:(CKRecordZone *)recordZone error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
+- (BOOL)_deleteZone:(CKRecordZone *)recordZone error:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
+- (BOOL)_setupDatabaseSubscriptionIfNecessary:(NSError * _Nullable * _Nullable)error __attribute__((objc_direct));
 @end
 
 NS_ASSUME_NONNULL_END

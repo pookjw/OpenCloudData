@@ -437,6 +437,21 @@ __attribute__((objc_direct_members))
     return *(id *)addr;
 }
 
++ (CKSubscriptionID)PFPrivateDatabaseSubscriptionID {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_PFPrivateDatabaseSubscriptionID"];
+    return *(id *)addr;
+}
+
++ (CKSubscriptionID)PFPublicDatabaseSubscriptionID {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"PFPublicDatabaseSubscriptionID"];
+    return *(id *)addr;
+}
+
++ (CKSubscriptionID)PFSharedDatabaseSubscriptionID {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_PFSharedDatabaseSubscriptionID"];
+    return *(id *)addr;
+}
+
 + (NSArray *)NSArray_EmptyArray {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSArray_EmptyArray"];
     return *(id *)addr;
