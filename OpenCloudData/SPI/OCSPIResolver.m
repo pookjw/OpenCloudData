@@ -422,11 +422,6 @@ __attribute__((objc_direct_members))
     return *(id *)addr;
 }
 
-+ (NSString *)NSCloudKitMirroringDelegateResetSyncReasonKey {
-    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateResetSyncReasonKey"];
-    return *(id *)addr;
-}
-
 + (NSString *)NSPersistentHistoryTombstoneAttributes {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSPersistentHistoryTombstoneAttributes"];
     return *(id *)addr;
@@ -449,6 +444,16 @@ __attribute__((objc_direct_members))
 
 + (CKSubscriptionID)PFSharedDatabaseSubscriptionID {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_PFSharedDatabaseSubscriptionID"];
+    return *(id *)addr;
+}
+
++ (NSString *)PFCloudKitOldUserIdentityKey {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_PFCloudKitOldUserIdentityKey"];
+    return *(id *)addr;
+}
+
++ (NSString *)NSCloudKitMirroringDelegateResetSyncReasonKey {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateResetSyncReasonKey"];
     return *(id *)addr;
 }
 

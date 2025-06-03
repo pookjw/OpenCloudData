@@ -586,8 +586,9 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
          */
         [managedObjectContext performBlockAndWait:^{
             // self(block) = x19
+            OCCKMetadataEntry *entry;
             @try {
-                OCCKMetadataEntry *entry = [OCCKMetadataEntry entryForKey:[OCSPIResolver NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey] fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+                entry = [OCCKMetadataEntry entryForKey:[OCSPIResolver NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey] fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
                 if (entry == nil) {
                     if (_error != nil) {
                         _succeed = NO;
@@ -595,14 +596,19 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
                     }
                     return;
                 }
-                
-                userIdentity = [entry.stringValue retain];
             } @catch (NSException *exception) {
-#warning TODO
                 _succeed = NO;
                 _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134402 userInfo:@{
                     @"NSUnderlyingException": exception
                 }];
+                return;
+            }
+            
+            @try {
+                userIdentity = [entry.stringValue retain];
+            } @catch (NSException *exception) {
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Unexpected exception thrown during account setup: %@\n", exception);
+                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Unexpected exception thrown during account setup: %@\n", exception);
             }
         }];
         
@@ -663,16 +669,149 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
     dispatch_group_t monitorGroup = [_storeMonitor.monitorGroup retain];
     /*
      __48-[PFCloudKitSetupAssistant _checkAccountStatus:]_block_invoke.20
-     monitorGroup = sp + 0x170
-     self = sp + 0x178
-     cloudKitSemaphore = sp + 0x180
-     _succeed = sp + 0x188
-     userIdentity = sp + 0x190
-     _error = sp + 0x198
-     useDeviceToDeviceEncryption = sp + 0x1a0
+     monitorGroup = sp + 0x170 = x19 + 0x20
+     self = sp + 0x178 = x19 + 0x28
+     cloudKitSemaphore = sp + 0x180 = x19 + 0x30
+     _succeed = sp + 0x188 = x19 + 0x38
+     userIdentity = sp + 0x190 = x19 + 0x40
+     _error = sp + 0x198 = x19 + 0x48
+     useDeviceToDeviceEncryption = sp + 0x1a0 = x19 + 0x50
      */
-    [container accountInfoWithCompletionHandler:^(CKAccountInfo * _Nullable accountInfo, NSError * _Nullable error) {
-        abort();
+    [container accountInfoWithCompletionHandler:^(CKAccountInfo * _Nullable accountInfo, NSError * _Nullable __error) {
+        /*
+         self(block) = x19
+         accountInfo = x21
+         __error = x22
+         */
+        os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Fetched account info for store %@: %@\n%@", __func__, __LINE__, monitorGroup, accountInfo, __error);
+        
+        if (accountInfo == nil) {
+            // <+608>
+            // original : getCloudKitCKErrorDomain
+            if (([__error.domain isEqualToString:CKErrorDomain]) && (__error.code == CKErrorNotAuthenticated)) {
+                // <+668>
+                // x20
+                NSMutableDictionary<NSErrorUserInfoKey, id> *userInfo = [[NSMutableDictionary alloc] init];
+                [userInfo setObject:@"Unable to initialize without an iCloud account (CKErrorNotAuthenticated)." forKey:NSLocalizedFailureReasonErrorKey];
+                [userInfo setObject:__error forKey:NSUnderlyingErrorKey];
+                _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134400 userInfo:userInfo];
+                [userInfo release];
+                
+                // original : 원래는 없음
+                _succeed = NO;
+            } else {
+                // <+776>
+                _succeed = NO;
+                [_error retain];
+            }
+            
+            dispatch_semaphore_signal(cloudKitSemaphore);
+            return;
+        }
+        
+        // <+232>
+        // x23
+        NSInteger accountStatus = accountInfo.accountStatus;
+        if ((accountStatus != 1) || !(accountInfo.hasValidCredentials)) {
+            _succeed = NO;
+            
+            // x20
+            NSMutableDictionary<NSErrorUserInfoKey, id> *userInfo = [[NSMutableDictionary alloc] init];
+            if (__error != nil) {
+                [userInfo setObject:__error forKey:NSUnderlyingErrorKey];
+            }
+            if (accountStatus == 3) {
+                if (userIdentity != nil) {
+                    [userInfo setObject:userIdentity forKey:[OCSPIResolver PFCloudKitOldUserIdentityKey]];
+                    [userInfo setObject:@2 forKey:[OCSPIResolver NSCloudKitMirroringDelegateResetSyncReasonKey]];
+                    _error = [[NSError errorWithDomain:NSCocoaErrorDomain code:134400 userInfo:userInfo] retain];
+                    // <+1152>
+                    // fin
+                } else {
+                    // <+968>
+                    if (self->_mirroringOptions.databaseScope == CKDatabaseScopePublic) {
+                        // <+988>
+                        _error = nil;
+                        _succeed = YES;
+                        // <+1152>
+                        // fin
+                    } else {
+                        // <+1224>
+                        [accountInfo hasValidCredentials]; // ???
+                        [userInfo setObject:@"Unable to initialize without an iCloud account (CKAccountStatusNoAccount)." forKey:NSLocalizedFailureReasonErrorKey];
+                        _error = [[NSError errorWithDomain:NSCocoaErrorDomain code:134400 userInfo:userInfo] retain];
+                        // <+1152>
+                        // fin
+                    }
+                }
+            } else if (accountStatus == 4) {
+                // <+1084>
+                [userInfo setObject:@"Unable to initialize without a valid iCloud account (CKAccountStatusTemporarilyUnavailable)." forKey:NSLocalizedFailureReasonErrorKey];
+                _error = [[NSError errorWithDomain:NSCocoaErrorDomain code:134400 userInfo:userInfo] retain];
+                // <+1152>
+                // fin
+            } else if (accountStatus == 2) {
+                // <+936>
+                [userInfo setObject:@"Unable to initialize without a valid iCloud account (CKAccountStatusRestricted)." forKey:NSLocalizedFailureReasonErrorKey];
+                _error = [[NSError errorWithDomain:NSCocoaErrorDomain code:134400 userInfo:userInfo] retain];
+                // <+1152>
+                // fin
+            } else {
+                // <+1012>
+                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Cannot generate a failure reason for an unknown account status: %ld\n", accountStatus);
+                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Cannot generate a failure reason for an unknown account status: %ld\n", accountStatus);
+                [userInfo setObject:@"Unknown account status" forKey:NSLocalizedFailureReasonErrorKey];
+                _error = [[NSError errorWithDomain:NSCocoaErrorDomain code:134400 userInfo:userInfo] retain];
+                // <+1152>
+                // fin
+            }
+            
+            [userInfo release];
+            dispatch_semaphore_signal(cloudKitSemaphore);
+            return;
+        }
+        
+        // <+264>
+        if (!useDeviceToDeviceEncryption || (((accountInfo.deviceToDeviceEncryptionAvailability & (1 << 0)) != 0) && ((accountInfo.deviceToDeviceEncryptionAvailability & (1 << 1)) != 0))) {
+            // <+948>
+            _succeed = YES;
+            dispatch_semaphore_signal(cloudKitSemaphore);
+            return;
+        }
+        
+        // <+300>
+        if (userIdentity != nil) {
+            // <+324>
+            _succeed = NO;
+            // x20
+            NSMutableDictionary<NSErrorUserInfoKey, id> *userInfo = [[NSMutableDictionary alloc] init];
+            [userInfo setObject:userIdentity forKey:[OCSPIResolver PFCloudKitOldUserIdentityKey]];
+            [userInfo setObject:@2 forKey:[OCSPIResolver NSCloudKitMirroringDelegateResetSyncReasonKey]];
+            
+            _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134400 userInfo:userInfo];
+            [userInfo release];
+            dispatch_semaphore_signal(cloudKitSemaphore);
+            return;
+        } else {
+            // <+1272>
+            _succeed = NO;
+            
+            NSString *reason;
+            if ((accountInfo.deviceToDeviceEncryptionAvailability & (1 << 0)) == 0) {
+                // <+1340>
+                reason = @"Unable to initialize the CloudKit container because this account does not support device to device encryption.";
+            } else {
+                // <+1376>
+                reason = @"Unable to initialize the CloudKit container because this device does not support device to device encryption.";
+            }
+            
+            _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134400 userInfo:@{
+                NSLocalizedFailureReasonErrorKey: reason
+            }];
+            dispatch_semaphore_signal(cloudKitSemaphore);
+            return;
+        }
+        
     }];
     
     dispatch_semaphore_wait(cloudKitSemaphore, DISPATCH_TIME_FOREVER);
