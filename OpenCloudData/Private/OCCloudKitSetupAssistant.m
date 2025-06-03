@@ -14,6 +14,7 @@
 #import "OpenCloudData/Private/OCCloudKitMetadataModel.h"
 #import "OpenCloudData/Private/Model/OCCKEvent.h"
 #import "OpenCloudData/SPI/CoreData/_PFRoutines.h"
+#import "OpenCloudData/Private/Model/OCCKMetadataEntry.h"
 #include <objc/runtime.h>
 
 CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
@@ -577,14 +578,32 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
         
         /*
          __48-[PFCloudKitSetupAssistant _checkAccountStatus:]_block_invoke_2
-         store = sp + 0x20
-         managedObjectContext = sp + 0x28
-         userIdentity = sp + 0x30
-         _error = sp + 0x38
-         _succeed = sp + 0x40
+         store = sp + 0x20 = x19 + 0x20
+         managedObjectContext = sp + 0x28 = x19 + 0x28
+         _error = sp + 0x30 = x19 + 0x30
+         userIdentity = sp + 0x38 = x19 + 0x38
+         _succeed = sp + 0x40 = x19 + 0x40
          */
         [managedObjectContext performBlockAndWait:^{
-            abort();
+            // self(block) = x19
+            @try {
+                OCCKMetadataEntry *entry = [OCCKMetadataEntry entryForKey:[OCSPIResolver NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey] fromStore:store inManagedObjectContext:managedObjectContext error:&_error];
+                if (entry == nil) {
+                    if (_error != nil) {
+                        _succeed = NO;
+                        [_error retain];
+                    }
+                    return;
+                }
+                
+                userIdentity = [entry.stringValue retain];
+            } @catch (NSException *exception) {
+#warning TODO
+                _succeed = NO;
+                _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134402 userInfo:@{
+                    @"NSUnderlyingException": exception
+                }];
+            }
         }];
         
         [managedObjectContext release];
