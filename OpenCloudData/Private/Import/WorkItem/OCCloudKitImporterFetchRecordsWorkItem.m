@@ -161,7 +161,7 @@
                 succeed = NO;
                 error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{
                     @"NSUnderlyingException": exception,
-                    NSLocalizedFailureErrorKey: @"Record fetch failed because fetching the record metadata hit an unhandled exception."
+                    NSLocalizedFailureReasonErrorKey: @"Record fetch failed because fetching the record metadata hit an unhandled exception."
                 }];
             }
         }];

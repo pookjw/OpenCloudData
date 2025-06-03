@@ -8,7 +8,7 @@
 #import "OpenCloudData/Private/Model/OCCKMetadataEntry.h"
 #import "OpenCloudData/Private/OCCloudKitMetadataModel.h"
 #import "OpenCloudData/Private/Log.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @implementation OCCKMetadataEntry
 @dynamic boolValueNum;

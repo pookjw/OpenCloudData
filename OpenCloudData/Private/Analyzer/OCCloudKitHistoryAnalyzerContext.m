@@ -11,8 +11,8 @@
 #import "OpenCloudData/SPI/OCSPIResolver.h"
 #import "OpenCloudData/SPI/CoreData/NSManagedObjectID+Private.h"
 #import "OpenCloudData/Private/Model/OCCKMetadataEntry.h"
-#import <objc/runtime.h>
-#import <objc/message.h>
+#include <objc/runtime.h>
+#include <objc/message.h>
 
 OBJC_EXPORT id objc_msgSendSuper2(void);
 

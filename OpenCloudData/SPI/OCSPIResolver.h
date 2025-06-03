@@ -103,7 +103,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)NSCloudKitMirroringDelegateBypassHistoryOnExportKey;
 + (NSString *)PFCloudKitServerChangeTokenKey;
 + (NSString *)NSCloudKitMirroringDelegateServerChangeTokensKey;
-+ (NSString *)_NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification;
++ (NSNotificationName)_NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification;
 + (NSString *)NSCloudKitMirroringDelegateMigrationAuthor;
 + (NSString *)NSCloudKitMirroringDelegateScanForRowsMissingFromHistoryKey;
 + (NSString *)NSCloudKitMirroringDelegateIgnoredPropertyKey;
@@ -112,10 +112,10 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)PFCloudKitMirroringDelegateToManyPrefix;
 + (NSString *)NSPersistentCloudKitContainerEncryptedAttributeKey;
 + (NSString *)PFCloudKitFakeRecordNamePrefix;
-+ (NSString *)NSCloudKitMirroringDelegateWillResetSyncNotificationName;
-+ (NSString *)NSCloudKitMirroringDelegateDidResetSyncNotificationName;
++ (NSNotificationName)NSCloudKitMirroringDelegateWillResetSyncNotificationName;
++ (NSNotificationName)NSCloudKitMirroringDelegateDidResetSyncNotificationName;
 + (NSString *)NSPersistentHistoryTombstoneAttributes;
-+ (NSString *)NSPersistentCloudKitContainerActivityChangedNotificationName;
++ (NSNotificationName)NSPersistentCloudKitContainerActivityChangedNotificationName;
 + (CKSubscriptionID)PFPrivateDatabaseSubscriptionID;
 + (CKSubscriptionID)PFPublicDatabaseSubscriptionID;
 + (CKSubscriptionID)PFSharedDatabaseSubscriptionID;

@@ -8,7 +8,7 @@
 #import <XCTest/XCTest.h>
 #import "OpenCloudData/Private/OCPersistentCloudKitContainerActivity.h"
 #import "OpenCloudData/SPI/CoreData/NSPersistentCloudKitContainerActivity.h"
-#import <objc/message.h>
+#include <objc/message.h>
 
 @interface OCPersistentCloudKitContainerActivityTests : XCTestCase
 @end

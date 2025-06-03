@@ -10,7 +10,7 @@
 #import "OpenCloudData/Private/Log.h"
 #import "OpenCloudData/SPI/OCSPIResolver.h"
 #import <CloudKit/CloudKit.h>
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @implementation OCCKRecordZoneMoveReceipt
 @dynamic recordName;

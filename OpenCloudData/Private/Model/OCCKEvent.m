@@ -13,7 +13,7 @@
 #import "OpenCloudData/Private/Request/OCCloudKitMirroringExportRequest.h"
 #import "OpenCloudData/Public/OCPersistentCloudKitContainerEvent.h"
 #import "OpenCloudData/Private/Log.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @implementation OCCKEvent
 @dynamic entityPath;

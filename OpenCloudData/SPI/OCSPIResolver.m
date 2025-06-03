@@ -367,7 +367,7 @@ __attribute__((objc_direct_members))
     return *(id *)addr;
 }
 
-+ (NSString *)_NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification {
++ (NSNotificationName)_NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"__NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification"];
     return *(id *)addr;
 }
@@ -412,12 +412,12 @@ __attribute__((objc_direct_members))
     return *(id *)addr;
 }
 
-+ (NSString *)NSCloudKitMirroringDelegateWillResetSyncNotificationName {
++ (NSNotificationName)NSCloudKitMirroringDelegateWillResetSyncNotificationName {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateWillResetSyncNotificationName"];
     return *(id *)addr;
 }
 
-+ (NSString *)NSCloudKitMirroringDelegateDidResetSyncNotificationName {
++ (NSNotificationName)NSCloudKitMirroringDelegateDidResetSyncNotificationName {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateDidResetSyncNotificationName"];
     return *(id *)addr;
 }
@@ -427,7 +427,7 @@ __attribute__((objc_direct_members))
     return *(id *)addr;
 }
 
-+ (NSString *)NSPersistentCloudKitContainerActivityChangedNotificationName {
++ (NSNotificationName)NSPersistentCloudKitContainerActivityChangedNotificationName {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSPersistentCloudKitContainerActivityChangedNotificationName"];
     return *(id *)addr;
 }

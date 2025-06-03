@@ -10,7 +10,7 @@
 #import "OpenCloudData/SPI/CoreData/NSManagedObjectContext+Private.h"
 #import "OpenCloudData/Private/Log.h"
 #import "OpenCloudData/SPI/OCSPIResolver.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 # define OS_UNFAIR_LOCK_FLAG_DATA_SYNCHRONIZATION (0x00010000)
 

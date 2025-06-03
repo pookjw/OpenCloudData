@@ -8,7 +8,7 @@
 #import <XCTest/XCTest.h>
 #import "OpenCloudData/Private/ValueTransformers/OCCloudKitMetadataValueTransformer.h"
 #import "OpenCloudData/SPI/CoreData/ValueTransformers/PFCloudKitMetadataValueTransformer.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @interface OCCloudKitMetadataValueTransformerTests : XCTestCase
 @end

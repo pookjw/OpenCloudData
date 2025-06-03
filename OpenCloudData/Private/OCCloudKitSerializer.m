@@ -24,7 +24,7 @@
 #import "OpenCloudData/SPI/Foundation/NSObject+NSKindOfAdditions.h"
 #import "OpenCloudData/SPI/CoreData/NSMergeableTransformableStringAttributeValue.h"
 #import "OpenCloudData/Private/Model/OCCKImportPendingRelationship.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
 

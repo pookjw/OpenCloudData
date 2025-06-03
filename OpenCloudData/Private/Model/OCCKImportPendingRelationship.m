@@ -10,7 +10,7 @@
 #import "OpenCloudData/Private/MirroredRelationship/OCMirroredOneToManyRelationship.h"
 #import "OpenCloudData/Private/MirroredRelationship/OCMirroredManyToManyRelationship.h"
 #import <CloudKit/CloudKit.h>
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @implementation OCCKImportPendingRelationship
 @dynamic recordName;

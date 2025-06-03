@@ -7,7 +7,7 @@
 
 #import "OpenCloudData/Private/Model/OCCKDatabaseMetadata.h"
 #import "OpenCloudData/Private/OCCloudKitMetadataModel.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @implementation OCCKDatabaseMetadata
 @dynamic hasSubscriptionNum;

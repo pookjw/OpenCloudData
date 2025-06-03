@@ -8,7 +8,7 @@
 #import <XCTest/XCTest.h>
 #import "OpenCloudData/Private/ValueTransformers/OCCKRecordZoneQueryPredicateTransformer.h"
 #import "OpenCloudData/SPI/CoreData/ValueTransformers/NSCKRecordZoneQueryPredicateTransformer.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @interface OCCKRecordZoneQueryPredicateTransformerTests : XCTestCase
 @end

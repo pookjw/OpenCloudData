@@ -367,7 +367,7 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
             _succeed = NO;
             _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{
                 @"NSUnderlyingException": exception,
-                NSLocalizedFailureErrorKey: @"Setup failed because an unhandled exception was caught during event history truncation."
+                NSLocalizedFailureReasonErrorKey: @"Setup failed because an unhandled exception was caught during event history truncation."
             }];
         }
     }];
@@ -417,7 +417,7 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
         if (store == nil) {
             _succeed = NO;
             _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134403 userInfo:@{
-                NSLocalizedFailureErrorKey: @"Failed to initialize the asset storage url because the store was removed from the coordinator."
+                NSLocalizedFailureReasonErrorKey: @"Failed to initialize the asset storage url because the store was removed from the coordinator."
             }];
             return;
         }
@@ -431,7 +431,7 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
             // <+788>
             _succeed = NO;
             _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134403 userInfo:@{
-                NSLocalizedFailureErrorKey: [NSString stringWithFormat:@"Failed to create largeBlobDirectoryURL with observed store: %@", store]
+                NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Failed to create largeBlobDirectoryURL with observed store: %@", store]
             }];
             return;
         }
@@ -567,7 +567,7 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
         if (store == nil) {
             _succeed = NO;
             _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
-                NSLocalizedFailureErrorKey: @"The mirroring delegate could not initialize because it's store was removed from the coordinator."
+                NSLocalizedFailureReasonErrorKey: @"The mirroring delegate could not initialize because it's store was removed from the coordinator."
             }];
             return;
         }

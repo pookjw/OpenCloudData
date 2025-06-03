@@ -11,7 +11,7 @@
 #import "OpenCloudData/SPI/CoreData/NSSQLCore.h"
 #import "OpenCloudData/Private/Log.h"
 #import "OpenCloudData/SPI/OCSPIResolver.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @implementation OCCKHistoryAnalyzerState
 @dynamic entityId;

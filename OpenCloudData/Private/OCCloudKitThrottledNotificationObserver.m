@@ -9,7 +9,7 @@
 #import "OpenCloudData/Private/Log.h"
 #import "OpenCloudData/SPI/CoreData/_PFClassicBackgroundRuntimeVoucher.h"
 #include <stdatomic.h>
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @implementation OCCloudKitThrottledNotificationObserver
 

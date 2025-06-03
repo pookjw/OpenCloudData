@@ -9,8 +9,8 @@
 #import "OpenCloudData/SPI/OCSPIResolver.h"
 #import "OpenCloudData/Private/Analyzer/OCCloudKitHistoryAnalyzerContext.h"
 #import "OpenCloudData/Private/Log.h"
-#import <objc/runtime.h>
-#import <objc/message.h>
+#include <objc/runtime.h>
+#include <objc/message.h>
 
 OBJC_EXPORT id objc_msgSendSuper2(void);
 

@@ -8,7 +8,7 @@
 #import "OpenCloudData/Private/Model/OCCKImportOperation.h"
 #import "OpenCloudData/Private/OCCloudKitMetadataModel.h"
 #import "OpenCloudData/Private/Log.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @implementation OCCKImportOperation
 @dynamic importDate;

@@ -10,7 +10,7 @@
 #import "OpenCloudData/SPI/CoreData/MirroredRelationship/PFMirroredManyToManyRelationshipV2.h"
 #import "OpenCloudData/SPI/OCSPIResolver.h"
 #import "OpenCloudData/Helper/_OCDirectMethodResolver.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 #import "OCRecordKeyValueSettingImpl.h"
 
 @interface OCMirroredManyToManyRelationshipV2Tests : XCTestCase

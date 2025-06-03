@@ -6,8 +6,8 @@
 //
 
 #import "OpenCloudData/Private/Analyzer/OCCloudKitHistoryAnalyzerOptions.h"
-#import <objc/runtime.h>
-#import <objc/message.h>
+#include <objc/runtime.h>
+#include <objc/message.h>
 
 OBJC_EXPORT id _Nullable objc_getProperty(id _Nullable self, SEL _Nonnull _cmd, ptrdiff_t offset, BOOL atomic);
 OBJC_EXPORT void objc_setProperty_nonatomic(id _Nullable self, SEL _Nonnull _cmd, id _Nullable newValue, ptrdiff_t offset);

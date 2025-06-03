@@ -9,7 +9,7 @@
 #import "OpenCloudData/Private/OCCloudKitMetadataModel.h"
 #import "OpenCloudData/Private/Model/OCCKDatabaseMetadata.h"
 #import "OpenCloudData/Private/Log.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @implementation OCCKRecordZoneMetadata
 @dynamic hasRecordZoneNum;

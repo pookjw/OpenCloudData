@@ -17,7 +17,7 @@
 #import "OpenCloudData/Private/Model/OCCKHistoryAnalyzerState.h"
 #import "OpenCloudData/Private/Model/OCCKRecordZoneMoveReceipt.h"
 #import "OpenCloudData/SPI/OCSPIResolver.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @implementation OCCloudKitExporter
 

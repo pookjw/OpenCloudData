@@ -8,8 +8,8 @@
 #import "shim.h"
 #import <CloudKit/CloudKit.h>
 #import <CoreData/CoreData.h>
-#import <objc/message.h>
-#import <objc/runtime.h>
+#include <objc/message.h>
+#include <objc/runtime.h>
 
 void sa_shim(void) {
 //    NSLog(@"%@", ((id (*)(Class, SEL, Class))objc_msgSend)([NSObject class], sel_registerName("_fd__methodDescriptionForClass:"), objc_lookUpClass("CKContainerOptions")));

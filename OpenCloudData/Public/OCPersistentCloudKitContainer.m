@@ -22,8 +22,8 @@
 #import "OpenCloudData/SPI/OCSPIResolver.h"
 #import <xpc/xpc.h>
 #import <CoreFoundation/CoreFoundation.h>
-#import <objc/runtime.h>
-#import <objc/message.h>
+#include <objc/runtime.h>
+#include <objc/message.h>
 @import ellekit;
 
 BOOL (*NSCloudKitMirroringDelegate_executeMirroringRequest_error_original)(id, id, id *);

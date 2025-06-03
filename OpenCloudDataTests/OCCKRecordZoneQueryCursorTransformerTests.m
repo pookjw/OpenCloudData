@@ -8,7 +8,7 @@
 #import <XCTest/XCTest.h>
 #import "OpenCloudData/Private/ValueTransformers/OCCKRecordZoneQueryCursorTransformer.h"
 #import "OpenCloudData/SPI/CoreData/ValueTransformers/NSCKRecordZoneQueryCursorTransformer.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @interface OCCKRecordZoneQueryCursorTransformerTests : XCTestCase
 @end

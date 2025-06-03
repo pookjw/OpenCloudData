@@ -210,7 +210,7 @@ FOUNDATION_EXTERN void NSRequestConcreteImplementation(id self, SEL _cmd, Class 
             if ((monitor == nil) || (monitor.declaredDead)) {
                 // <+252>
                 _succeed = NO;
-                _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134407 userInfo:@{NSLocalizedFailureErrorKey: [NSString stringWithFormat:@"Request '%@' was cancelled because the store was removed from the coordinator.", self->_request.requestIdentifier]}];
+                _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134407 userInfo:@{NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Request '%@' was cancelled because the store was removed from the coordinator.", self->_request.requestIdentifier]}];
             } else {
                 // <+400>
                 /*
@@ -990,7 +990,7 @@ FOUNDATION_EXTERN void NSRequestConcreteImplementation(id self, SEL _cmd, Class 
                 // <+436>
                 // x21
                 NSError *_error = [NSError errorWithDomain:NSCocoaErrorDomain code:134407 userInfo:@{
-                    NSLocalizedFailureErrorKey: [NSString stringWithFormat:@"Request '%@' was cancelled because the store was removed from the coordinator.", self.request.requestIdentifier]
+                    NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Request '%@' was cancelled because the store was removed from the coordinator.", self.request.requestIdentifier]
                 }];
                 
                 result = [self createMirroringResultForRequest:self.request storeIdentifier:monitor.storeIdentifier success:NO madeChanges:NO error:_error];
@@ -1023,7 +1023,7 @@ FOUNDATION_EXTERN void NSRequestConcreteImplementation(id self, SEL _cmd, Class 
                 // <+252>
                 // x23
                 NSError *_error = [NSError errorWithDomain:NSCocoaErrorDomain code:134407 userInfo:@{
-                    NSLocalizedFailureErrorKey: [NSString stringWithFormat:@"Request '%@' was cancelled because the store was removed from the coordinator.", self.request.requestIdentifier]
+                    NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Request '%@' was cancelled because the store was removed from the coordinator.", self.request.requestIdentifier]
                 }];
                 
                 result = [self createMirroringResultForRequest:self.request storeIdentifier:monitor.storeIdentifier success:NO madeChanges:NO error:_error];

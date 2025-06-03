@@ -27,7 +27,7 @@
 #import "OpenCloudData/Private/Model/OCCKHistoryAnalyzerState.h"
 #import "OpenCloudData/SPI/CoreData/NSPersistentStore+Private.h"
 #import "OpenCloudData/Private/OCCloudKitMirroringDelegate.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @implementation OCCloudKitMetadataModelMigrator
 

@@ -319,7 +319,7 @@
         if (store == nil) {
             _succeed = NO;
             _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134407 userInfo:@{
-                NSLocalizedFailureErrorKey: [NSString stringWithFormat:@"Request '%@' was cancelled because the store was removed from the coordinator.", self.request.requestIdentifier]
+                NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Request '%@' was cancelled because the store was removed from the coordinator.", self.request.requestIdentifier]
             }];
             return;
         }

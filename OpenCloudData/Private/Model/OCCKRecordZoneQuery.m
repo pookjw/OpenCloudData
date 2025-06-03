@@ -8,7 +8,7 @@
 #import "OpenCloudData/Private/Model/OCCKRecordZoneQuery.h"
 #import "OpenCloudData/Private/OCCloudKitMetadataModel.h"
 #import "OpenCloudData/Private/Model/OCCKRecordZoneMetadata.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @implementation OCCKRecordZoneQuery
 @dynamic recordZone;

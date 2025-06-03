@@ -21,7 +21,7 @@
 #import "OpenCloudData/SPI/CoreData/NSSQLModel.h"
 #import "OpenCloudData/SPI/CoreData/NSSQLiteStatement.h"
 #import "OpenCloudData/SPI/OCSPIResolver.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 NSString * const OCCKRecordZoneQueryCursorTransformerName = @"com.pookjw.openclouddata.cloudkit.query.cursor";
 NSString * const OCCKRecordZoneQueryPredicateTransformerName = @"com.pookjw.openclouddata.cloudkit.predicate";

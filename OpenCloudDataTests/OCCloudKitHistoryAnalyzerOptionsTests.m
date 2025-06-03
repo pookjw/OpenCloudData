@@ -9,7 +9,7 @@
 #import "OpenCloudData/Private/Analyzer/OCCloudKitHistoryAnalyzerOptions.h"
 #import "OpenCloudData/Private/Request/OCCloudKitMirroringRequest.h"
 #import "OpenCloudData/Helper/_OCDirectMethodResolver.h"
-#import <objc/message.h>
+#include <objc/message.h>
 
 @interface OCCloudKitHistoryAnalyzerOptionsTests : XCTestCase
 @end

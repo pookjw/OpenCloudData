@@ -16,7 +16,7 @@
 #import "OpenCloudData/Private/Log.h"
 #import "OpenCloudData/SPI/OCSPIResolver.h"
 #import "OpenCloudData/Private/OCCKRecordMetadataReceiptArchive.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @implementation OCCKRecordMetadata
 @dynamic ckRecordName;

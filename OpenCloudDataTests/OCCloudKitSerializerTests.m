@@ -10,7 +10,7 @@
 #import "OpenCloudData/SPI/CoreData/PFCloudKitSerializer.h"
 #import "OpenCloudData/Helper/_OCDirectMethodResolver.h"
 #import "OpenCloudData/SPI/OCSPIResolver.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @interface OCCloudKitSerializerTests : XCTestCase
 @end

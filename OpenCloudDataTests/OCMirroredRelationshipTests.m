@@ -9,7 +9,7 @@
 #import "OpenCloudData/Private/MirroredRelationship/OCMirroredRelationship.h"
 #import "OpenCloudData/SPI/CoreData/MirroredRelationship/PFMirroredRelationship.h"
 #import "OpenCloudData/SPI/OCSPIResolver.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @interface OCMirroredRelationshipTests : XCTestCase
 @end

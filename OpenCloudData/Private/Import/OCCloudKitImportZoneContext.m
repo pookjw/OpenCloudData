@@ -16,7 +16,7 @@
 #import "OpenCloudData/Private/OCCloudKitSerializer.h"
 #import "OpenCloudData/Private/Model/OCCKImportOperation.h"
 #import "OpenCloudData/SPI/CoreData/NSManagedObjectID+Private.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @implementation OCCloudKitImportZoneContext
 

@@ -9,7 +9,7 @@
 #import <CloudKit/CloudKit.h>
 #import "OpenCloudData/Private/Model/OCCKRecordMetadata.h"
 #import "OpenCloudData/SPI/CoreData/Model/NSCKRecordMetadata.h"
-#import <objc/runtime.h>
+#include <objc/runtime.h>
 
 @interface OCCKRecordMetadataTests : XCTestCase
 @end
