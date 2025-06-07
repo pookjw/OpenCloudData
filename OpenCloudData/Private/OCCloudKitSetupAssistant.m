@@ -1229,10 +1229,10 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
     switch (_mirroringOptions.databaseScope) {
         case CKDatabaseScopeShared: {
             // <+3956>
-            // x24
-            NSMutableSet *set_1 = [[NSMutableSet alloc] init];
+            // x24 // 안 쓰이는듯?
+            NSMutableSet<CKRecordZoneID *> *set_1 = [[NSMutableSet alloc] init];
             // x25
-            NSMutableSet *set_2 = [[NSMutableSet alloc] init];
+            NSMutableSet<CKRecordID *> *set_2 = [[NSMutableSet alloc] init];
             // x26
             OCCloudKitStoreMonitor *storeMonitor = [_storeMonitor retain];
             
@@ -1271,9 +1271,40 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
                  */
                 [context performBlockAndWait:^{
                     // self(block) = x19
-                    // x20
-                    NSFetchRequest<OCCKRecordZoneMetadata *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordZoneMetadata entityPath]];
-                    abort();
+                    @try {
+                        // sp, #0x58
+                        NSError * _Nullable __error = nil;
+                        // x20
+                        NSFetchRequest<OCCKRecordZoneMetadata *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordZoneMetadata entityPath]];
+                        fetchRequest.affectedStores = @[store];
+                        fetchRequest.predicate = [NSPredicate predicateWithFormat:@"database.databaseScopeNum = %@ AND %K == YES", [NSNumber numberWithInteger:3], @"needsNewShareInvitation"];
+                        
+                        // x20
+                        NSArray<OCCKRecordZoneMetadata *> *fetchedObjects = [context executeFetchRequest:fetchRequest error:&__error];
+                        
+                        if (__error != nil) {
+                            _error = [__error retain];
+                            _succeed = NO;
+                            return;
+                        }
+                        
+                        for (OCCKRecordZoneMetadata *metadata in fetchedObjects) {
+                            // x22
+                            CKRecordZoneID *zoneID = [metadata createRecordZoneID];
+                            // original : getCloudKitCKRecordIDClass, getCloudKitCKRecordNameZoneWideShare
+                            // x23
+                            CKRecordID *recordID = [[CKRecordID alloc] initWithRecordName:CKRecordNameZoneWideShare zoneID:zoneID];
+                            [set_2 addObject:recordID];
+                            [recordID release];
+                            [zoneID release];
+                        }
+                    } @catch (NSException *exception) {
+                        _succeed = NO;
+                        _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{
+                            @"NSUnderlyingException": exception,
+                            NSLocalizedFailureReasonErrorKey: @"An unhandled exception was caught during a fetch for zone in manatee identity loss recovery."
+                        }];
+                    }
                 }];
                 
                 [context release];
@@ -1294,12 +1325,24 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
                 
                 /*
                  __71-[PFCloudKitSetupAssistant _recoverFromManateeIdentityLossIfNecessary:]_block_invoke_3.58
-                 semaphore = sp + 0x40
-                 _succeed = sp + 0x48
-                 _error = sp + 0x50
+                 semaphore = sp + 0x40 = x19 + 0x20
+                 _succeed = sp + 0x48 = x19 + 0x28
+                 _error = sp + 0x50 = x19 + 0x30
                  */
                 operation.modifyRecordsCompletionBlock = ^(NSArray<CKRecord *> * _Nullable savedRecords, NSArray<CKRecordID *> * _Nullable deletedRecordIDs, NSError * _Nullable operationError) {
-                    abort();
+                    // self(block) = x19
+                    if (operationError != nil) {
+                        /*
+                         deletedRecordIDs = x21
+                         operationError = x20
+                         */
+                        _succeed = NO;
+                        _error = [operationError retain];
+                        
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Deleting records in Shared database %@ in response to Manatee identity loss failed, %@", __func__, __LINE__, deletedRecordIDs, operationError);
+                    }
+                    
+                    dispatch_semaphore_signal(semaphore);
                 };
                 
                 [_container addOperation:operation];
@@ -1317,15 +1360,90 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
                 
                 /*
                  __71-[PFCloudKitSetupAssistant _recoverFromManateeIdentityLossIfNecessary:]_block_invoke.59
-                 storeMonitor = sp + 0x170
-                 set_1 = sp + 0x178
-                 self = sp + 0x180
-                 _error = sp + 0x188
-                 _succeed = sp + 0x190
-                 3 = sp + 0x198
+                 storeMonitor = sp + 0x170 = x20 + 0x20
+                 set_1 = sp + 0x178 = x20 + 0x28
+                 self = sp + 0x180 = x20 + 0x30
+                 _error = sp + 0x188 = x20 + 0x38
+                 _succeed = sp + 0x190 = x20 + 0x40
+                 3 = sp + 0x198 = x20 + 0x48
                  */
                 [storeMonitor performBlock:^{
-                    abort();
+                    // self(block) = x20
+                    // x19
+                    NSPersistentStore *store = [storeMonitor retainedMonitoredStore];
+                    if (store == nil) {
+                        // <+176>
+                        _succeed = NO;
+                        _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
+                            NSLocalizedFailureReasonErrorKey: @"The mirroring delegate could not recovery from Manatee identity loss because it's store was removed from the coordinator."
+                        }];
+                    }
+                    
+                    // <+56>
+                    // x21
+                    NSManagedObjectContext *context = [storeMonitor newBackgroundContextForMonitoredCoordinator];
+                    context.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateSetupAuthor];
+                    
+                    /*
+                     __71-[PFCloudKitSetupAssistant _recoverFromManateeIdentityLossIfNecessary:]_block_invoke_2.60
+                     set_1 = sp + 0x20 = x19 + 0x20
+                     store = sp + 0x28 = x19 + 0x28
+                     context = sp + 0x30 = x19 + 0x30
+                     self = sp + 0x38 = x19 + 0x38
+                     _error = sp + 0x40 = x19 + 0x40
+                     _succeed = sp + 0x48 = x19 + 0x48
+                     3 = sp + 0x50 = x19 + 0x50
+                     */
+                    [context performBlockAndWait:^{
+                        // self(block) = x19
+                        @try {
+                            for (CKRecordZoneID *zoneID in set_1) {
+                                // sp, #0x28
+                                NSError * _Nullable __error = nil;
+                                
+                                OCCKRecordZoneMetadata * _Nullable metadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:zoneID inDatabaseWithScope:CKDatabaseScopeShared forStore:store inContext:context error:&__error];
+                                
+                                if (__error != nil) {
+                                    _error = [__error retain];
+                                    _succeed = NO;
+                                    return;
+                                }
+                                
+                                if (metadata != nil) {
+                                    metadata.needsRecoveryFromIdentityLoss = NO;
+                                } else {
+                                    _succeed = NO;
+                                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Failed to fetch zone metadata during un-marking zones needing recovery from Manatee identity loss: %@\n", __error); // nil 나올듯
+                                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Failed to fetch zone metadata during un-marking zones needing recovery from Manatee identity loss: %@\n", __error); // nil 나올듯
+                                }
+                                
+                                // <+280>
+                                if (context.hasChanges) {
+                                    BOOL result = [context save:&__error];
+                                    if (!result) {
+                                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Failed to save metadata while un-marking zones needing recovery from Manatee identity loss: %@", __func__, __LINE__, self, __error);
+                                    }
+                                }
+                                
+                                // <+472>
+                                if (__error != nil) {
+                                    // <+632>
+                                    _error = [__error retain];
+                                    _succeed = NO;
+                                    return;
+                                }
+                            }
+                        } @catch (NSException *exception) {
+                            _succeed = NO;
+                            _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{
+                                @"NSUnderlyingException": exception,
+                                NSLocalizedFailureReasonErrorKey: @"An unhandled exception was caught during a fetch for zone in manatee identity loss recovery."
+                            }];
+                        }
+                    }];
+                    
+                    [context release];
+                    [store release];
                 }];
                 
                 [storeMonitor release];
@@ -1345,14 +1463,77 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
             
             /*
              __71-[PFCloudKitSetupAssistant _recoverFromManateeIdentityLossIfNecessary:]_block_invoke
-             storeMonitor = sp + 0x100
-             set = sp + 0x108
-             _error = sp + 0x110
-             _succeed = sp + 0x118
-             2 = sp + 0x120
+             storeMonitor = sp + 0x100 = x20 + 0x20
+             set = sp + 0x108 = x20 + 0x28
+             _error = sp + 0x110 = x20 + 0x30
+             _succeed = sp + 0x118 = x20 + 0x38
+             2 = sp + 0x120 = x20 + 0x40
              */
             [storeMonitor performBlock:^{
-                abort();
+                // self(block) = x20
+                // x19
+                NSPersistentStore *store = [storeMonitor retainedMonitoredStore];
+                if (store == nil) {
+                    _succeed = NO;
+                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
+                        NSLocalizedFailureReasonErrorKey: @"The mirroring delegate could not initialize because it's store was removed from the coordinator."
+                    }];
+                    return;
+                }
+                
+                // x21
+                NSManagedObjectContext *context = [storeMonitor newBackgroundContextForMonitoredCoordinator];
+                context.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateSetupAuthor];
+                
+                /*
+                 __71-[PFCloudKitSetupAssistant _recoverFromManateeIdentityLossIfNecessary:]_block_invoke_2
+                 store = sp + 0x28 = x19 + 0x20
+                 context = sp + 0x30 = x19 + 0x28
+                 set = sp + 0x38 = x19 + 0x30
+                 _error = sp + 0x40 = x19 + 0x38
+                 _succeed = sp + 0x48 = x19 + 0x40
+                 2 = sp + 0x50 = x19 + 0x48
+                 */
+                [context performBlockAndWait:^{
+                    // self(block) = x19
+                    @try {
+                        // sp, #0x58
+                        NSError * _Nullable __error = nil;
+                        
+                        // x20
+                        NSFetchRequest<OCCKRecordZoneMetadata *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordZoneMetadata entityPath]];
+                        fetchRequest.affectedStores = @[store];
+                        fetchRequest.predicate = [NSPredicate predicateWithFormat:@"database.databaseScopeNum = %@ AND %K == YES", [NSNumber numberWithInteger:CKDatabaseScopePrivate], @"needsRecoveryFromIdentityLoss"];
+                        
+                        // x20
+                        NSArray<OCCKRecordZoneMetadata *> *fetchedObjects = [context executeFetchRequest:fetchRequest error:&__error];
+                        
+                        if (__error != nil) {
+                            _error = [__error retain];
+                            _succeed = NO;
+                            return;
+                        }
+                        
+                        // <+252>
+                        // x22
+                        for (OCCKRecordZoneMetadata *metadata in fetchedObjects) {
+                            // original : getCloudKitCKRecordZoneIDClass
+                            // x22
+                            CKRecordZoneID *zoneID = [[CKRecordZoneID alloc] initWithZoneName:metadata.ckRecordZoneName ownerName:metadata.ckOwnerName];
+                            [set addObject:zoneID];
+                            [zoneID release];
+                        }
+                    } @catch (NSException *exception) {
+                        _succeed = NO;
+                        _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{
+                            @"NSUnderlyingException": exception,
+                            NSLocalizedFailureReasonErrorKey: @"An unhandled exception was caught during a fetch for zone in manatee identity loss recovery."
+                        }];
+                    }
+                }];
+                
+                [context release];
+                [store release];
             }];
             
             [storeMonitor release];
