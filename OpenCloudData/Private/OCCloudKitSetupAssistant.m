@@ -904,14 +904,32 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
     
     /*
      __47-[PFCloudKitSetupAssistant _checkUserIdentity:]_block_invoke
-     storeIdentifier = sp + 0x170
-     cloudKitSemaphore = sp + 0x178
-     _succeed = sp + 0x180
-     recordID = sp + 0x188
-     _error = sp + 0x190
+     storeIdentifier = sp + 0x170 = x19 + 0x20
+     cloudKitSemaphore = sp + 0x178 = x19 + 0x28
+     _succeed = sp + 0x180 = x19 + 0x30
+     recordID = sp + 0x188 = x19 + 0x38
+     _error = sp + 0x190 = x19 + 0x40
      */
-    [_container fetchUserRecordIDWithCompletionHandler:^(CKRecordID * _Nullable recordID, NSError * _Nullable error) {
-        abort();
+    [_container fetchUserRecordIDWithCompletionHandler:^(CKRecordID * _Nullable _recordID, NSError * _Nullable __error) {
+        /*
+         self(block) = x19
+         _recordID = x20
+         __error = x21
+         */
+        os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): Fetched user recordID for store %@: %@\n%@", __func__, __LINE__, storeIdentifier, recordID, __error);
+        
+        // <+228>
+        if (recordID == nil) {
+            // <+260>
+            _error = [__error retain];
+            dispatch_semaphore_signal(cloudKitSemaphore);
+            return;
+        }
+        
+        // <+232>
+        _succeed = YES;
+        recordID = [_recordID retain];
+        dispatch_semaphore_signal(cloudKitSemaphore);
     }];
     
     dispatch_semaphore_wait(cloudKitSemaphore, DISPATCH_TIME_FOREVER);
@@ -924,23 +942,108 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
         // original : getCloudKitCKErrorDomain
         if (([_error.domain isEqualToString:CKErrorDomain]) && (_error.code == CKErrorNotAuthenticated)) {
             // <+2324>
+            // 뭔지 모르겠음. 할당 안하고 읽기만 함
             // sp, #0x90
             __block id _Nullable value = nil;
             
             /*
              __47-[PFCloudKitSetupAssistant _checkUserIdentity:]_block_invoke.82
-             storeMonitor = sp + 0x100
-             self = sp + 0x108
-             _succeed = sp + 0x110
-             value = sp + 0x118
-             _error = sp + 0x120
+             storeMonitor = sp + 0x100 = x20 + 0x20
+             self = sp + 0x108 = x20 + 0x28
+             _succeed = sp + 0x110 = x20 + 0x30
+             value = sp + 0x118 = x20 + 0x38
+             _error = sp + 0x120 = x20 + 0x40
              */
             [storeMonitor performBlock:^{
-                abort();
+                // self(block) = x20
+                // x19
+                NSPersistentStore *store = [storeMonitor retainedMonitoredStore];
+                
+                if (store == nil) {
+                    // <+168>
+                    _succeed = NO;
+                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134407 userInfo:@{
+                        NSLocalizedFailureReasonErrorKey: @"Identity check was cancelled because the store was removed from the coordinator."
+                    }];
+                    return;
+                }
+                
+                // x21
+                NSManagedObjectContext *context = [storeMonitor newBackgroundContextForMonitoredCoordinator];
+                context.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateSetupAuthor];
+                
+                /*
+                 __47-[PFCloudKitSetupAssistant _checkUserIdentity:]_block_invoke_2.83
+                 store = sp + 0x28 = x19 + 0x20
+                 context = sp + 0x30 = x19 + 0x28
+                 self = sp + 0x38 = x19 + 0x30
+                 _succeed = sp + 0x40 = x19 + 0x38
+                 _error = sp + 0x48 = x19 + 0x40
+                 value = sp + 0x50 = x19 + 0x48
+                 */
+                [context performBlockAndWait:^{
+                    // self(block) = x19
+                    // sp + 0x8
+                    NSError * _Nullable __error = nil;
+                    
+                    // x20
+                    NSString *checkedCKIdentityDefaultsKey = [OCSPIResolver NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey];
+                    // x22
+                    NSString *ckIdentityRecordNameDefaultsKey = [OCSPIResolver NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey];
+                    
+                    // x21
+                    NSDictionary<NSString *, OCCKMetadataEntry *> * entries = [OCCKMetadataEntry entriesForKeys:@[
+                        checkedCKIdentityDefaultsKey, ckIdentityRecordNameDefaultsKey
+                    ]
+                                                                                                      fromStore:store
+                                                                                         inManagedObjectContext:context
+                                                                                                          error:&__error];
+                    
+                    if (entries == nil) {
+                        // <+776>
+                        _succeed = NO;
+                        _error = [__error retain];
+                        return;
+                    }
+                    
+                    // <+132>
+                    if (!([entries objectForKey:checkedCKIdentityDefaultsKey].boolValue)) {
+                        // <+316>
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: First identity fetch failed due to authentication but store was never assigned to a user record: %@", __func__, __LINE__, self, value);
+                        OCCKMetadataEntry * _Nullable entry = [entries objectForKey:checkedCKIdentityDefaultsKey];
+                        if (entry != nil) {
+                            entry.boolValue = YES;
+                        } else {
+                            [OCCKMetadataEntry insertMetadataEntryWithKey:checkedCKIdentityDefaultsKey boolValue:YES forStore:store intoManagedObjectContext:context];
+                        }
+                        
+                        BOOL result = [context save:&__error];
+                        if (!result) {
+                            _succeed = NO;
+                            _error = [__error retain];
+                        }
+                        return;
+                    }
+                    
+                    OCCKMetadataEntry *entry = [entries objectForKey:ckIdentityRecordNameDefaultsKey];
+                    if (entry == nil) {
+                        _succeed = YES;
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Identity fetch failed due to authentication but store was never assigned to a user record: %@", __func__, __LINE__, self, value);
+                        return;
+                    }
+                    
+                    // <+176>
+                    _succeed = NO;
+                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134405 userInfo:@{
+                        [OCSPIResolver PFCloudKitOldUserIdentityKey]: entry.stringValue,
+                        [OCSPIResolver NSCloudKitMirroringDelegateResetSyncReasonKey]: @2
+                    }];
+                }];
+                [context release];
+                [store release];
+                
+                [value release];
             }];
-            
-            // 아무것도 안하는듯?
-            [value release];
             
             if (_error == nil) {
                 [self endActivityForPhase:3 withError:nil];
@@ -948,6 +1051,7 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
             } else {
                 [self endActivityForPhase:3 withError:_error];
                 if (error != NULL) *error = [[_error retain] autorelease];
+                [_error release];
                 return NO;
             }
         } else {
