@@ -596,19 +596,18 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
                     }
                     return;
                 }
-            } @catch (NSException *exception) {
-                _succeed = NO;
-                _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134402 userInfo:@{
-                    @"NSUnderlyingException": exception
-                }];
-                return;
-            }
-            
-            @try {
+                
                 userIdentity = [entry.stringValue retain];
             } @catch (NSException *exception) {
-                os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Unexpected exception thrown during account setup: %@\n", exception);
-                os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Unexpected exception thrown during account setup: %@\n", exception);
+                @try {
+                    _succeed = NO;
+                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134402 userInfo:@{
+                        @"NSUnderlyingException": exception
+                    }];
+                } @catch (NSException *exception) {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Unexpected exception thrown during account setup: %@\n", exception);
+                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Unexpected exception thrown during account setup: %@\n", exception);
+                }
             }
         }];
         
@@ -1081,14 +1080,72 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
     
     /*
      __47-[PFCloudKitSetupAssistant _checkUserIdentity:]_block_invoke.79
-     storeMonitor = sp + 0x100
-     self = sp + 0x108
-     recordID = sp + 0x110
-     _succeed = sp + 0x118
-     _error = sp + 0x120
+     storeMonitor = sp + 0x100 = x19 + 0x20
+     self = sp + 0x108 = x19 + 0x28
+     recordID = sp + 0x110 = x19 + 0x30
+     _succeed = sp + 0x118 = x19 + 0x38
+     _error = sp + 0x120 = x19 + 0x40
      */
     [storeMonitor performBlock:^{
-        abort();
+        // self(block) = x19
+        // sp + 0x8
+        NSPersistentStore *store = [storeMonitor retainedMonitoredStore];
+        if (store == nil) {
+            return;
+        }
+        // x20
+        NSManagedObjectContext *context = [storeMonitor newBackgroundContextForMonitoredCoordinator];
+        context.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateSetupAuthor];
+        
+        /*
+         __47-[PFCloudKitSetupAssistant _checkUserIdentity:]_block_invoke_2
+         store = sp + 0x30 = x19 + 0x20
+         context = sp + 0x38 = x19 + 0x28
+         self = sp + 0x40 = x19 + 0x30
+         recordID = sp + 0x48 = x19 + 0x38
+         _succeed = sp + 0x50 = x19 + 0x40
+         _error = sp + 0x58 = x19 + 0x48
+         */
+        [context performBlock:^{
+            // self(block) = x19
+            @try {
+                // sp, #0x8
+                NSError * _Nullable __error = nil;
+                
+                // x21
+                NSString *NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey = [OCSPIResolver NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey];
+                // x20
+                NSString *NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey = [OCSPIResolver NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey];
+                
+                // x22
+                OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entriesForKeys:@[NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey, NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey]
+                                                                              fromStore:store
+                                                                 inManagedObjectContext:context
+                                                                                  error:&__error];
+                if (entry == nil) {
+                    // <+456>
+                    _succeed = NO;
+                    _error = [__error retain];
+                    return;
+                }
+                
+                // <+140>
+                abort();
+            } @catch (NSException *exception) {
+                @try {
+                    _succeed = NO;
+                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134402 userInfo:@{
+                        @"NSUnderlyingException": exception
+                    }];
+                } @catch (NSException *exception) {
+                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Unexpected exception thrown during identity check: %@\n", exception);
+                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Unexpected exception thrown during identity check: %@\n", exception);
+                }
+            }
+        }];
+        
+        [context release];
+        [store release];
     }];
     
     if (_error == nil) {
