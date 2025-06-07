@@ -627,6 +627,7 @@ CK_EXTERN NSString * const CKIdentityUpdateNotification;
 }
 
 - (void)observeChangesForStore:(NSSQLCore *)persistentStore inPersistentStoreCoordinator:(NSPersistentStoreCoordinator *)persistentStoreCoordinator {
+#warning TODO Offset 기록
     // inlined from __108-[NSCloudKitMirroringDelegate persistentStoreCoordinator:didSuccessfullyAddPersistentStore:withDescription:]_block_invoke
     /*
      self = x19
@@ -637,6 +638,7 @@ CK_EXTERN NSString * const CKIdentityUpdateNotification;
     NSSQLCore * _Nullable observedStore = self->_observedStore;
     os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: Observing store: %@", __func__, __LINE__, self, persistentStore);
     if (observedStore != nil) return;
+    _observedStore = persistentStore;
     
     @autoreleasepool {
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(coordinatorWillRemoveStore:) name:NSPersistentStoreCoordinatorWillRemoveStoreNotification object:nil];

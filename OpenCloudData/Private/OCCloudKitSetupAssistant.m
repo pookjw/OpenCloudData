@@ -1625,12 +1625,9 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
         // <+5048>
         *error = [[_error retain] autorelease];
         [_error release];
-        return NO;
     }
     
-    
-    
-    abort();
+    return _succeed;
 }
 
 - (BOOL)_createZoneIfNecessary:(NSError * _Nullable *)error {

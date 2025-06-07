@@ -36,7 +36,7 @@
             
             [persistentStoreCoordinator performBlockAndWait:^{
                 [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(coordinatorWillRemoveStore:) name:[OCSPIResolver _NSPersistentStoreCoordinatorPrivateWillRemoveStoreNotification] object:nil];
-                storeIsAlive = ([persistentStoreCoordinator persistentStoreForIdentifier:identifier]);
+                storeIsAlive = ([persistentStoreCoordinator persistentStoreForIdentifier:identifier] != nil);
             }];
             
             _storeIsAlive = storeIsAlive;
