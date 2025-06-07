@@ -452,6 +452,11 @@ __attribute__((objc_direct_members))
     return *(id *)addr;
 }
 
++ (NSString *)PFCloudKitNewUserIdentityKey {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_PFCloudKitNewUserIdentityKey"];
+    return *(id *)addr;
+}
+
 + (NSString *)NSCloudKitMirroringDelegateResetSyncReasonKey {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSCloudKitMirroringDelegateResetSyncReasonKey"];
     return *(id *)addr;

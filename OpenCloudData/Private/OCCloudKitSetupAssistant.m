@@ -15,6 +15,7 @@
 #import "OpenCloudData/Private/Model/OCCKEvent.h"
 #import "OpenCloudData/SPI/CoreData/_PFRoutines.h"
 #import "OpenCloudData/Private/Model/OCCKMetadataEntry.h"
+#import "OpenCloudData/Private/Model/OCCKRecordZoneMetadata.h"
 #include <objc/runtime.h>
 
 CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
@@ -1118,11 +1119,11 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
                 NSString *NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey = [OCSPIResolver NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey];
                 
                 // x22
-                OCCKMetadataEntry * _Nullable entry = [OCCKMetadataEntry entriesForKeys:@[NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey, NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey]
+                NSDictionary<NSString *,OCCKMetadataEntry *> * _Nullable entries = [OCCKMetadataEntry entriesForKeys:@[NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey, NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey]
                                                                               fromStore:store
                                                                  inManagedObjectContext:context
                                                                                   error:&__error];
-                if (entry == nil) {
+                if (entries == nil) {
                     // <+456>
                     _succeed = NO;
                     _error = [__error retain];
@@ -1130,7 +1131,58 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
                 }
                 
                 // <+140>
-                abort();
+                // x23
+                OCCKMetadataEntry *entry_1 = [entries objectForKey:NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey];
+                if (entry_1 == nil) {
+                    entry_1 = [OCCKMetadataEntry insertMetadataEntryWithKey:NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey boolValue:NO forStore:store intoManagedObjectContext:context];
+                }
+                
+                if (!entry_1.boolValue) {
+                    // <+464>
+                    entry_1.boolValue = YES;
+                    [OCCKMetadataEntry insertMetadataEntryWithKey:NSCloudKitMirroringDelegateCheckedCKIdentityDefaultsKey stringValue:recordID.recordName forStore:store intoManagedObjectContext:context];
+                    BOOL result = [context save:&_error];
+                    if (!result) {
+                        [_error retain];
+                    }
+                    return;
+                }
+                
+                // <+196>
+                // x21
+                OCCKMetadataEntry *entry_2 = [entries objectForKey:NSCloudKitMirroringDelegateCKIdentityRecordNameDefaultsKey];
+                if (entry_2 == nil) {
+                    // <+520>
+                    _succeed = NO;
+                    os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: CKIdentity record changed from nil to %@", __func__, __LINE__, self, recordID);
+                    // <+700>
+                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134405 userInfo:@{
+                        [OCSPIResolver PFCloudKitNewUserIdentityKey]: recordID.recordName,
+                        [OCSPIResolver NSCloudKitMirroringDelegateResetSyncReasonKey]: @1
+                    }];
+                    return;
+                } else {
+                    if ([entry_2.stringValue isEqualToString:recordID.recordName]) {
+                        // <+276>
+                        os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: CKIdentity record matches store: %@", __func__, __LINE__, self, recordID);
+                        
+                        BOOL result = [context save:&_error];
+                        if (!result) {
+                            [_error retain];
+                        }
+                        return;
+                    } else {
+                        // <+812>
+                        os_log_with_type(_OCLogGetLogStream(0x11), OS_LOG_TYPE_DEFAULT, "OpenCloudData+CloudKit: %s(%d): %@: CKIdentity record has changed from %@ to %@", __func__, __LINE__, self, entry_2.stringValue, recordID.recordName);
+                        _succeed = NO;
+                        _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134405 userInfo:@{
+                            [OCSPIResolver PFCloudKitOldUserIdentityKey]: entry_2.stringValue,
+                            [OCSPIResolver PFCloudKitNewUserIdentityKey]: recordID.recordName,
+                            [OCSPIResolver NSCloudKitMirroringDelegateResetSyncReasonKey]: @3
+                        }];
+                        return;
+                    }
+                }
             } @catch (NSException *exception) {
                 @try {
                     _succeed = NO;
@@ -1186,14 +1238,46 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
             
             /*
              __71-[PFCloudKitSetupAssistant _recoverFromManateeIdentityLossIfNecessary:]_block_invoke.54
-             storeMonitor = sp + 0x100
-             set_2 = sp + 0x108
-             _error = sp + 0x110
-             _succeed = sp + 0x118
-             3 = sp + 0x120
+             storeMonitor = sp + 0x100 = x19 + 0x20
+             set_2 = sp + 0x108 = x19 + 0x28
+             _error = sp + 0x110 = x19 + 0x30
+             _succeed = sp + 0x118 = x19 + 0x38
+             3 = sp + 0x120 = x19 + 0x40
              */
             [storeMonitor performBlock:^{
-                abort();
+                // self(block) = x20
+                // x19
+                NSPersistentStore *store = [storeMonitor retainedMonitoredStore];
+                if (store == nil) {
+                    _succeed = NO;
+                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
+                        NSLocalizedFailureReasonErrorKey: @"The mirroring delegate could not initialize because it's store was removed from the coordinator."
+                    }];
+                    return;
+                }
+                
+                // x21
+                NSManagedObjectContext *context = [storeMonitor newBackgroundContextForMonitoredCoordinator];
+                context.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateSetupAuthor];
+                
+                /*
+                 __71-[PFCloudKitSetupAssistant _recoverFromManateeIdentityLossIfNecessary:]_block_invoke_2.55
+                 store = sp + 0x28 = x19 + 0x20
+                 context = sp + 0x30 = x19 + 0x28
+                 set_2 = sp + 0x38 = x19 + 0x30
+                 _error = sp + 0x40 = x19 + 0x38
+                 _succeed = sp + 0x48 = x19 + 0x40
+                 3 = sp + 0x50 = x19 + 0x48
+                 */
+                [context performBlockAndWait:^{
+                    // self(block) = x19
+                    // x20
+                    NSFetchRequest<OCCKRecordZoneMetadata *> *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:[OCCKRecordZoneMetadata entityPath]];
+                    abort();
+                }];
+                
+                [context release];
+                [store release];
             }];
             
             [storeMonitor release];

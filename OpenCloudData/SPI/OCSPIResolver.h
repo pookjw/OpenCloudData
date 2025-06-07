@@ -120,6 +120,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (CKSubscriptionID)PFPublicDatabaseSubscriptionID;
 + (CKSubscriptionID)PFSharedDatabaseSubscriptionID;
 + (NSString *)PFCloudKitOldUserIdentityKey;
++ (NSString *)PFCloudKitNewUserIdentityKey;
 + (NSString *)NSCloudKitMirroringDelegateResetSyncReasonKey;
 
 + (NSArray *)NSArray_EmptyArray;
