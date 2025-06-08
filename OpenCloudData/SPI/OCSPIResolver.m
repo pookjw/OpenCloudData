@@ -462,6 +462,16 @@ __attribute__((objc_direct_members))
     return *(id *)addr;
 }
 
++ (void)_PFModelUtilities_addAttributes_toPropertiesOfEntity:(Class)x0 x1:(NSDictionary<NSString *,NSArray *> *)x1 x2:(NSEntityDescription *)x2 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[_PFModelUtilities addAttributes:toPropertiesOfEntity:]"];
+    ((void (*)(Class, id, id))addr)(x0, x1, x2);
+}
+
++ (void)_PFModelUtilities_addRelationships_toPropertiesOfEntity:(Class)x0 x1:(NSDictionary<NSString *,NSArray *> *)x1 x2:(NSEntityDescription *)x2 {
+    const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"+[_PFModelUtilities addRelationships:toPropertiesOfEntity:]"];
+    ((void (*)(Class, id, id))addr)(x0, x1, x2);
+}
+
 + (NSArray *)NSArray_EmptyArray {
     const void *addr = [OCSPIResolver _addressFromCoreDataForSymbol:"_NSArray_EmptyArray"];
     return *(id *)addr;

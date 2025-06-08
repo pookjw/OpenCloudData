@@ -23,6 +23,8 @@
 #import "OpenCloudData/SPI/OCSPIResolver.h"
 #import "OpenCloudData/SPI/CoreData/NSManagedObjectModel+Private.h"
 #import "OpenCloudData/Private/Model/OCCKExportMetadata.h"
+#import "OpenCloudData/Private/Model/OCCKMirroredRelationship.h"
+#import "OpenCloudData/SPI/OCSPIResolver.h"
 #include <objc/runtime.h>
 
 NSString * const OCCKRecordZoneQueryCursorTransformerName = @"com.pookjw.openclouddata.cloudkit.query.cursor";
@@ -500,16 +502,53 @@ NSArray<Class> * _oc_PFModelMap_ancillaryModelFactoryClasses_custom(Class self, 
          */
         
         @autoreleasepool {
-            // x19
+            // x20
             NSManagedObjectModel *model = [[NSManagedObjectModel alloc] init];
             model._modelsReferenceIDOffset = [OCCloudKitMetadataModel ancillaryEntityOffset];
             
-            // x19
+            // x20/x21
             NSEntityDescription *exportMetadata = [[NSEntityDescription alloc] init];
             exportMetadata.name = @"NSCKExportMetadata";
-            // originak : @"NSCKExportMetadata"
+            // original : @"NSCKExportMetadata"
             exportMetadata.managedObjectClassName = NSStringFromClass([OCCKExportMetadata class]);
             
+            // sp, #0x50
+            NSEntityDescription *exportedObject = [[NSEntityDescription alloc] init];
+            exportedObject.name = @"NSCKExportedObject";
+            // original : NSCKExportedObject
+            exportedObject.managedObjectClassName = NSStringFromClass([OCCKExportedObject class]);
+            
+            // x23
+            NSEntityDescription *exportOperation = [[NSEntityDescription alloc] init];
+            exportOperation.name = @"NSCKExportOperation";
+            // original : NSCKExportOperation
+            exportOperation.managedObjectClassName = NSStringFromClass([OCCKExportOperation class]);
+            
+            // sp, #0x60
+            NSEntityDescription *mirroredRelationship = [[NSEntityDescription alloc] init];
+            mirroredRelationship.name = NSStringFromClass(objc_lookUpClass("NSCKMirroredRelationship"));
+            // original : NSCKMirroredRelationship
+            mirroredRelationship.managedObjectClassName = NSStringFromClass([OCCKMirroredRelationship class]);
+            
+            // <+500>
+            [OCSPIResolver _PFModelUtilities_addAttributes_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                             x1:@{
+                @"exportedAt": @[@(NSDateAttributeType)],
+                @"historyToken": @[
+                    @(NSTransformableAttributeType),
+                    @YES,
+                    [NSPersistentHistoryToken class],
+                    // original : @"com.apple.CoreData.cloudkit.metadata.transformer"
+                    @"com.pookjw.OpenCloudData.cloudkit.metadata.transformer"
+                ],
+                @"identifier": @[@(NSStringAttributeType)]
+            }
+                                                                             x2:exportMetadata];
+            
+            // <+608>
+            [OCSPIResolver _PFModelUtilities_addRelationships_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                                x1:@{/*TODO*/}
+                                                                                x2:exportMetadata];
             abort();
         }
     });

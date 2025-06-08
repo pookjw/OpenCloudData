@@ -123,6 +123,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)PFCloudKitNewUserIdentityKey;
 + (NSString *)NSCloudKitMirroringDelegateResetSyncReasonKey;
 
++ (void)_PFModelUtilities_addAttributes_toPropertiesOfEntity:(Class)x0 x1:(NSDictionary<NSString *, NSArray *> *)x1 x2:(NSEntityDescription *)x2;
++ (void)_PFModelUtilities_addRelationships_toPropertiesOfEntity:(Class)x0 x1:(NSDictionary<NSString *, NSArray *> *)x1 x2:(NSEntityDescription *)x2;
+
 + (NSArray *)NSArray_EmptyArray;
 + (NSSet *)NSSet_EmptySet;
 + (BOOL)z9dsptsiQ80etb9782fsrs98bfdle88;
