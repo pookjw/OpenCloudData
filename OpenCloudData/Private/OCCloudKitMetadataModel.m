@@ -21,6 +21,8 @@
 #import "OpenCloudData/SPI/CoreData/NSSQLModel.h"
 #import "OpenCloudData/SPI/CoreData/NSSQLiteStatement.h"
 #import "OpenCloudData/SPI/OCSPIResolver.h"
+#import "OpenCloudData/SPI/CoreData/NSManagedObjectModel+Private.h"
+#import "OpenCloudData/Private/Model/OCCKExportMetadata.h"
 #include <objc/runtime.h>
 
 NSString * const OCCKRecordZoneQueryCursorTransformerName = @"com.pookjw.openclouddata.cloudkit.query.cursor";
@@ -489,7 +491,30 @@ NSArray<Class> * _oc_PFModelMap_ancillaryModelFactoryClasses_custom(Class self, 
 }
 
 + (NSManagedObjectModel *)_newMetadataModelV16 __attribute__((objc_direct)) {
-    abort();
+    static NSManagedObjectModel *result;
+    
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        /*
+         0x1b8 = NSEntityDescription
+         */
+        
+        @autoreleasepool {
+            // x19
+            NSManagedObjectModel *model = [[NSManagedObjectModel alloc] init];
+            model._modelsReferenceIDOffset = [OCCloudKitMetadataModel ancillaryEntityOffset];
+            
+            // x19
+            NSEntityDescription *exportMetadata = [[NSEntityDescription alloc] init];
+            exportMetadata.name = @"NSCKExportMetadata";
+            // originak : @"NSCKExportMetadata"
+            exportMetadata.managedObjectClassName = NSStringFromClass([OCCKExportMetadata class]);
+            
+            abort();
+        }
+    });
+    
+    return [result retain];
 }
 
 @end

@@ -1561,13 +1561,20 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
                 
                 /*
                  __71-[PFCloudKitSetupAssistant _recoverFromManateeIdentityLossIfNecessary:]_block_invoke_3
-                 recordZoneIDs = sp + 0x40
-                 semaphore = sp + 0x48
-                 _succeed = sp + 0x50
-                 _error = sp + 0x58
+                 recordZoneIDs = sp + 0x40 = x19 + 0x20
+                 semaphore = sp + 0x48 = x19 + 0x28
+                 _succeed = sp + 0x50 = x19 + 0x30
+                 _error = sp + 0x58 = x19 + 0x38
                  */
                 operation.modifyRecordZonesCompletionBlock = ^(NSArray<CKRecordZone *> * _Nullable savedRecordZones, NSArray<CKRecordZoneID *> * _Nullable deletedRecordZoneIDs, NSError * _Nullable operationError) {
-                    abort();
+                    // self(block) = x19
+                    if (operationError != nil) {
+                        _succeed = NO;
+                        _error = [operationError retain];
+                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): Deleting zones %@ in response to Manatee identity loss failed, %@", __func__, __LINE__, recordZoneIDs, operationError);
+                    }
+                    
+                    dispatch_semaphore_signal(semaphore);
                 };
                 
                 [_database addOperation:operation];
@@ -1585,15 +1592,87 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
                 
                 /*
                  __71-[PFCloudKitSetupAssistant _recoverFromManateeIdentityLossIfNecessary:]_block_invoke.50
-                 storeMonitor = sp + 0x170
-                 set = sp + 0x178
-                 self = sp + 0x180
-                 _error = sp + 0x188
-                 _succeed = sp + 0x190
-                 2 = sp + 0x198
+                 storeMonitor = sp + 0x170 = x20 + 0x20
+                 set = sp + 0x178 = x20 + 0x28
+                 self = sp + 0x180 = x20 + 0x30
+                 _error = sp + 0x188 = x20 + 0x38
+                 _succeed = sp + 0x190 = x20 + 0x40
+                 2 = sp + 0x198 = x20 + 0x48
                  */
                 [storeMonitor performBlock:^{
-                    abort();
+                    // self(block) = x20
+                    // x19
+                    NSPersistentStore *store = [storeMonitor retainedMonitoredStore];
+                    if (store == nil) {
+                        // <+176>
+                        _succeed = NO;
+                        _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
+                            NSLocalizedFailureReasonErrorKey: @"The mirroring delegate could not recovery from Manatee identity loss because it's store was removed from the coordinator."
+                        }];
+                        return;
+                    }
+                    
+                    // x21
+                    NSManagedObjectContext *context = [storeMonitor newBackgroundContextForMonitoredCoordinator];
+                    context.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateSetupAuthor];
+                    
+                    /*
+                     __71-[PFCloudKitSetupAssistant _recoverFromManateeIdentityLossIfNecessary:]_block_invoke_2.51
+                     set = sp + 0x20 = x19 + 0x20
+                     store = sp + 0x28 = x19 + 0x28
+                     context = sp + 0x30 = x19 + 0x30
+                     self = sp + 0x38 = x19 + 0x38
+                     _error = sp + 0x40 = x19 + 0x40
+                     _succeed = sp + 0x48 = x19 + 0x48
+                     2 = sp + 0x50 = x19 + 0x50
+                     */
+                    [context performBlockAndWait:^{
+                        // self(block) = x19
+                        @try {
+                            for (CKRecordZoneID *zoneID in set) {
+                                // sp, #0x28
+                                NSError * _Nullable __error = nil;
+                                OCCKRecordZoneMetadata * _Nullable metadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:zoneID inDatabaseWithScope:CKDatabaseScopePrivate forStore:store inContext:context error:&__error];
+                                
+                                if (__error != nil) {
+                                    // <+632>
+                                    _error = [__error retain];
+                                    _succeed = NO;
+                                    return;
+                                }
+                                
+                                if (metadata == nil) {
+                                    _succeed = NO;
+                                    os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Failed to fetch zone metadata during un-marking zones needing recovery from Manatee identity loss: %@\n", __error);
+                                    os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Failed to fetch zone metadata during un-marking zones needing recovery from Manatee identity loss: %@\n", __error);
+                                } else {
+                                    metadata.needsRecoveryFromIdentityLoss = NO;
+                                }
+                                
+                                // <+280>
+                                if (context.hasChanges) {
+                                    BOOL result = [context save:&__error];
+                                    if (!result) {
+                                        os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData+CloudKit: %s(%d): %@: Failed to save metadata while un-marking zones needing recovery from Manatee identity loss: %@", __func__, __LINE__, self, __error);
+                                        if (__error != nil) {
+                                            _error = [__error retain];
+                                            _succeed = NO;
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                        } @catch (NSException *exception) {
+                            _succeed = NO;
+                            _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{
+                                @"NSUnderlyingException": exception,
+                                NSLocalizedFailureReasonErrorKey: @"An unhandled exception was caught during a fetch for zone in manatee identity loss recovery."
+                            }];
+                        }
+                    }];
+                    
+                    [context release];
+                    [store release];
                 }];
                 
                 [storeMonitor release];
@@ -1648,15 +1727,68 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
     if ((databaseScope == CKDatabaseScopePublic) || (databaseScope == CKDatabaseScopePrivate)) {
         /*
          __51-[PFCloudKitSetupAssistant _createZoneIfNecessary:]_block_invoke
-         storeMonitor = sp + 0x40
-         self = sp + 0x48
-         flag_1 = sp + 0x50
-         _succeed = sp + 0x58
-         _error = sp + 0x60
-         databaseScope = sp + 0x68
+         storeMonitor = sp + 0x40 = x20 + 0x20
+         self = sp + 0x48 = x20 + 0x28
+         flag_1 = sp + 0x50 = x20 + 0x30
+         _succeed = sp + 0x58 = x20 + 0x38
+         _error = sp + 0x60 = x20 + 0x40
+         databaseScope = sp + 0x68 = x20 + 0x48
          */
         [storeMonitor performBlock:^{
-            abort();
+            // self(block) = x20
+            // x19
+            NSPersistentStore *store = [storeMonitor retainedMonitoredStore];
+            if (store == nil) {
+                _succeed = NO;
+                _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
+                    NSLocalizedFailureReasonErrorKey: @"The mirroring delegate could not initialize because it's store was removed from the coordinator."
+                }];
+                return;
+            }
+            
+            // x21
+            NSManagedObjectContext *context = [storeMonitor newBackgroundContextForMonitoredCoordinator];
+            context.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateSetupAuthor];
+            
+            /*
+             __51-[PFCloudKitSetupAssistant _createZoneIfNecessary:]_block_invoke_2
+             self = sp + 0x20 = x19 + 0x20
+             store = sp + 0x28 = x19 + 0x28
+             context = sp + 0x30 = x19 + 0x30
+             flag_1 = sp + 0x38 = x19 + 0x38
+             _succeed = sp + 0x40 = x19 + 0x40
+             _error = sp + 0x48 = x19 + 0x48
+             databaseScope = sp + 0x50 = x19 + 0x50
+             */
+            [context performBlockAndWait:^{
+                // self(block) = x19
+                @try {
+                    // sp
+                    NSError * _Nullable __error = nil;
+                    // x20
+                    CKRecordZoneID *zoneID = [OCCloudKitSerializer defaultRecordZoneIDForDatabaseScope:databaseScope];
+                    
+                    OCCKRecordZoneMetadata * _Nullable metadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:zoneID inDatabaseWithScope:_mirroringOptions.databaseScope forStore:store inContext:context error:&__error];
+                    
+                    if (metadata == nil) {
+                        _succeed = NO;
+                        _error = [__error retain];
+                    } else {
+                        flag_1 = metadata.hasRecordZone;
+                    }
+                    
+                    [zoneID release];
+                } @catch (NSException *exception) {
+                    _succeed = NO;
+                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{
+                        @"NSUnderlyingException": exception,
+                        NSLocalizedFailureReasonErrorKey: @"Setup failed because an unhandled exception was caught during a fetch for zone creation."
+                    }];
+                }
+            }];
+            
+            [context release];
+            [store release];
         }];
     } else {
         _succeed = YES;
@@ -1759,7 +1891,9 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
             CKRecordZone *recordZone = [[CKRecordZone alloc] initWithZoneID:recordZoneID];
             // <+5872>
             _succeed = [self _checkIfZoneExists:recordZone error:&_error];
-            // <+5008>
+            // <+7208>
+            
+            [recordZoneID release];
             [recordZone release];
             if (_error != nil) {
                 *error = _error;
@@ -1792,19 +1926,45 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
     [_setupRequest.options applyToOperation:operation];
     
     // x29 - 0x100
-    __block NSDictionary<CKRecordZoneID *,CKRecordZone *> * _Nullable recordZonesByZoneID = nil;
+    __block CKRecordZoneCapabilities capabilities = 0;
     
     /*
      __53-[PFCloudKitSetupAssistant _checkIfZoneExists:error:]_block_invoke
-     recordZone = sp + 0x170
-     cloudKitSemaphore = sp + 0x178
-     recordZonesByZoneID = sp + 0x180
-     databaseScope = sp + 0x188
-     _error = sp + 0x190
-     _succeed = sp + 0x198
+     recordZone = sp + 0x170 = x19 + 0x20
+     cloudKitSemaphore = sp + 0x178 = x19 + 0x28
+     _error = sp + 0x180 = x19 + 0x30
+     _succeed = sp + 0x188 = x19 + 0x38
+     capabilities = sp + 0x190 = x19 + 0x40
+     databaseScope = sp + 0x198 = x19 + 0x48
      */
     operation.fetchRecordZonesCompletionBlock = ^(NSDictionary<CKRecordZoneID *,CKRecordZone *> * _Nullable recordZonesByZoneID, NSError * _Nullable operationError) {
-        abort();
+        // self(block) = x19
+        if (operationError != nil) {
+            _error = [operationError retain];
+            dispatch_semaphore_signal(cloudKitSemaphore);
+            return;
+        }
+        
+        if (recordZonesByZoneID == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Zone fetch didn't return an error or a dictionary of zones\n");
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Zone fetch didn't return an error or a dictionary of zones\n");
+            return;
+        }
+        
+        // recordZonesByZoneID = x20
+        CKRecordZone *zone = [recordZonesByZoneID objectForKey:recordZone.zoneID];
+        
+        if (zone == nil) {
+            _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134400 userInfo:@{
+                NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Could not locate the desired zone in the database with scope '%@': %@", CKDatabaseScopeString(databaseScope), recordZone.zoneID]
+            }];
+            dispatch_semaphore_signal(cloudKitSemaphore);
+            return;
+        }
+        
+        _succeed = YES;
+        capabilities = zone.capabilities;
+        dispatch_semaphore_signal(cloudKitSemaphore);
     };
     
     [_database addOperation:operation];
@@ -1828,14 +1988,58 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
             
             /*
              __53-[PFCloudKitSetupAssistant _checkIfZoneExists:error:]_block_invoke.67
-             storeMonitor = sp + 0x100
-             recordZone = sp + 0x108
-             _succeed = sp + 0x110
-             _error = sp + 0x118
-             1 = sp + 0x120
+             storeMonitor = sp + 0x100 = x20 + 0x20
+             recordZone = sp + 0x108 = x20 + 0x28
+             _succeed = sp + 0x110 = x20 + 0x30
+             _error = sp + 0x118 = x20 + 0x38
+             1 = sp + 0x120 = x20 + 0x40
              */
             [storeMonitor performBlock:^{
-                abort();
+                // self(block) = x20
+                // x19
+                NSPersistentStore *store = [storeMonitor retainedMonitoredStore];
+                if (store == nil) {
+                    _succeed = NO;
+                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
+                        NSLocalizedFailureReasonErrorKey: @"The mirroring delegate could not initialize because it's store was removed from the coordinator."
+                    }];
+                    return;
+                }
+                
+                // x21
+                NSManagedObjectContext *context = [storeMonitor newBackgroundContextForMonitoredCoordinator];
+                
+                /*
+                 __53-[PFCloudKitSetupAssistant _checkIfZoneExists:error:]_block_invoke_2.68
+                 recordZone = sp + 0x28 = x19 + 0x20
+                 store = sp + 0x30 = x19 + 0x28
+                 context = sp + 0x38 = x19 + 0x30
+                 _succeed = sp + 0x40 = x19 + 0x38
+                 _error = sp + 0x48 = x19 + 0x40
+                 1 = sp + 0x50 = x19 + 0x48
+                 */
+                [context performBlockAndWait:^{
+                    // self(block) = x19
+                    // sp, #0x8
+                    NSError * _Nullable __error = nil;
+                    // x20
+                    OCCKRecordZoneMetadata * _Nullable metadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:recordZone.zoneID inDatabaseWithScope:CKDatabaseScopePublic forStore:store inContext:context error:&__error];
+                    if (metadata == nil) {
+                        _succeed = NO;
+                        _error = [__error retain];
+                        return;
+                    }
+                    
+                    metadata.supportsFetchChanges = NO;
+                    metadata.supportsRecordSharing = NO;
+                    metadata.supportsAtomicChanges = YES;
+                    
+                    BOOL result = [context save:&__error];
+                    if (!result) {
+                        _succeed = NO;
+                        _error = [__error retain];
+                    }
+                }];
             }];
             
             [storeMonitor release];
@@ -1865,14 +2069,56 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
     
     /*
      __53-[PFCloudKitSetupAssistant _checkIfZoneExists:error:]_block_invoke.66
-     storeMonitor = sp + 0x100
-     recordZone = sp + 0x108
-     recordZonesByZoneID = sp + 0x110
-     _succeed = sp + 0x118
-     _error = sp + 0x120
+     storeMonitor = sp + 0x100 = x20 + 0x20
+     recordZone = sp + 0x108 = x20 + 0x28
+     recordZonesByZoneID = sp + 0x110 = x20 + 0x30
+     _succeed = sp + 0x118 = x20 + 0x38
+     _error = sp + 0x120 = x20 + 0x40
+     databaseScope = sp + 0x128 = x20 + 0x48
      */
     [storeMonitor performBlock:^{
-        abort();
+        // self(block) = x20
+        // x19
+        NSPersistentStore *store = [storeMonitor retainedMonitoredStore];
+        if (store == nil) {
+            _succeed = NO;
+            _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
+                NSLocalizedFailureReasonErrorKey: @"The mirroring delegate could not initialize because it's store was removed from the coordinator."
+            }];
+            return;
+        }
+        
+        // x21
+        NSManagedObjectContext *context = [storeMonitor newBackgroundContextForMonitoredCoordinator];
+        
+        /*
+         __53-[PFCloudKitSetupAssistant _checkIfZoneExists:error:]_block_invoke_2
+         recordZone = sp + 0x20 = x19 + 0x20
+         store = sp + 0x28 = x19 + 0x28
+         context = sp + 0x30 = x19 + 0x30
+         capabilities = sp + 0x38 = x19 + 0x38
+         _succeed = sp + 0x40 = x19 + 0x40
+         _error = sp + 0x48 = x19 + 0x48
+         databaseScope = sp + 0x50 = x19 + 0x50
+         */
+        [context performBlockAndWait:^{
+            // self(block) = x19
+            // sp, #0x8
+            NSError * _Nullable __error = nil;
+            // x20
+            OCCKRecordZoneMetadata * _Nullable metadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:recordZone.zoneID inDatabaseWithScope:databaseScope forStore:store inContext:context error:&__error];
+            
+            if (metadata == nil) {
+                _succeed = NO;
+                _error = [__error retain];
+                return;
+            }
+            
+            abort();
+        }];
+        
+        [context release];
+        [store release];
     }];
     
     [storeMonitor release];
@@ -1909,14 +2155,67 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
         // <+5676>
         /*
          __66-[PFCloudKitSetupAssistant _setupDatabaseSubscriptionIfNecessary:]_block_invoke_3
-         storeMonitor = sp + 0x170
-         databaseHasSubscription = sp + 0x178
-         _succeed = sp + 0x180
-         _error = sp + 0x188
-         3 = sp + 0x190
+         storeMonitor = sp + 0x170 = x20 + 0x20
+         databaseHasSubscription = sp + 0x178 = x20 + 0x28
+         _succeed = sp + 0x180 = x20 + 0x30
+         _error = sp + 0x188 = x20 + 0x38
+         3 = sp + 0x190 = x20 + 0x40
          */
         [storeMonitor performBlock:^{
-            abort();
+            // self(block) = x20
+            // x19
+            NSPersistentStore *store = [storeMonitor retainedMonitoredStore];
+            if (store == nil) {
+                _succeed = NO;
+                _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
+                    NSLocalizedFailureReasonErrorKey: @"The mirroring delegate could not initialize because it's store was removed from the coordinator."
+                }];
+                return;
+            }
+            
+            // x21
+            NSManagedObjectContext *context = [storeMonitor newBackgroundContextForMonitoredCoordinator];
+            context.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateSetupAuthor];
+            
+            /*
+             __66-[PFCloudKitSetupAssistant _setupDatabaseSubscriptionIfNecessary:]_block_invoke_4
+             store = sp + 0x28 = x19 + 0x20
+             context = sp + 0x30 = x19 + 0x28
+             databaseHasSubscription = sp + 0x38 = x19 + 0x30
+             _succeed = sp + 0x40 = x19 + 0x38
+             _error = sp + 0x48 = x19 + 0x40
+             3 = sp + 0x50 = x19 + 0x48
+             */
+            [context performBlockAndWait:^{
+                // self(block) = x19
+                @try {
+                    // sp
+                    NSError * _Nullable __error = nil;
+                    OCCKDatabaseMetadata * _Nullable metadata = [OCCKDatabaseMetadata databaseMetadataForScope:CKDatabaseScopeShared forStore:store inContext:context error:&__error];
+                    
+                    if (metadata == nil) {
+                        _succeed = NO;
+                        _error = [__error retain];
+                        return;
+                    }
+                    
+                    databaseHasSubscription = metadata.hasSubscription;
+                    BOOL result = [context save:&__error];
+                    if (!result) {
+                        _succeed = NO;
+                        _error = [__error retain];
+                    }
+                } @catch (NSException *exception) {
+                    _succeed = NO;
+                    _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134421 userInfo:@{
+                        @"NSUnderlyingException": exception,
+                        NSLocalizedFailureReasonErrorKey: @"Setup failed because an unhandled exception was caught during a database metadata fetch for the database subscription."
+                    }];
+                }
+            }];
+            
+            [context release];
+            [store release];
         }];
         // <+5752>
     } else if (databaseScope == CKDatabaseScopePrivate) {
@@ -1926,16 +2225,66 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
         
         /*
          __66-[PFCloudKitSetupAssistant _setupDatabaseSubscriptionIfNecessary:]_block_invoke
-         storeMonitor = sp + 0x170
-         recordZoneID = sp + 0x178
-         metadataHasSubscription (sp + 0x1b0) DatabaseWithScope
-         databaseHasSubscription = sp + 0x188
-         _succeed = sp + 0x190
-         _error = sp + 0x198
-         2 = sp + 0x1a0
+         storeMonitor = sp + 0x170 = x20 + 0x20
+         recordZoneID = sp + 0x178 = x20 + 0x28
+         metadataHasSubscription (sp + 0x1b0) DatabaseWithScope = x20 + 0x30
+         databaseHasSubscription = sp + 0x188 = x20 + 0x38
+         _succeed = sp + 0x190 = x20 + 0x40
+         _error = sp + 0x198 = x20 + 0x48
+         2 = sp + 0x1a0 = x20 + 0x50
          */
         [storeMonitor performBlock:^{
-            abort();
+            // self(block) = x20
+            // x19
+            NSPersistentStore *store = [storeMonitor retainedMonitoredStore];
+            if (store == nil) {
+                _succeed = NO;
+                _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
+                    NSLocalizedFailureReasonErrorKey: @"The mirroring delegate could not initialize because it's store was removed from the coordinator."
+                }];
+                return;
+            }
+            
+            // x21
+            NSManagedObjectContext *context = [storeMonitor newBackgroundContextForMonitoredCoordinator];
+            context.transactionAuthor = [OCSPIResolver NSCloudKitMirroringDelegateSetupAuthor];
+            
+            /*
+             __66-[PFCloudKitSetupAssistant _setupDatabaseSubscriptionIfNecessary:]_block_invoke_2
+             recordZoneID = sp + 0x28 = x19 + 0x20
+             store = sp + 0x30 = x19 + 0x28
+             context = sp + 0x38 = x19 + 0x30
+             metadataHasSubscription = sp + 0x40 = x19 + 0x38
+             databaseHasSubscription = sp + 0x48 = x19 + 0x40
+             _succeed = sp + 0x50 = x19 + 0x48
+             _error = sp + 0x58 = x19 + 0x50
+             2 = sp + 0x60 = x19 + 0x58
+             */
+            [context performBlockAndWait:^{
+                // self(block) = x19
+                // sp
+                NSError * _Nullable __error = nil;
+                // x20
+                OCCKRecordZoneMetadata * _Nullable metadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:recordZoneID inDatabaseWithScope:CKDatabaseScopePrivate forStore:store inContext:context error:&__error];
+                
+                if (metadata == nil) {
+                    _succeed = NO;
+                    _error = [__error retain];
+                    return;
+                }
+                
+                metadataHasSubscription = metadata.hasSubscription;
+                databaseHasSubscription = metadata.database.hasSubscription;
+                
+                BOOL result = [context save:&__error];
+                if (!result) {
+                    _succeed = NO;
+                    _error = [__error retain];
+                }
+            }];
+            
+            [context release];
+            [store release];
         }];
         
         [recordZoneID release];
@@ -2006,11 +2355,206 @@ CK_EXTERN NSString * _Nullable CKDatabaseScopeString(CKDatabaseScope);
 }
 
 - (BOOL)_saveZone:(CKRecordZone *)recordZone error:(NSError * _Nullable *)error {
-    abort();
+    /*
+     self = x21
+     recordZone = x20
+     error = x19
+     */
+    // x29, #-0xa0
+    __block BOOL _succeed = NO; // 나중에 0x1 넣어주는듯?
+    // sp, #0xc0
+    __block NSError * _Nullable _error = nil;
+    // x22
+    dispatch_semaphore_t cloudKitSemaphore = _cloudKitSemaphore;
+    
+    // original : getCloudKitCKModifyRecordZonesOperationClass
+    // x23
+    CKModifyRecordZonesOperation *opetation = [[CKModifyRecordZonesOperation alloc] initWithRecordZonesToSave:@[recordZone] recordZoneIDsToDelete:nil];
+    [_setupRequest.options applyToOperation:opetation];
+    
+    // sp, #0xa0
+    __block CKRecordZoneCapabilities capabilities = 0;
+    /*
+     __44-[PFCloudKitSetupAssistant _saveZone:error:]_block_invoke
+     recordZone = sp + 0x78 = x19 + 0x20
+     cloudKitSemaphore = sp + 0x80 = x19 + 0x28
+     _error = sp + 0x88 = x19 + 0x30
+     capabilities = sp + 0x90 = x19 + 0x38
+     _succeed = sp + 0x98 = x19 + 0x40
+     */
+    opetation.modifyRecordZonesCompletionBlock = ^(NSArray<CKRecordZone *> * _Nullable savedRecordZones, NSArray<CKRecordZoneID *> * _Nullable deletedRecordZoneIDs, NSError * _Nullable operationError) {
+        // self(block) = x19
+        if (operationError != nil) {
+            _error = [operationError retain];
+            dispatch_semaphore_signal(cloudKitSemaphore);
+            return;
+        }
+        
+        // x22
+        for (CKRecordZone *_recordZone in savedRecordZones) {
+            if ([_recordZone.zoneID isEqual:recordZone.zoneID]) {
+                capabilities = _recordZone.capabilities;
+                _succeed = YES;
+            }
+        }
+        
+        dispatch_semaphore_signal(cloudKitSemaphore);
+    };
+    
+    // <+308>
+    [_database addOperation:opetation];
+    dispatch_semaphore_wait(cloudKitSemaphore, DISPATCH_TIME_FOREVER);
+    [opetation release];
+    
+    if (!_succeed) {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) {
+                *error = [[_error retain] autorelease];
+            }
+        }
+        
+        [_error release];
+        return NO;
+    }
+    
+    // <+352>
+    CKDatabaseScope databaseScope = _mirroringOptions.databaseScope;
+    // x21
+    OCCloudKitStoreMonitor *storeMonitor = [_storeMonitor retain];
+    
+    /*
+     __44-[PFCloudKitSetupAssistant _saveZone:error:]_block_invoke_2
+     storeMonitor = sp + 0x28 = x20 + 0x20
+     recordZone = sp + 0x30 = x20 + 0x28
+     capabilities = sp + 0x38 = x20 + 0x30
+     _succeed = sp + 0x40 = x20 + 0x38
+     _error = sp + 0x48 = x20 + 0x40
+     databaseScope = sp + 0x50 = x20 + 0x48
+     */
+    [storeMonitor performBlock:^{
+        // self(block) = x20
+        // x19
+        NSPersistentStore *store = [storeMonitor retainedMonitoredStore];
+        if (store == nil) {
+            _succeed = NO;
+            _error = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:134060 userInfo:@{
+                NSLocalizedFailureReasonErrorKey: @"The mirroring delegate could not initialize because it's store was removed from the coordinator."
+            }];
+            return;
+        }
+        
+        // x21
+        NSManagedObjectContext *context = [storeMonitor newBackgroundContextForMonitoredCoordinator];
+        
+        /*
+         __44-[PFCloudKitSetupAssistant _saveZone:error:]_block_invoke_3
+         recordZone = sp + 0x20 = x19 + 0x20
+         store = sp + 0x28 = x19 + 0x28
+         context = sp + 0x30 = x19 + 0x30
+         capabilities = sp + 0x38 = x19 + 0x38
+         _succeed = sp + 0x40 = x19 + 0x40
+         _error = sp + 0x48 = x19 + 0x48
+         databaseScope = sp + 0x50 = x19 + 0x50
+         */
+        [context performBlockAndWait:^{
+            // self(block) = x19
+            // sp, #0x8]
+            NSError * _Nullable __error = nil;
+            // x20
+            OCCKRecordZoneMetadata * _Nullable metadata = [OCCKRecordZoneMetadata zoneMetadataForZoneID:recordZone.zoneID inDatabaseWithScope:databaseScope forStore:store inContext:context error:&__error];
+            if (metadata == nil) {
+                _succeed = NO;
+                _error = [__error retain];
+                return;
+            }
+            
+            abort();
+        }];
+        
+        [context release];
+        [store release];
+    }];
+    
+    [storeMonitor release];
+    
+    if (!_succeed) {
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) {
+                *error = [[_error retain] autorelease];
+            }
+        }
+    }
+    
+    _error = nil;
+    [_error release];
+    return _succeed;
 }
 
 - (BOOL)_deleteZone:(CKRecordZone *)recordZone error:(NSError * _Nullable *)error {
-    abort();
+    /*
+     self = x20
+     recordZone = x21
+     error = x19
+     */
+    // sp, #0x70
+    __block BOOL _succeed = NO;
+    // sp, #0x40
+    __block NSError * _Nullable _error = nil;
+    // x22
+    dispatch_semaphore_t cloudKitSemaphore = _cloudKitSemaphore;
+    // original : getCloudKitCKModifyRecordZonesOperationClass
+    // x23
+    CKModifyRecordZonesOperation *operation = [[CKModifyRecordZonesOperation alloc] initWithRecordZonesToSave:nil recordZoneIDsToDelete:@[recordZone.zoneID]];
+    
+    [_setupRequest.options applyToOperation:operation];
+    
+    /*
+     __46-[PFCloudKitSetupAssistant _deleteZone:error:]_block_invoke
+     recordZone = sp + 0x20
+     cloudKitSemaphore = sp + 0x28
+     _succeed = sp + 0x30
+     _error = sp + 0x38
+     */
+    operation.modifyRecordZonesCompletionBlock = ^(NSArray<CKRecordZone *> * _Nullable savedRecordZones, NSArray<CKRecordZoneID *> * _Nullable deletedRecordZoneIDs, NSError * _Nullable operationError) {
+        /*
+         self(block) = x19
+         deletedRecordZoneIDs = x21
+         operationError = x20
+         */
+        
+        if ([deletedRecordZoneIDs containsObject:recordZone.zoneID]) {
+            _succeed = YES;
+        } else {
+            _error = [operationError retain];
+        }
+        
+        dispatch_semaphore_signal(cloudKitSemaphore);
+    };
+    
+    [_database addOperation:operation];
+    dispatch_semaphore_wait(cloudKitSemaphore, DISPATCH_TIME_FOREVER);
+    [operation release];
+    
+    if (!_succeed) {
+        [_error autorelease];
+        
+        if (_error == nil) {
+            os_log_error(_OCLogGetLogStream(0x11), "OpenCloudData: fault: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+            os_log_fault(_OCLogGetLogStream(0x11), "OpenCloudData: Illegal attempt to return an error without one in %s:%d\n", __FILE__, __LINE__);
+        } else {
+            if (error != NULL) {
+                *error = _error;
+            }
+        }
+    }
+    
+    return _succeed;
 }
 
 @end
