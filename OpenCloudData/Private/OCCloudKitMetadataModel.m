@@ -24,6 +24,9 @@
 #import "OpenCloudData/SPI/CoreData/NSManagedObjectModel+Private.h"
 #import "OpenCloudData/Private/Model/OCCKExportMetadata.h"
 #import "OpenCloudData/Private/Model/OCCKMirroredRelationship.h"
+#import "OpenCloudData/Private/Model/OCCKImportOperation.h"
+#import "OpenCloudData/Private/Model/OCCKRecordZoneMetadata.h"
+#import "OpenCloudData/Private/Model/OCCKMetadataEntry.h"
 #import "OpenCloudData/SPI/OCSPIResolver.h"
 #include <objc/runtime.h>
 
@@ -536,7 +539,7 @@ NSArray<Class> * _oc_PFModelMap_ancillaryModelFactoryClasses_custom(Class self, 
                 @"exportedAt": @[@(NSDateAttributeType)],
                 @"historyToken": @[
                     @(NSTransformableAttributeType),
-                    @YES,
+                    @YES, // isOptional
                     [NSPersistentHistoryToken class],
                     // original : @"com.apple.CoreData.cloudkit.metadata.transformer"
                     @"com.pookjw.OpenCloudData.cloudkit.metadata.transformer"
@@ -547,8 +550,474 @@ NSArray<Class> * _oc_PFModelMap_ancillaryModelFactoryClasses_custom(Class self, 
             
             // <+608>
             [OCSPIResolver _PFModelUtilities_addRelationships_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
-                                                                                x1:@{/*TODO*/}
+                                                                                x1:@{
+                @"operations": @[
+                    @0, // maxCount
+                    exportOperation,
+                    [NSNull null],
+                    @(NSCascadeDeleteRule) // deleteRule
+                ]
+            }
                                                                                 x2:exportMetadata];
+            
+            // <+628>
+            [OCSPIResolver _PFModelUtilities_addAttributes_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                             x1:@{
+                @"identifier": @[@(NSStringAttributeType)],
+                @"statusNum": @[
+                    @(NSInteger64AttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ]
+            }
+                                                                             x2:exportOperation];
+            
+            // <+784>
+            [OCSPIResolver _PFModelUtilities_addRelationships_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                                x1:@{
+                @"exportMetadata": @[
+                    @1, // maxCount
+                    exportMetadata,
+                    @"operations"
+                ],
+                @"objects": @[
+                    @0, // maxCount
+                    exportedObject,
+                    @(NSCascadeDeleteRule) // deleteRule
+                ]
+            }
+                                                                                x2:exportOperation];
+            
+            // <+808>
+            [OCSPIResolver _PFModelUtilities_addAttributes_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                             x1:@{
+                @"changeTypeNum": @[
+                    @(NSInteger64AttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ],
+                @"ckRecordName": @[
+                    @(NSStringAttributeType)
+                ],
+                @"typeNum": @[
+                    @(NSInteger64AttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ],
+                
+            }
+                                                                             x2:exportedObject];
+            
+            // <+892>
+            [OCSPIResolver _PFModelUtilities_addRelationships_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                                x1:@{
+                @"operation": @[
+                    @1, // maxCount
+                    exportOperation,
+                    @"objects" // inverse
+                ]
+            }
+                                                                                x2:exportedObject];
+            
+            // <+896>
+            // x19
+            NSEntityDescription *importOperation = [[NSEntityDescription alloc] init];
+            importOperation.name = NSStringFromClass(objc_lookUpClass("NSCKImportOperation"));
+            // original : NSCKImportOperation
+            importOperation.managedObjectClassName = NSStringFromClass([OCCKImportOperation class]);
+            
+            // x22
+            NSEntityDescription *importPendingRelationship = [[NSEntityDescription alloc] init];
+            importPendingRelationship.name = NSStringFromClass(objc_lookUpClass("ImportPendingRelationship"));
+            // original : ImportPendingRelationship
+            importPendingRelationship.managedObjectClassName = NSStringFromClass([OCCKImportPendingRelationship class]);
+            
+            [OCSPIResolver _PFModelUtilities_addAttributes_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                             x1:@{
+                @"changeTokenBytes": @[@(NSBinaryDataAttributeType)],
+                @"importDate": @[@(NSDateAttributeType)],
+                @"operationUUID": @[@(NSUUIDAttributeType)]
+            }
+                                                                             x2:importOperation];
+            
+            [OCSPIResolver _PFModelUtilities_addRelationships_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                                x1:@{
+                @"pendingRelationships": @[
+                    @0, // maxCount
+                    importPendingRelationship
+                ]
+            }
+                                                                                x2:importOperation];
+            
+            [OCSPIResolver _PFModelUtilities_addAttributes_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                             x1:@{
+                @"cdEntityName": @[@(NSStringAttributeType)],
+                @"needsDelete": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @NO // defaultValue
+                ],
+                @"recordName": @[@(NSStringAttributeType)],
+                @"recordZoneName": @[
+                    @(NSStringAttributeType),
+                    @NO // isOptional
+                ],
+                @"recordZoneOwnerName": @[
+                    @(NSStringAttributeType),
+                    @NO // isOptional
+                ],
+                @"relatedEntityName": @[@(NSStringAttributeType)],
+                @"relatedRecordName": @[@(NSStringAttributeType)],
+                @"relatedRecordZoneName": @[
+                    @(NSStringAttributeType),
+                    @NO // isOptional
+                ],
+                @"relatedRecordZoneOwnerName": @[
+                    @(NSStringAttributeType),
+                    @NO // isOptional
+                ],
+                @"relationshipName": @[@(NSStringAttributeType)]
+            }
+                                                                             x2:importPendingRelationship];
+            
+            // <+1236>
+            [OCSPIResolver _PFModelUtilities_addRelationships_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                                x1:@{
+                @"operation": @[
+                    @1, // maxCount
+                    importOperation,
+                    @"pendingRelationships" // inverse
+                ]
+            }
+                                                                                x2:importPendingRelationship];
+            
+            // <+1528>
+            [OCSPIResolver _PFModelUtilities_addAttributes_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                             x1:@{
+                @"cdEntityName": @[@(NSStringAttributeType)],
+                @"ckRecordID": @[@(NSStringAttributeType)],
+                @"ckRecordSystemFields": @[@(NSBinaryDataAttributeType)],
+                @"isPending": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @NO // defaultValue
+                ],
+                @"isUploaded": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @NO // defaultValue
+                ],
+                @"needsDelete": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @NO // defaultValue
+                ],
+                @"recordName": @[@(NSStringAttributeType)],
+                @"relatedEntityName": @[@(NSStringAttributeType)],
+                @"relatedRecordName": @[@(NSStringAttributeType)],
+                @"relationshipName": @[@(NSStringAttributeType)]
+            }
+                                                                             x2:mirroredRelationship];
+            
+            // sp, #0x58
+            NSEntityDescription *recordZoneMetadata = [[NSEntityDescription alloc] init];
+            recordZoneMetadata.name = NSStringFromClass(objc_lookUpClass("NSCKRecordZoneMetadata"));
+            // original : NSCKRecordZoneMetadata
+            recordZoneMetadata.managedObjectClassName = NSStringFromClass([OCCKRecordZoneMetadata class]);
+            
+            // sp, #0x68
+            NSEntityDescription *recordMetadata = [[NSEntityDescription alloc] init];
+            recordMetadata.name = NSStringFromClass(objc_lookUpClass("NSCKRecordMetadata"));
+            // original : NSCKRecordMetadata
+            recordMetadata.managedObjectClassName = NSStringFromClass([OCCKRecordMetadata class]);
+            
+            // sp
+            NSEntityDescription *metadataEntry = [[NSEntityDescription alloc] init];
+            metadataEntry.name = NSStringFromClass(objc_lookUpClass("NSCKMetadataEntry"));
+            // original : NSCKMetadataEntry
+            metadataEntry.managedObjectClassName = NSStringFromClass([OCCKMetadataEntry class]);
+            
+            // x23
+            NSEntityDescription *databaseMetadata = [[NSEntityDescription alloc] init];
+            databaseMetadata.name = NSStringFromClass(objc_lookUpClass("NSCKDatabaseMetadata"));
+            // original : NSCKDatabaseMetadata
+            databaseMetadata.managedObjectClassName = NSStringFromClass([OCCKDatabaseMetadata class]);
+            
+            // <+2040>
+            [OCSPIResolver _PFModelUtilities_addAttributes_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                             x1:@{
+                @"boolValueNum": @[@(NSInteger16AttributeType)],
+                @"dateValue": @[@(NSDateAttributeType)],
+                @"integerValue": @[@(NSInteger64AttributeType)],
+                @"key": @[
+                    @(NSStringAttributeType),
+                    @NO // isOptional
+                ],
+                @"stringValue": @[@(NSStringAttributeType)],
+                @"transformedValue": @[
+                    @(NSTransformableAttributeType),
+                    @YES, // isOptional
+                    [NSNull null],
+                    // original : @"com.apple.CoreData.cloudkit.metadata.transformer"
+                    @"com.pookjw.OpenCloudData.cloudkit.metadata.transformer"
+                ]
+            }
+                                                                             x2:metadataEntry];
+            
+            // <+2252>
+            [OCSPIResolver _PFModelUtilities_addAttributes_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                             x1:@{
+                @"currentChangeToken": @[
+                    @(NSTransformableAttributeType),
+                    @YES, // isOptional
+                    [CKServerChangeToken class], // original : getCloudKitCKServerChangeTokenClass
+                    // original : @"com.apple.CoreData.cloudkit.metadata.transformer"
+                    @"com.pookjw.OpenCloudData.cloudkit.metadata.transformer"
+                ],
+                @"databaseName": @[
+                    @(NSStringAttributeType),
+                    @NO // isOptional
+                ],
+                @"databaseScopeNum": @[
+                    @(NSInteger16AttributeType),
+                    @NO // isOptional
+                ],
+                @"hasSubscriptionNum": @[
+                    @(NSInteger16AttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ],
+                @"lastFetchDate": @[
+                    @(NSDateAttributeType),
+                    @YES // isOptional
+                ]
+            }
+                                                                             x2:databaseMetadata];
+            
+            databaseMetadata.uniquenessConstraints = @[@[@"databaseScopeNum"]];
+            
+            [OCSPIResolver _PFModelUtilities_addAttributes_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                             x1:@{
+                @"ckOwnerName": @[
+                    @(NSStringAttributeType),
+                    @NO // isOptional
+                ],
+                @"ckRecordZoneName": @[
+                    @(NSStringAttributeType),
+                    @NO // isOptional
+                ],
+                @"currentChangeToken": @[
+                    @(NSTransformableAttributeType),
+                    @YES, // isOptional
+                    [CKServerChangeToken class], // original : getCloudKitCKServerChangeTokenClass
+                    // original : @"com.apple.CoreData.cloudkit.metadata.transformer"
+                    @"com.pookjw.OpenCloudData.cloudkit.metadata.transformer"
+                ],
+                @"encodedShareData": @[
+                    @(NSBinaryDataAttributeType),
+                    @YES
+                ],
+                @"hasRecordZoneNum": @[
+                    @(NSInteger16AttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ],
+                @"hasSubscriptionNum": @[
+                    @(NSInteger16AttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ],
+                @"lastFetchDate": @[
+                    @(NSDateAttributeType),
+                    @YES, // isOptional
+                ],
+                @"needsImport": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ],
+                @"needsNewShareInvitation": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ],
+                @"needsRecoveryFromIdentityLoss": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ],
+                @"needsRecoveryFromUserPurge": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ],
+                @"needsRecoveryFromZoneDelete": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ],
+                @"needsShareDelete": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ],
+                @"needsShareUpdate": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ],
+                @"supportsAtomicChanges": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ],
+                @"supportsFetchChanges": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ],
+                @"supportsRecordSharing": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ],
+                @"supportsZoneSharing": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @0 // defaultValue
+                ]
+            }
+                                                                             x2:recordZoneMetadata];
+            
+            // <+3104>
+            [OCSPIResolver _PFModelUtilities_addAttributes_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                             x1:@{
+                @"ckRecordName": @[
+                    @(NSStringAttributeType),
+                    @NO, // isOptional
+                ],
+                @"ckRecordSystemFields": @[@(NSBinaryDataAttributeType)],
+                @"ckShare": @[@(NSBinaryDataAttributeType)],
+                @"encodedRecord": @[
+                    @(NSBinaryDataAttributeType),
+                    @YES, // isOptional
+                    @YES // allowsExternalBinaryDataStorage
+                ],
+                @"entityId": @[
+                    @(NSInteger64AttributeType),
+                    @NO // isOptional
+                ],
+                @"entityPK": @[
+                    @(NSInteger64AttributeType),
+                    @NO // isOptional
+                ],
+                @"lastExportedTransactionNumber": @[
+                    @(NSInteger64AttributeType),
+                    @YES // isOptional
+                ],
+                @"needsCloudDelete": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @NO // defaultValue
+                ],
+                @"needsLocalDelete": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @NO // defaultValue
+                ],
+                @"needsUpload": @[
+                    @(NSBooleanAttributeType),
+                    @YES, // isOptional
+                    @NO // defaultValue
+                ],
+                @"pendingExportChangeTypeNumber": @[
+                    @(NSInteger16AttributeType),
+                    @YES // isOptional
+                ],
+                @"pendingExportTransactionNumber": @[
+                    @(NSInteger64AttributeType),
+                    @YES // isOptional
+                ]
+            }
+                                                                             x2:recordMetadata];
+            
+            // <+3244>
+            [OCSPIResolver _PFModelUtilities_addRelationships_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                                x1:@{
+                @"recordZone": @[
+                    @1, // maxCount
+                    recordZoneMetadata,
+                    [NSNull null], // inverse
+                    @(NSNullifyDeleteRule), // deleteRule
+                    @YES, // isOptional
+                ]
+            }
+                                                                                x2:mirroredRelationship];
+            
+            // <+3368>
+            [OCSPIResolver _PFModelUtilities_addRelationships_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                                x1:@{
+                @"recordZones": @[
+                    @0, // maxCount
+                    recordZoneMetadata,
+                    [NSNull null],
+                    @(NSCascadeDeleteRule) // deleteRule
+                ]
+            }
+                                                                                x2:databaseMetadata];
+            
+            // <+3484>
+            [OCSPIResolver _PFModelUtilities_addRelationships_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                                x1:@{
+                @"database": @[
+                    @1, // maxCount
+                    databaseMetadata,
+                    @"recordZones",
+                    @(NSNullifyDeleteRule), // deleteRule
+                    @NO // isOptional
+                ]
+            }
+                                                                                x2:recordZoneMetadata];
+            
+            // <+3660>
+            [OCSPIResolver _PFModelUtilities_addRelationships_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                                x1:@{
+                @"mirroredRelationships": @[
+                    @0, // maxCount
+                    mirroredRelationship,
+                    @"recordZone", // inverse
+                    @(NSCascadeDeleteRule) // deleteRule
+                ],
+                @"records": @[
+                    @0, // maxCount
+                    recordMetadata,
+                    [NSNull null], // inverse
+                    @(NSCascadeDeleteRule) // deleteRule
+                ]
+            }
+                                                                                x2:recordZoneMetadata];
+            
+            // <+3772>
+            [OCSPIResolver _PFModelUtilities_addRelationships_toPropertiesOfEntity:objc_lookUpClass("_PFModelUtilities")
+                                                                                x1:@{
+                @"recordZone": @[
+                    @1, // maxCount
+                    recordZoneMetadata,
+                    @"records", // inverse
+                    @(NSNullifyDeleteRule), // deleteRule
+                    @NO // isOptional
+                ]
+            }
+                                                                                x2:recordMetadata];
+            
+            recordZoneMetadata.uniquenessConstraints = @[
+                @[@"ckRecordZoneName", @"ckOwnerName", @"database"]
+            ];
+            mirroredRelationship.uniquenessConstraints = @[
+                @[@"ckRecordID", @"recordZone"]
+            ];
+            
+            // <+3832>
             abort();
         }
     });
